@@ -1,0 +1,49 @@
+#!/bin/sh
+
+BRANCH=stable
+DIR=/usr/src/smoothwall
+REPO=git
+
+case $1 in
+  -?|-h|--help)
+    echo "Usage: $0 [branch [dir [repo]]]"
+    echo "    'branch' is the branch to check out (default is 'stable')"
+    echo "    'dir' is the path to create (default is '/usr/src/smoothwall')"
+    echo "    'repo' is the repository to address (default is 'git')"
+    echo "You must specify a directory in order to specify a branch."
+    echo "You must specify a directory and branch in order to specify a repo"
+    echo
+    echo "Notes:"
+    echo "  Express v3.0 must be built in /usr/src/smoothwall."
+    echo "  Express v3.1 and later may be built anywhere."
+    echo
+    echo "Examples:"
+    echo "  '$0'"
+    echo "  '$0 update9 /usr/src/smoothwall'"
+    echo "  '$0 fest3er-swe3.1-rc3 /home/fest3er/smoothwall'"
+    echo "  '$0 express-next /proj/express-next"
+    echo "  '$0 fest3er-dev /proj/express-next devs"
+    exit 1
+    ;;
+esac
+
+if [ "$1" != "" ]; then
+	BRANCH=$1
+fi
+
+if [ "$2" != "" ]; then
+	DIR=$2
+fi
+
+if [ "$3" != "" ]; then
+	REPO=$3
+fi
+
+mkdir -p $DIR
+cd `dirname $DIR`
+
+git clone git://git.code.sf.net/p/smoothwall/${REPO} `basename $DIR`
+
+cd `basename $DIR`
+
+git checkout -b $BRANCH origin/$BRANCH

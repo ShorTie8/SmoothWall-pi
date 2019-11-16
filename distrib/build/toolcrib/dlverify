@@ -1,0 +1,131 @@
+#!/bin/bash +h
+#
+# SmoothWall Build system.
+#
+# (c) SmoothWall Ltd 2005
+#
+# This code is distributed under the terms of the GPL v2.
+
+# With git semi-integrated, dlverify now needs PACKAGE, gitURL, gitBranch and
+#   gitCommitID exported to it IFF the original internet source is git.
+
+# Function git2tgz
+#   Fetch from git instead of tarball repo
+function git2tgz () {
+
+  # Nicer names from make() in ENV
+  #   pkgName=$(PACKAGE)
+  #   gitURL=$(gitURL)
+  #   gitBranch=$(gitBranch)
+  #   gitCommitID=$(VERSION)
+
+  # Prep the dir
+  rm -rf "${pkgName}-${gitBranch}"
+
+  # Go 'n' git
+  echo "git from ${gitURL}"
+  git clone "${gitURL}" "${pkgName}-${gitBranch}" || exit 102
+  cd "${pkgName}-${gitBranch}"
+  echo "git checkout ${gitCommitID}"
+  git checkout -q ${gitCommitID} || exit 103
+
+  # tar it
+  cd ..
+  echo "tar"
+  tar cfz "${DIRECTORY}/${pkgName}-${gitBranch}.tar.gz" \
+      --exclude=".git*" "${pkgName}-${gitBranch}" || exit 104
+
+  # remove the dir
+  rm -rf "${pkgName}-${gitBranch}" || exit 105
+}
+
+
+# Function try_DL
+#   Minimize replicated code. A function to attempt a download
+
+function try_DL () {
+  if [ "$1" != "" ]; then
+    if [ "$1" != "$2" -o "$1" == "$2" -a "${gitURL}" == "" ]; then
+      # It's a normal HTTP URL; try this source
+      wget --progress=dot:giga -o /proc/$PPID/fd/2 ${PASV}${CONTINUE_DL}${NO_CHECK_CERT}--directory "$DIRECTORY" "$2"
+      return $?
+    else
+      # Internet source is git
+      git2tgz
+      return $?
+    fi
+  fi
+
+  # Or indicate 'not successful'
+  return 1
+}
+
+
+# Use passive FTP?
+set | grep "PASV=" >/dev/null 2>&1
+if [ "$?" -eq 0 ]; then
+  PASV=""
+else
+  PASV="--no-passive-ftp "
+fi
+
+# Continue a croaked DL?
+set | grep "CONTINUE_DL=" >/dev/null 2>&1
+if [ "$?" -eq 0 ]; then
+  CONTINUE_DL="-c "
+else
+  CONTINUE_DL=""
+fi
+
+# Check SSL certs or not?
+set | grep "NO_CHECK_CERT=" >/dev/null 2>&1
+if [ "$?" -eq 0 ]; then
+  NO_CHECK_CERT="--no-check-certificate "
+else
+  NO_CHECK_CERT=""
+fi
+
+# Mirror sources
+set | grep "MIRROR_UNO=" >/dev/null 2>&1 || MIRROR_UNO=""
+set | grep "MIRROR_DOS=" >/dev/null 2>&1 || MIRROR_DOS="http://downloads.smoothwall.org/buildmirror"
+
+DIRECTORY="$1"
+URL="$2"
+EXPECTED_MD5="$3"
+
+if [ "$DIRECTORY" = "" -o "$URL" = "" ]; then
+  echo "Usage: $0 <directory> <url> [expected md5]"
+  exit 0
+fi
+
+FILENAME=`basename "$URL"`
+
+# If we don't already have the tar ball
+if [ ! -e "$DIRECTORY/$FILENAME.done" ]; then
+
+  # Try first mirror, second mirror, or URL
+  # URL can be via wget or git.
+  try_DL "$MIRROR_UNO" "$MIRROR_UNO/$FILENAME" \
+  || try_DL "$MIRROR_DOS" "$MIRROR_DOS/$FILENAME" \
+  || try_DL "$URL" "$URL"
+
+  if [ $? -ne 0 ]; then
+    echo "Download failed"
+    exit 1
+  fi
+
+  # Historic checksum
+  if [ "$EXPECTED_MD5" != "" ]; then
+    MD5=`md5sum "$DIRECTORY/$FILENAME" | cut -d " " -f 1`
+    if [ "$MD5" != "$EXPECTED_MD5" ]; then
+      echo "MD5 missmatch.  Was $MD5, meant to be $EXPECTED_MD5"
+      rm -f "$DIRECTORY/$FILENAME"
+      exit 1
+    fi
+  fi
+
+  # If DL and optional checksum succeed, touch the .done file.
+  touch "$DIRECTORY/$FILENAME.done"
+fi
+
+exit 0

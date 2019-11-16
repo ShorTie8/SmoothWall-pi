@@ -1,0 +1,480 @@
+#!/bin/sh
+
+# Get connmark bits and flags. This file contains the bit field definitions
+#   for the various conn types.
+. /etc/rc.d/inc.bits-flags
+
+# Disable ICMP Redirect Acceptance
+for FILE in /proc/sys/net/ipv4/conf/*/accept_redirects; do
+	echo 0 > $FILE
+done
+
+# Disable Source Routed Packets
+for FILE in /proc/sys/net/ipv4/conf/*/accept_source_route; do
+	echo 0 > $FILE
+done
+
+# Log Spoofed Packets, Source Routed Packets, Redirect Packets
+for FILE in /proc/sys/net/ipv4/conf/*/log_martians; do
+	echo 1 > $FILE
+done
+
+# Set timeouts.  2.5 hours for TCP.
+echo 9000 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
+
+# Set timeout for udp, since the servers fail in 90+ seconds, lots of hits
+echo 100 > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout
+
+# Set timeouts for tcp, to avoid the nagging FINACK, FIN, RSTACKs
+echo 630 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_fin_wait
+echo 360 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_last_ack
+echo 630 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_close_wait
+echo 360 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_close
+
+# IPV6: Set default policy to DROP everything
+/usr/sbin/ip6tables -F
+/usr/sbin/ip6tables -X
+for j in INPUT FORWARD OUTPUT; do
+  /usr/sbin/ip6tables -P $j DROP
+done
+
+/usr/sbin/ip6tables -t mangle -F
+/usr/sbin/ip6tables -t mangle -X
+for j in PREROUTING INPUT FORWARD OUTPUT POSTROUTING; do
+  /usr/sbin/ip6tables -t mangle -P $j DROP
+done
+
+# But reject DNS to avoid timeout delays
+/usr/sbin/ip6tables -A FORWARD -p udp --destination-port 53 -j REJECT
+/usr/sbin/ip6tables -A INPUT -p udp --destination-port 53 -j REJECT
+/usr/sbin/ip6tables -A OUTPUT -p udp --destination-port 53 -j REJECT
+
+/sbin/iptables -F
+/sbin/iptables -X
+
+/sbin/iptables -P INPUT DROP
+/sbin/iptables -P FORWARD DROP
+/sbin/iptables -P OUTPUT ACCEPT
+
+/sbin/iptables -t nat -F
+/sbin/iptables -t nat -X
+
+/sbin/iptables -t mangle -F
+/sbin/iptables -t mangle -X
+
+# Link Local routing blocker
+/sbin/iptables -N lldrop
+/sbin/iptables -A lldrop -j LOG --log-prefix "Denied-by-filter:lldrop "
+/sbin/iptables -A lldrop -j DROP
+
+# TEST-NET routing blocker
+# From RFC5737, "The blocks 192.0.2.0/24 (TEST-NET-1), 198.51.100.0/24
+# (TEST-NET-2), and 203.0.113.0/24 (TEST-NET-3) are provided for use in
+# documentation." They should not appear on any network and are not for
+# private use. So treat them as Link-Local addresses.
+/sbin/iptables -N tndrop
+/sbin/iptables -A tndrop -j LOG --log-prefix "Denied-by-filter:tndrop "
+/sbin/iptables -A tndrop -j DROP
+for TEST_NET in 192.0.2.0/24 198.51.100.0/24 203.0.113.0/24; do
+  for CHAIN in INPUT FORWARD OUTPUT; do
+    for DIR in s d; do
+      /sbin/iptables -A ${CHAIN} -${DIR} ${TEST_NET} -j tndrop
+    done
+  done
+done
+
+# IP blocker
+/sbin/iptables -N ipblock
+/sbin/iptables -A INPUT -i ppp0 -j ipblock
+/sbin/iptables -A INPUT -i ippp0 -j ipblock
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A INPUT -i $RED_DEV -j ipblock
+fi
+/sbin/iptables -A FORWARD -i ppp0 -j ipblock
+/sbin/iptables -A FORWARD -i ippp0 -j ipblock
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -i $RED_DEV -j ipblock
+fi
+
+# localhost
+/sbin/iptables -A INPUT -i lo -j ACCEPT
+
+# Setup timed access chains.
+/sbin/iptables -N timedaccess
+/sbin/iptables -N timedaction
+#/sbin/iptables -A timedaction -j LOG --log-prefix "Denied-by-filter:tim-act "
+/sbin/iptables -A timedaction -p tcp -m state --state ESTABLISHED -j REJECT --reject-with tcp-reset
+/sbin/iptables -A timedaction -j REJECT --reject-with icmp-admin-prohibited
+
+# Apply the time rules to deny the traffic.
+/sbin/iptables -A INPUT -j timedaccess
+/sbin/iptables -A FORWARD -j timedaccess
+
+# For IGMP and multicast
+/sbin/iptables -N advnet
+/sbin/iptables -A INPUT -i ppp0 -j advnet
+/sbin/iptables -A INPUT -i ippp0 -j advnet
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A INPUT -i $RED_DEV -j advnet
+fi
+
+# Spoof protection for RED (rp_filter does not work with FreeS/WAN)
+/sbin/iptables -N spoof
+/sbin/iptables -A spoof -s $GREEN_NETADDRESS/$GREEN_NETMASK -j DROP
+if [ "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -A spoof -s $ORANGE_NETADDRESS/$ORANGE_NETMASK -j DROP
+fi
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -A spoof -s $PURPLE_NETADDRESS/$PURPLE_NETMASK -j DROP
+fi
+
+/sbin/iptables -A INPUT -i ppp0 -j spoof
+/sbin/iptables -A INPUT -i ippp0 -j spoof
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A INPUT -i $RED_DEV -j spoof
+fi
+
+# Ethernet
+/sbin/iptables -A INPUT -i $GREEN_DEV -j ACCEPT
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -A INPUT -i $PURPLE_DEV -j ACCEPT
+fi
+
+# IPSEC
+/sbin/iptables -N secin
+/sbin/iptables -A secin -i ipsec0 -j ACCEPT
+/sbin/iptables -N secout
+/sbin/iptables -A secout -o ipsec0 -j ACCEPT
+
+# block is an INPUT chain.
+/sbin/iptables -N block
+
+# Let known packets through.
+/sbin/iptables -A block -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Technically, since Smoothwall Express does not use NOTRACK and INVALID packets have
+#   already been dropped, everything in chain block after this point *must* be NEW. There is
+#   no need to check for state NEW.
+
+# Check IPSEC packets
+/sbin/iptables -A block -j secin
+
+/sbin/iptables -A block -i $GREEN_DEV -j ACCEPT
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -A block -i $PURPLE_DEV -j ACCEPT
+fi
+
+# External access.  Rule set with setxtaccess setuid
+/sbin/iptables -N xtaccess
+/sbin/iptables -A block -j xtaccess
+
+# IPSEC
+/sbin/iptables -N ipsec
+/sbin/iptables -A ipsec -p udp --destination-port 500 -j ACCEPT
+/sbin/iptables -A ipsec -p udp --destination-port 4500 -j ACCEPT
+/sbin/iptables -A ipsec -p 50 -j ACCEPT
+/sbin/iptables -A ipsec -p 51 -j ACCEPT
+/sbin/iptables -A block -i ppp0 -j ipsec
+/sbin/iptables -A block -i ippp0 -j ipsec
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A block -i $RED_DEV -j ipsec
+fi
+
+# SIP RTP ports
+/sbin/iptables -N siprtpports
+/sbin/iptables -A block -i ppp0 -j siprtpports
+/sbin/iptables -A block -i ippp0 -j siprtpports
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A block -i $RED_DEV -j siprtpports
+fi
+
+# DHCP
+if [ "$RED_DEV" != "" -a "$RED_TYPE" = "DHCP" ]; then
+	/sbin/iptables -A block -p tcp --source-port 67 --destination-port 68 \
+		-i $RED_DEV -j ACCEPT
+	/sbin/iptables -A block -p tcp --source-port 68 --destination-port 67 \
+		-i $RED_DEV -j ACCEPT
+	/sbin/iptables -A block -p udp --source-port 67 --destination-port 68 \
+		-i $RED_DEV -j ACCEPT
+	/sbin/iptables -A block -p udp --source-port 68 --destination-port 67 \
+		-i $RED_DEV -j ACCEPT
+fi
+
+# All ICMP on ppp too.
+/sbin/iptables -A block -p icmp -i ppp0 -j ACCEPT
+/sbin/iptables -A block -p icmp -i ippp0 -j ACCEPT
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A block -p icmp -i $RED_DEV -j ACCEPT
+fi
+
+/sbin/iptables -N badtraffic
+/sbin/iptables -A block -j badtraffic
+
+/sbin/iptables -A INPUT -j block
+
+# last rule in INPUT chain is for logging.
+/sbin/iptables -A INPUT -j LOG --log-prefix "Denied-by-filter:INPUT "
+/sbin/iptables -A INPUT -j REJECT
+
+# Green, Orange and Purple chains for outbound, and allows for always allowed.
+/sbin/iptables -N outgreen
+/sbin/iptables -N outorange
+/sbin/iptables -N outpurple
+/sbin/iptables -N allows
+
+# Setup our outgoing filter stub chains.
+/sbin/iptables -N outbound
+/sbin/iptables -A outbound -p icmp -j ACCEPT
+/sbin/iptables -A outbound -j allows
+/sbin/iptables -A outbound -i $GREEN_DEV -j outgreen
+if [ "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -A outbound -i $ORANGE_DEV -j outorange
+fi
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -A outbound -i $PURPLE_DEV -j outpurple
+fi
+
+/sbin/iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+# Technically, since Smoothwall Express does not use NOTRACK and since INVALID packets have
+#   already been dropped, everything in FORWARD after this point *must* be NEW. There is
+#   no need to check for state NEW.
+
+# IPSEC itself determines what passes through the VPN. It should be safe to ACCEPT
+#   all packets to and from ipsec0
+/sbin/iptables -A FORWARD -j secin
+/sbin/iptables -A FORWARD -j secout
+
+# Allow packets that we know about through.
+/sbin/iptables -A FORWARD -m state --state NEW -o ppp0 -j outbound
+/sbin/iptables -A FORWARD -m state --state NEW -o ippp0 -j outbound
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -m state --state NEW -o $RED_DEV -j outbound
+fi
+
+# Port forwarding & Bouncing portforwards
+/sbin/iptables -N portfwf
+/sbin/iptables -A FORWARD -i ppp0 -j portfwf
+/sbin/iptables -A FORWARD -i ippp0 -j portfwf
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -i $RED_DEV -j portfwf
+fi
+/sbin/iptables -A FORWARD -m mark --mark 1 -j portfwf
+if [ "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -m mark --mark 2 -j portfwf
+fi
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -m mark --mark 3 -j portfwf
+fi
+
+# Setup dmzholes chains for internal pinholes
+/sbin/iptables -N dmzholes
+
+# Allow GREEN to talk to ORANGE.
+if [ "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -i $GREEN_DEV -o $ORANGE_DEV -m state \
+		--state NEW -j ACCEPT
+	# dmz pinhole chain.  setdmzholes setuid prog adds rules here to allow
+	# ORANGE to talk to GREEN.
+	/sbin/iptables -A FORWARD -i $ORANGE_DEV -o $GREEN_DEV -j dmzholes
+fi
+
+# Allow GREEN to talk to PURPLE.
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -i $GREEN_DEV -o $PURPLE_DEV -m state \
+		--state NEW -j ACCEPT
+	# dmz pinhole chain.  setdmzholes setuid prog adds rules here to allow
+	# PURPLE to talk to GREEN.
+	/sbin/iptables -A FORWARD -i $PURPLE_DEV -o $GREEN_DEV -j dmzholes
+fi
+
+# Allow PURPLE to talk to ORANGE.
+if [ "$PURPLE_DEV" != "" -a "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -i $PURPLE_DEV -o $ORANGE_DEV -m state \
+		--state NEW -j ACCEPT
+	# dmz pinhole chain.  setdmzholes setuid prog adds rules here to allow
+	# ORANGE to talk to PURPLE.
+	/sbin/iptables -A FORWARD -i $ORANGE_DEV -o $PURPLE_DEV -j dmzholes
+fi
+
+# VPN
+/sbin/iptables -A FORWARD -i $GREEN_DEV -o ipsec0 -j ACCEPT
+/sbin/iptables -A FORWARD -i ipsec0 -o $GREEN_DEV -j ACCEPT
+
+# UPNP
+/sbin/iptables -N MINIUPNPD
+/sbin/iptables -A FORWARD -i ppp0 ! -o ppp0 -j MINIUPNPD
+/sbin/iptables -A FORWARD -i ippp0 ! -o ippp0 -j MINIUPNPD
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -A FORWARD -i $RED_DEV ! -o $RED_DEV -j MINIUPNPD
+fi
+
+/sbin/iptables -A FORWARD -j LOG --log-prefix "Denied-by-filter:FORWARD "
+/sbin/iptables -A FORWARD -j REJECT
+
+# NAT table
+/sbin/iptables -t nat -F
+/sbin/iptables -t nat -X
+
+# Port forwarding
+/sbin/iptables -t nat -N portfw
+/sbin/iptables -t nat -A PREROUTING -j portfw
+
+# UPNP
+/sbin/iptables -t nat -N MINIUPNPD
+for iface in $RED_DEV ppp0 ippp0; do
+  /sbin/iptables -t nat -A PREROUTING -i $iface -j MINIUPNPD
+done
+/sbin/iptables -t nat -N MINIUPNPD-POSTROUTING
+for iface in $RED_DEV ppp0 ippp0; do
+  /sbin/iptables -t nat -A POSTROUTING -o $iface -j MINIUPNPD-POSTROUTING
+done
+
+# Web proxy
+/sbin/iptables -t nat -N squid
+/sbin/iptables -t nat -N jmpsquid
+/sbin/iptables -t nat -A jmpsquid -d 10.0.0.0/8 -j RETURN
+/sbin/iptables -t nat -A jmpsquid -d 172.16.0.0/12 -j RETURN
+/sbin/iptables -t nat -A jmpsquid -d 192.168.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpsquid -d 169.254.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpsquid -j squid
+/sbin/iptables -t nat -A PREROUTING -i $GREEN_DEV -j jmpsquid
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -t nat -A PREROUTING -i $PURPLE_DEV -j jmpsquid
+fi
+
+# IMSpector
+/sbin/iptables -t nat -N im
+/sbin/iptables -t nat -N jmpim
+/sbin/iptables -t nat -A jmpim -d 10.0.0.0/8 -j RETURN
+/sbin/iptables -t nat -A jmpim -d 172.16.0.0/12 -j RETURN
+/sbin/iptables -t nat -A jmpim -d 192.168.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpim -d 169.254.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpim -j im
+/sbin/iptables -t nat -A PREROUTING -i $GREEN_DEV -j jmpim
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -t nat -A PREROUTING -i $PURPLE_DEV -j jmpim
+fi
+
+# POP3 proxy
+/sbin/iptables -t nat -N p3scan
+/sbin/iptables -t nat -N jmpp3scan
+/sbin/iptables -t nat -A jmpp3scan -d 10.0.0.0/8 -j RETURN
+/sbin/iptables -t nat -A jmpp3scan -d 172.16.0.0/12 -j RETURN
+/sbin/iptables -t nat -A jmpp3scan -d 192.168.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpp3scan -d 169.254.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpp3scan -j p3scan
+/sbin/iptables -t nat -A PREROUTING -i $GREEN_DEV -j jmpp3scan
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -t nat -A PREROUTING -i $PURPLE_DEV -j jmpp3scan
+fi
+
+# SIP proxy
+/sbin/iptables -t nat -N sip
+/sbin/iptables -t nat -N jmpsip
+/sbin/iptables -t nat -A jmpsip -d 10.0.0.0/8 -j RETURN
+/sbin/iptables -t nat -A jmpsip -d 172.16.0.0/12 -j RETURN
+/sbin/iptables -t nat -A jmpsip -d 192.168.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpsip -d 169.254.0.0/16 -j RETURN
+/sbin/iptables -t nat -A jmpsip -j sip
+/sbin/iptables -t nat -A PREROUTING -i $GREEN_DEV -j jmpsip
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -t nat -A PREROUTING -i $PURPLE_DEV -j jmpsip
+fi
+
+# Masquerade
+/sbin/iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE
+/sbin/iptables -t nat -A POSTROUTING -o ippp0 -j MASQUERADE
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -t nat -A POSTROUTING -o $RED_DEV -j MASQUERADE
+fi
+
+# Bouncing port forwards
+/sbin/iptables -t nat -A POSTROUTING -o $GREEN_DEV -m mark --mark 1 -j SNAT --to-source $GREEN_ADDRESS
+if [ "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -t nat -A POSTROUTING -o $ORANGE_DEV -m mark --mark 2 -j SNAT --to-source $ORANGE_ADDRESS
+fi
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -t nat -A POSTROUTING -o $PURPLE_DEV -m mark --mark 3 -j SNAT --to-source $PURPLE_ADDRESS
+fi
+
+
+# Drop INVALID packets early
+/sbin/iptables -t mangle -N invdrop
+# Don't log here; soon enough, advnet will add logging if it's set
+/sbin/iptables -t mangle -A invdrop -j DROP
+/sbin/iptables -t mangle -I PREROUTING -m state --state INVALID -j invdrop
+
+# adding MINIUPNPD chain to mangle
+/sbin/iptables -t mangle -N MINIUPNPD
+/sbin/iptables -t mangle -A PREROUTING -i ppp0 -j MINIUPNPD
+/sbin/iptables -t mangle -A PREROUTING -i ippp0 -j MINIUPNPD
+/sbin/iptables -t mangle -A PREROUTING -i $RED_DEV -j MINIUPNPD
+
+# Portforward bouncing
+/sbin/iptables -t mangle -N portfwb
+/sbin/iptables -t mangle -A PREROUTING -j portfwb
+
+# Stats
+/sbin/iptables -t mangle -N prerouting-1
+/sbin/iptables -t mangle -N prerouting-2
+/sbin/iptables -t mangle -N postrouting-1
+/sbin/iptables -t mangle -N postrouting-2
+
+/sbin/iptables -t mangle -A PREROUTING -j prerouting-1
+/sbin/iptables -t mangle -A PREROUTING -j prerouting-2
+/sbin/iptables -t mangle -A POSTROUTING -j postrouting-1
+/sbin/iptables -t mangle -A POSTROUTING -j postrouting-2
+
+/sbin/iptables -t mangle -A prerouting-2 -i ppp0 -j RETURN
+/sbin/iptables -t mangle -A postrouting-2 -o ppp0 -j RETURN
+/sbin/iptables -t mangle -A prerouting-2 -i ippp0 -j RETURN
+/sbin/iptables -t mangle -A postrouting-2 -o ippp0 -j RETURN
+
+# GREEN always exists
+/sbin/iptables -t mangle -A prerouting-1 -i $GREEN_DEV -j RETURN
+/sbin/iptables -t mangle -A postrouting-1 -o $GREEN_DEV -j RETURN
+if [ "$ORANGE_DEV" != "" ]; then
+	/sbin/iptables -t mangle -A prerouting-1 -i $ORANGE_DEV -j RETURN
+	/sbin/iptables -t mangle -A postrouting-1 -o $ORANGE_DEV -j RETURN
+fi
+if [ "$PURPLE_DEV" != "" ]; then
+	/sbin/iptables -t mangle -A prerouting-1 -i $PURPLE_DEV -j RETURN
+	/sbin/iptables -t mangle -A postrouting-1 -o $PURPLE_DEV -j RETURN
+fi
+if [ "$RED_DEV" != "" ]; then
+	/sbin/iptables -t mangle -A prerouting-2 -i $RED_DEV -j RETURN
+	/sbin/iptables -t mangle -A postrouting-2 -o $RED_DEV -j RETURN
+fi
+
+# Prepare traffic accounting
+/sbin/iptables -t mangle -N account
+. /etc/rc.d/inc.account-setup
+for I in INPUT OUTPUT FORWARD; do
+	/sbin/iptables -t mangle -A $I -j account
+done
+
+# QoS stuff
+/sbin/iptables -t mangle -N trafficoutput
+/sbin/iptables -t mangle -A OUTPUT -j trafficoutput
+/sbin/iptables -t mangle -N trafficforward
+/sbin/iptables -t mangle -A FORWARD -j trafficforward
+/sbin/iptables -t mangle -N trafficpostrouting
+/sbin/iptables -t mangle -A POSTROUTING -j trafficpostrouting
+
+# Another hook for McNeill's ModInstall integration
+# This allows mods to set up firewall rules. *How* they correctly insert
+#   such rules is up to them.
+echolog "e" "s" "" "  Load mods' firewall rules"
+# if any; limited to .../mods/*/etc/rc.d, 90-99
+shopt -s nullglob
+unset i
+for i in /var/smoothwall/mods/*/etc/rc.d/9[0-9]rc.firewall.up; do
+  $i
+done
+shopt -u nullglob
+
+# These are rules to set connmarks that identify the type of conn: INCOMING,
+#   OUTGOING, and INTERNAL, and identify a few other useful
+#   things.
+. /etc/rc.d/rc.zoneConnMarks

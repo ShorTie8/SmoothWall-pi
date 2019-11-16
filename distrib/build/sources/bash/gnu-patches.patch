@@ -1,0 +1,1366 @@
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-001
+
+Bug-Reported-by:	Yann Rouillard <yann@pleiades.fr.eu.org>
+Bug-Reference-ID:	<4B44A410.4070107@pleiades.fr.eu.org>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-01/msg00018.html
+
+Bug-Description:
+
+A prototype for vsnprintf was incorrect, and caused compilation failures
+on systems that did not have a suitable vsnprintf, but had a declaration in
+one of the system header files.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/builtins/printf.def	2009-11-20 15:31:23.000000000 -0500
+--- builtins/printf.def	2010-01-07 08:50:06.000000000 -0500
+***************
+*** 173,177 ****
+  
+  #if !HAVE_VSNPRINTF
+! extern int vsnprintf __P((char *, size_t, const char *, ...)) __attribute__((__format__ (printf, 3, 4)));
+  #endif
+  
+--- 173,177 ----
+  
+  #if !HAVE_VSNPRINTF
+! extern int vsnprintf __P((char *, size_t, const char *, va_list)) __attribute__((__format__ (printf, 3, 0)));
+  #endif
+  
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 0
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 1
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-002
+
+Bug-Reported-by:	guillaume.outters@free.fr
+Bug-Reference-ID:	<20100105230441.70D171AA7F52@asterix.local>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-01/msg00017.html
+
+Bug-Description:
+
+Bash-4.1/Readline-6.1 introduced a hook function that allows applications
+to rewrite or modify filenames read from the file system before comparing
+them with a word to be completed.  The converted filename, if it matches,
+needs to be inserted into the line buffer, replacing the original contents.
+
+This fixes a completion bug on Mac OS X involving filenames containing
+UTF-8 characters.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/lib/readline/complete.c	2009-11-29 18:39:30.000000000 -0500
+--- lib/readline/complete.c	2010-01-06 08:30:23.000000000 -0500
+***************
+*** 2139,2143 ****
+        if (filename_len == 0)
+  	{
+! 	  if (_rl_match_hidden_files == 0 && HIDDEN_FILE (entry->d_name))
+  	    continue;
+  
+--- 2139,2143 ----
+        if (filename_len == 0)
+  	{
+! 	  if (_rl_match_hidden_files == 0 && HIDDEN_FILE (convfn))
+  	    continue;
+  
+***************
+*** 2220,2224 ****
+  	    }
+  
+! 	  strcpy (temp + dirlen, entry->d_name);
+  	}
+        else
+--- 2220,2224 ----
+  	    }
+  
+! 	  strcpy (temp + dirlen, convfn);
+  	}
+        else
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 1
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 2
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-003
+
+Bug-Reported-by:	coyote@wariat.org.pl
+Bug-Reference-ID:	<4b64a1f8.06e2660a.60af.4bfb@mx.google.com>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-01/msg00135.html
+
+Bug-Description:
+
+If command completion is attempted on a word with a quoted globbing
+character (e.g., `*' or `?'), bash can reference a NULL pointer and
+dump core.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/bashline.c	2009-10-24 14:10:19.000000000 -0400
+--- bashline.c	2010-01-30 21:53:49.000000000 -0500
+***************
+*** 1681,1685 ****
+       characters in the common prefix are bad) will ever be returned on
+       regular completion. */
+!   if (glob_pattern_p (hint))
+      {
+        if (state == 0)
+--- 1681,1685 ----
+       characters in the common prefix are bad) will ever be returned on
+       regular completion. */
+!   if (globpat)
+      {
+        if (state == 0)
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 2
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 3
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-004
+
+Bug-Reported-by:	Crestez Dan Leonard <cdleonard@gmail.com>
+Bug-Reference-ID:	<1265592839.30682.21.camel@deskbox>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-02/msg00034.html
+
+Bug-Description:
+
+When running in Posix mode and executing a shell function without local
+variables, bash will not propagate a variable in a special builtin's temporary
+environment to have global scope.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/variables.c	2009-11-03 14:13:58.000000000 -0500
+--- variables.c	2010-02-08 17:36:18.000000000 -0500
+***************
+*** 3809,3812 ****
+--- 3809,3817 ----
+    if (tempvar_p (var) && (posixly_correct || (var->attributes & att_propagate)))
+      {
++       /* Make sure we have a hash table to store the variable in while it is
++ 	 being propagated down to the global variables table.  Create one if
++ 	 we have to */
++       if ((vc_isfuncenv (shell_variables) || vc_istempenv (shell_variables)) && shell_variables->table == 0)
++ 	shell_variables->table = hash_create (0);
+        /* XXX - should we set v->context here? */
+        v = bind_variable_internal (var->name, value_cell (var), shell_variables->table, 0, 0);
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 3
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 4
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-005
+
+Bug-Reported-by:	werner@suse.de
+Bug-Reference-ID:	<201002251238.o1PCcYcg016893@boole.suse.de>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-02/msg00132.html
+
+Bug-Description:
+
+When the `read' builtin times out after the timeout specified with -t is
+exceeded, it does not reset the flags that tell signal handlers to process
+signals immediately instead of deferring their handling.  This can result
+in unsafe functions being called from signal handlers, which can cause bash
+to hang or dump core.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/builtins/read.def	2009-10-08 11:35:46.000000000 -0400
+--- builtins/read.def	2010-03-17 17:35:39.000000000 -0400
+***************
+*** 616,621 ****
+      zsyncfd (fd);
+  
+-   interrupt_immediately--;
+-   terminate_immediately--;
+    discard_unwind_frame ("read_builtin");
+  
+--- 616,619 ----
+***************
+*** 624,627 ****
+--- 622,628 ----
+  assign_vars:
+  
++   interrupt_immediately--;
++   terminate_immediately--;
++ 
+  #if defined (ARRAY_VARS)
+    /* If -a was given, take the string read, break it into a list of words,
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 4
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 5
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-006
+
+Bug-Reported-by:	Mike Frysinger <vapier@gentoo.org>
+Bug-Reference-ID:	<201003210155.56618.vapier@gentoo.org>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-03/msg00063.html
+
+Bug-Description:
+
+Bash did not correctly print/reproduce here documents attached to commands
+inside compound commands such as for and while.  This affected the
+execution of such commands inside a shell function when the function
+definition is saved and later restored using `.' or `eval'.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/print_cmd.c	2009-09-16 15:32:26.000000000 -0400
+--- print_cmd.c	2010-03-22 21:15:30.000000000 -0400
+***************
+*** 114,117 ****
+--- 114,123 ----
+  #define CHECK_XTRACE_FP	xtrace_fp = (xtrace_fp ? xtrace_fp : stderr)
+  
++ #define PRINT_DEFERRED_HEREDOCS(x) \
++   do { \
++     if (deferred_heredocs) \
++       print_deferred_heredocs (x); \
++   } while (0)
++ 
+  /* Non-zero means the stuff being printed is inside of a function def. */
+  static int inside_function_def;
+***************
+*** 561,571 ****
+  {
+    print_for_command_head (for_command);
+- 
+    cprintf (";");
+    newline ("do\n");
+    indentation += indentation_amount;
+    make_command_string_internal (for_command->action);
+    semicolon ();
+    indentation -= indentation_amount;
+    newline ("done");
+  }
+--- 566,578 ----
+  {
+    print_for_command_head (for_command);
+    cprintf (";");
+    newline ("do\n");
++ 
+    indentation += indentation_amount;
+    make_command_string_internal (for_command->action);
++   PRINT_DEFERRED_HEREDOCS ("");
+    semicolon ();
+    indentation -= indentation_amount;
++ 
+    newline ("done");
+  }
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 5
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 6
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-007
+
+Bug-Reported-by:	Rob Robason <rob@robason.net>
+Bug-Reference-ID:	<1269513145.22336.9.camel@home.robason.homelinux.net>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-03/msg00089.html
+
+Bug-Description:
+
+A typo caused bash to not honor a precision specification in a printf
+format.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/builtins/printf.def	2010-01-18 10:50:22.000000000 -0500
+--- builtins/printf.def	2010-03-25 09:40:56.000000000 -0400
+***************
+*** 118,122 ****
+        nw = vflag ? vbprintf (f, fieldwidth, func) : printf (f, fieldwidth, func); \
+      else if (have_precision) \
+!       nw = vflag ? vbprintf (f, precision, func) : printf (f, fieldwidth, func); \
+      else \
+        nw = vflag ? vbprintf (f, func) : printf (f, func); \
+--- 118,122 ----
+        nw = vflag ? vbprintf (f, fieldwidth, func) : printf (f, fieldwidth, func); \
+      else if (have_precision) \
+!       nw = vflag ? vbprintf (f, precision, func) : printf (f, precision, func); \
+      else \
+        nw = vflag ? vbprintf (f, func) : printf (f, func); \
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 6
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 7
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-008
+
+Bug-Reported-by:	Dennis van Dok <dvandok@gmail.com>
+Bug-Reference-ID:	<4BBF2501.5050703@gmail.com>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-04/msg00038.html
+
+Bug-Description:
+
+When declaring an associative array and implicitly assigning a value
+to element "0", bash does not correctly allocate memory, leading to
+a segmentation violation when that element or the array itself is
+unset.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/builtins/declare.def	2009-11-25 19:42:00.000000000 -0500
+--- builtins/declare.def	2010-05-30 18:25:21.000000000 -0400
+***************
+*** 513,517 ****
+  	      /* let bind_{array,assoc}_variable take care of this. */
+  	      if (assoc_p (var))
+! 		bind_assoc_variable (var, name, "0", value, aflags);
+  	      else
+  		bind_array_variable (name, 0, value, aflags);
+--- 519,523 ----
+  	      /* let bind_{array,assoc}_variable take care of this. */
+  	      if (assoc_p (var))
+! 		bind_assoc_variable (var, name, savestring ("0"), value, aflags);
+  	      else
+  		bind_array_variable (name, 0, value, aflags);
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 7
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 8
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-009
+
+Bug-Reported-by:	Tomas Trnka <tomastrnka@gmx.com>
+Bug-Reference-ID:	<201003242030.02166.tomastrnka@gmx.com>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-03/msg00090.html
+
+Bug-Description:
+
+An arriving SIGCHLD will interrupt `slow' system calls such as write(2) to
+or read(2) from a terminal.  This results in an error message and truncated
+input or output.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/sig.c	Fri Aug 14 16:31:52 2009
+--- sig.c	Fri Mar 26 22:34:11 2010
+***************
+*** 655,660 ****
+--- 655,663 ----
+      act.sa_flags |= SA_INTERRUPT;	/* XXX */
+    else
+      act.sa_flags |= SA_RESTART;		/* XXX */
++ #else
++   if (sig == SIGCHLD)
++     act.sa_flags |= SA_RESTART;
+  #endif
+    sigemptyset (&act.sa_mask);
+    sigemptyset (&oact.sa_mask);
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 8
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 9
+  
+  #endif /* _PATCHLEVEL_H_ */
+
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-010
+
+Bug-Reported-by:	Stephane Jourdois <sjourdois@gmail.com>
+Bug-Reference-ID:	<AANLkTimbh1t2BmCjnCgACpEidArJMBIEtr30Vv3VzHxf@mail.gmail.com>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2010-05/msg00165.html
+
+Bug-Description:
+
+The expansion of the \W prompt string escape sequence incorrectly used
+strcpy to copy overlapping strings.  Only memmove works in this case.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/parse.y	2009-12-30 12:51:42.000000000 -0500
+--- parse.y	2011-02-24 16:40:48.000000000 -0500
+***************
+*** 5153,5157 ****
+  			t = strrchr (t_string, '/');
+  			if (t)
+! 			  strcpy (t_string, t + 1);
+  		      }
+  		  }
+--- 5153,5157 ----
+  			t = strrchr (t_string, '/');
+  			if (t)
+! 			  memmove (t_string, t + 1, strlen (t));
+  		      }
+  		  }
+*** bash-4.1-patched/y.tab.c	2009-12-30 12:52:02.000000000 -0500
+--- y.tab.c	2011-02-24 16:50:27.000000000 -0500
+***************
+*** 7482,7486 ****
+  			t = strrchr (t_string, '/');
+  			if (t)
+! 			  strcpy (t_string, t + 1);
+  		      }
+  		  }
+--- 7482,7486 ----
+  			t = strrchr (t_string, '/');
+  			if (t)
+! 			  memmove (t_string, t + 1, strlen (t));
+  		      }
+  		  }
+***************
+*** 8244,8246 ****
+  }
+  #endif /* HANDLE_MULTIBYTE */
+- 
+--- 8244,8245 ----
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 9
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 10
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-011
+
+Bug-Reported-by:	<piuma@piumalab.org>
+Bug-Reference-ID:	<4DAAC0DB.7060606@piumalab.org>
+Bug-Reference-URL:	http://lists.gnu.org/archive/html/bug-bash/2011-04/msg00075.html
+
+Bug-Description:
+
+Under certain circumstances, running `fc -l' two times in succession with a
+relative history offset at the end of the history will result in an incorrect
+calculation of the last history entry and a seg fault.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1-patched/builtins/fc.def	2009-03-21 14:03:43.000000000 -0400
+--- builtins/fc.def	2011-04-19 15:46:17.000000000 -0400
+***************
+*** 304,307 ****
+--- 304,317 ----
+    last_hist = i - rh - hist_last_line_added;
+  
++   /* XXX */
++   if (i == last_hist && hlist[last_hist] == 0)
++     while (last_hist >= 0 && hlist[last_hist] == 0)
++       last_hist--;
++   if (last_hist < 0)
++     {
++       sh_erange ((char *)NULL, _("history specification"));
++       return (EXECUTION_FAILURE);
++     }
++ 
+    if (list)
+      {
+***************
+*** 466,470 ****
+  {
+    int sign, n, clen, rh;
+!   register int i, j;
+    register char *s;
+  
+--- 476,480 ----
+  {
+    int sign, n, clen, rh;
+!   register int i, j, last_hist;
+    register char *s;
+  
+***************
+*** 486,490 ****
+       calculation as if it were on. */
+    rh = remember_on_history || ((subshell_environment & SUBSHELL_COMSUB) && enable_history_list);
+!   i -= rh + hist_last_line_added;
+  
+    /* No specification defaults to most recent command. */
+--- 496,508 ----
+       calculation as if it were on. */
+    rh = remember_on_history || ((subshell_environment & SUBSHELL_COMSUB) && enable_history_list);
+!   last_hist = i - rh - hist_last_line_added;
+! 
+!   if (i == last_hist && hlist[last_hist] == 0)
+!     while (last_hist >= 0 && hlist[last_hist] == 0)
+!       last_hist--;
+!   if (last_hist < 0)
+!     return (-1);
+! 
+!   i = last_hist;
+  
+    /* No specification defaults to most recent command. */
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 10
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 11
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-012
+
+Bug-Reported-by:	Stephane Chazelas <stephane.chazelas@gmail.com>
+Bug-Reference-ID:
+Bug-Reference-URL:
+
+Bug-Description:
+
+Under certain circumstances, bash will execute user code while processing the
+environment for exported function definitions.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1.11/builtins/common.h	2009-12-22 16:30:42.000000000 -0500
+--- builtins/common.h	2014-09-16 19:27:38.000000000 -0400
+***************
+*** 36,39 ****
+--- 36,41 ----
+  
+  /* Flags for describe_command, shared between type.def and command.def */
++ #define SEVAL_FUNCDEF	0x080		/* only allow function definitions */
++ #define SEVAL_ONECMD	0x100		/* only allow a single command */
+  #define CDESC_ALL		0x001	/* type -a */
+  #define CDESC_SHORTDESC		0x002	/* command -V */
+*** bash-4.1.11/builtins/evalstring.c	2009-10-17 21:18:50.000000000 -0400
+--- builtins/evalstring.c	2014-09-16 19:27:38.000000000 -0400
+***************
+*** 262,265 ****
+--- 262,273 ----
+  	      struct fd_bitmap *bitmap;
+  
++ 	      if ((flags & SEVAL_FUNCDEF) && command->type != cm_function_def)
++ 		{
++ 		  internal_warning ("%s: ignoring function definition attempt", from_file);
++ 		  should_jump_to_top_level = 0;
++ 		  last_result = last_command_exit_value = EX_BADUSAGE;
++ 		  break;
++ 		}
++ 
+  	      bitmap = new_fd_bitmap (FD_BITMAP_SIZE);
+  	      begin_unwind_frame ("pe_dispose");
+***************
+*** 322,325 ****
+--- 330,336 ----
+  	      dispose_fd_bitmap (bitmap);
+  	      discard_unwind_frame ("pe_dispose");
++ 
++ 	      if (flags & SEVAL_ONECMD)
++ 		break;
+  	    }
+  	}
+*** bash-4.1.11/variables.c	2010-03-26 12:15:39.000000000 -0400
+--- variables.c	2014-09-16 19:27:38.000000000 -0400
+***************
+*** 348,357 ****
+  	  strcpy (temp_string + char_index + 1, string);
+  
+! 	  parse_and_execute (temp_string, name, SEVAL_NONINT|SEVAL_NOHIST);
+! 
+! 	  /* Ancient backwards compatibility.  Old versions of bash exported
+! 	     functions like name()=() {...} */
+! 	  if (name[char_index - 1] == ')' && name[char_index - 2] == '(')
+! 	    name[char_index - 2] = '\0';
+  
+  	  if (temp_var = find_function (name))
+--- 348,355 ----
+  	  strcpy (temp_string + char_index + 1, string);
+  
+! 	  /* Don't import function names that are invalid identifiers from the
+! 	     environment. */
+! 	  if (legal_identifier (name))
+! 	    parse_and_execute (temp_string, name, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_FUNCDEF|SEVAL_ONECMD);
+  
+  	  if (temp_var = find_function (name))
+***************
+*** 362,369 ****
+  	  else
+  	    report_error (_("error importing function definition for `%s'"), name);
+- 
+- 	  /* ( */
+- 	  if (name[char_index - 1] == ')' && name[char_index - 2] == '\0')
+- 	    name[char_index - 2] = '(';		/* ) */
+  	}
+  #if defined (ARRAY_VARS)
+--- 360,363 ----
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 11
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 12
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-013
+
+Bug-Reported-by:	Tavis Ormandy <taviso@cmpxchg8b.com>
+Bug-Reference-ID:
+Bug-Reference-URL:	http://twitter.com/taviso/statuses/514887394294652929
+
+Bug-Description:
+
+Under certain circumstances, bash can incorrectly save a lookahead character and
+return it on a subsequent call, even when reading a new line.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1.12/parse.y	2011-02-24 19:41:01.000000000 -0500
+--- parse.y	2014-09-25 16:13:57.000000000 -0400
+***************
+*** 2812,2815 ****
+--- 2812,2817 ----
+    word_desc_to_read = (WORD_DESC *)NULL;
+  
++   eol_ungetc_lookahead = 0;
++ 
+    current_token = '\n';		/* XXX */
+    last_read_token = '\n';
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 12
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 13
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-014
+
+Bug-Reported-by:	Florian Weimer <fweimer@redhat.com>
+Bug-Reference-ID:
+Bug-Reference-URL:
+
+Bug-Description:
+
+This patch changes the encoding bash uses for exported functions to avoid
+clashes with shell variables and to avoid depending only on an environment
+variable's contents to determine whether or not to interpret it as a shell
+function.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1.13/variables.c	2014-09-16 19:27:38.000000000 -0400
+--- variables.c	2014-09-27 20:57:46.000000000 -0400
+***************
+*** 80,83 ****
+--- 80,88 ----
+  #define ifsname(s)	((s)[0] == 'I' && (s)[1] == 'F' && (s)[2] == 'S' && (s)[3] == '\0')
+  
++ #define BASHFUNC_PREFIX		"BASH_FUNC_"
++ #define BASHFUNC_PREFLEN	10	/* == strlen(BASHFUNC_PREFIX */
++ #define BASHFUNC_SUFFIX		"%%"
++ #define BASHFUNC_SUFFLEN	2	/* == strlen(BASHFUNC_SUFFIX) */
++ 
+  extern char **environ;
+  
+***************
+*** 269,273 ****
+  static void dispose_temporary_env __P((sh_free_func_t *));     
+  
+! static inline char *mk_env_string __P((const char *, const char *));
+  static char **make_env_array_from_var_list __P((SHELL_VAR **));
+  static char **make_var_export_array __P((VAR_CONTEXT *));
+--- 274,278 ----
+  static void dispose_temporary_env __P((sh_free_func_t *));     
+  
+! static inline char *mk_env_string __P((const char *, const char *, int));
+  static char **make_env_array_from_var_list __P((SHELL_VAR **));
+  static char **make_var_export_array __P((VAR_CONTEXT *));
+***************
+*** 339,357 ****
+        /* If exported function, define it now.  Don't import functions from
+  	 the environment in privileged mode. */
+!       if (privmode == 0 && read_but_dont_execute == 0 && STREQN ("() {", string, 4))
+  	{
+  	  string_length = strlen (string);
+! 	  temp_string = (char *)xmalloc (3 + string_length + char_index);
+  
+! 	  strcpy (temp_string, name);
+! 	  temp_string[char_index] = ' ';
+! 	  strcpy (temp_string + char_index + 1, string);
+  
+  	  /* Don't import function names that are invalid identifiers from the
+  	     environment. */
+! 	  if (legal_identifier (name))
+! 	    parse_and_execute (temp_string, name, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_FUNCDEF|SEVAL_ONECMD);
+  
+! 	  if (temp_var = find_function (name))
+  	    {
+  	      VSETATTR (temp_var, (att_exported|att_imported));
+--- 344,373 ----
+        /* If exported function, define it now.  Don't import functions from
+  	 the environment in privileged mode. */
+!       if (privmode == 0 && read_but_dont_execute == 0 &&
+! 	  STREQN (BASHFUNC_PREFIX, name, BASHFUNC_PREFLEN) &&
+! 	  STREQ (BASHFUNC_SUFFIX, name + char_index - BASHFUNC_SUFFLEN) &&
+! 	  STREQN ("() {", string, 4))
+  	{
++ 	  size_t namelen;
++ 	  char *tname;		/* desired imported function name */
++ 
++ 	  namelen = char_index - BASHFUNC_PREFLEN - BASHFUNC_SUFFLEN;
++ 
++ 	  tname = name + BASHFUNC_PREFLEN;	/* start of func name */
++ 	  tname[namelen] = '\0';		/* now tname == func name */
++ 
+  	  string_length = strlen (string);
+! 	  temp_string = (char *)xmalloc (namelen + string_length + 2);
+  
+! 	  memcpy (temp_string, tname, namelen);
+! 	  temp_string[namelen] = ' ';
+! 	  memcpy (temp_string + namelen + 1, string, string_length + 1);
+  
+  	  /* Don't import function names that are invalid identifiers from the
+  	     environment. */
+! 	  if (absolute_program (tname) == 0 && (posixly_correct == 0 || legal_identifier (tname)))
+! 	    parse_and_execute (temp_string, tname, SEVAL_NONINT|SEVAL_NOHIST|SEVAL_FUNCDEF|SEVAL_ONECMD);
+  
+! 	  if (temp_var = find_function (tname))
+  	    {
+  	      VSETATTR (temp_var, (att_exported|att_imported));
+***************
+*** 359,363 ****
+  	    }
+  	  else
+! 	    report_error (_("error importing function definition for `%s'"), name);
+  	}
+  #if defined (ARRAY_VARS)
+--- 375,382 ----
+  	    }
+  	  else
+! 	    report_error (_("error importing function definition for `%s'"), tname);
+! 
+! 	  /* Restore original suffix */
+! 	  tname[namelen] = BASHFUNC_SUFFIX[0];
+  	}
+  #if defined (ARRAY_VARS)
+***************
+*** 2520,2524 ****
+  
+    INVALIDATE_EXPORTSTR (var);
+!   var->exportstr = mk_env_string (name, value);
+  
+    array_needs_making = 1;
+--- 2539,2543 ----
+  
+    INVALIDATE_EXPORTSTR (var);
+!   var->exportstr = mk_env_string (name, value, 0);
+  
+    array_needs_making = 1;
+***************
+*** 3339,3357 ****
+  
+  static inline char *
+! mk_env_string (name, value)
+       const char *name, *value;
+  {
+!   int name_len, value_len;
+!   char	*p;
+  
+    name_len = strlen (name);
+    value_len = STRLEN (value);
+!   p = (char *)xmalloc (2 + name_len + value_len);
+!   strcpy (p, name);
+!   p[name_len] = '=';
+    if (value && *value)
+!     strcpy (p + name_len + 1, value);
+    else
+!     p[name_len + 1] = '\0';
+    return (p);
+  }
+--- 3358,3397 ----
+  
+  static inline char *
+! mk_env_string (name, value, isfunc)
+       const char *name, *value;
++      int isfunc;
+  {
+!   size_t name_len, value_len;
+!   char	*p, *q;
+  
+    name_len = strlen (name);
+    value_len = STRLEN (value);
+! 
+!   /* If we are exporting a shell function, construct the encoded function
+!      name. */
+!   if (isfunc && value)
+!     {
+!       p = (char *)xmalloc (BASHFUNC_PREFLEN + name_len + BASHFUNC_SUFFLEN + value_len + 2);
+!       q = p;
+!       memcpy (q, BASHFUNC_PREFIX, BASHFUNC_PREFLEN);
+!       q += BASHFUNC_PREFLEN;
+!       memcpy (q, name, name_len);
+!       q += name_len;
+!       memcpy (q, BASHFUNC_SUFFIX, BASHFUNC_SUFFLEN);
+!       q += BASHFUNC_SUFFLEN;
+!     }
+!   else
+!     {
+!       p = (char *)xmalloc (2 + name_len + value_len);
+!       memcpy (p, name, name_len);
+!       q = p + name_len;
+!     }
+! 
+!   q[0] = '=';
+    if (value && *value)
+!     memcpy (q + 1, value, value_len + 1);
+    else
+!     q[1] = '\0';
+! 
+    return (p);
+  }
+***************
+*** 3439,3443 ****
+  	     using the cached exportstr... */
+  	  list[list_index] = USE_EXPORTSTR ? savestring (value)
+! 					   : mk_env_string (var->name, value);
+  
+  	  if (USE_EXPORTSTR == 0)
+--- 3479,3483 ----
+  	     using the cached exportstr... */
+  	  list[list_index] = USE_EXPORTSTR ? savestring (value)
+! 					   : mk_env_string (var->name, value, function_p (var));
+  
+  	  if (USE_EXPORTSTR == 0)
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 13
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 14
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-015
+
+Bug-Reported-by:	Florian Weimer <fweimer@redhat.com>
+Bug-Reference-ID:
+Bug-Reference-URL:
+
+Bug-Description:
+
+There are two local buffer overflows in parse.y that can cause the shell
+to dump core when given many here-documents attached to a single command
+or many nested loops.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1.14/parse.y	2014-09-27 12:18:25.000000000 -0400
+--- parse.y	2014-09-30 19:36:03.000000000 -0400
+***************
+*** 168,171 ****
+--- 168,174 ----
+  static int reserved_word_acceptable __P((int));
+  static int yylex __P((void));
++ 
++ static void push_heredoc __P((REDIRECT *));
++ static char *mk_alexpansion __P((char *));
+  static int alias_expand_token __P((char *));
+  static int time_command_acceptable __P((void));
+***************
+*** 262,266 ****
+  /* Variables to manage the task of reading here documents, because we need to
+     defer the reading until after a complete command has been collected. */
+! static REDIRECT *redir_stack[10];
+  int need_here_doc;
+  
+--- 265,271 ----
+  /* Variables to manage the task of reading here documents, because we need to
+     defer the reading until after a complete command has been collected. */
+! #define HEREDOC_MAX 16
+! 
+! static REDIRECT *redir_stack[HEREDOC_MAX];
+  int need_here_doc;
+  
+***************
+*** 304,308 ****
+     index is decremented after a case, select, or for command is parsed. */
+  #define MAX_CASE_NEST	128
+! static int word_lineno[MAX_CASE_NEST];
+  static int word_top = -1;
+  
+--- 309,313 ----
+     index is decremented after a case, select, or for command is parsed. */
+  #define MAX_CASE_NEST	128
+! static int word_lineno[MAX_CASE_NEST+1];
+  static int word_top = -1;
+  
+***************
+*** 517,521 ****
+  			  redir.filename = $2;
+  			  $$ = make_redirection (source, r_reading_until, redir, 0);
+! 			  redir_stack[need_here_doc++] = $$;
+  			}
+  	|	NUMBER LESS_LESS WORD
+--- 522,526 ----
+  			  redir.filename = $2;
+  			  $$ = make_redirection (source, r_reading_until, redir, 0);
+! 			  push_heredoc ($$);
+  			}
+  	|	NUMBER LESS_LESS WORD
+***************
+*** 524,528 ****
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_reading_until, redir, 0);
+! 			  redir_stack[need_here_doc++] = $$;
+  			}
+  	|	REDIR_WORD LESS_LESS WORD
+--- 529,533 ----
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_reading_until, redir, 0);
+! 			  push_heredoc ($$);
+  			}
+  	|	REDIR_WORD LESS_LESS WORD
+***************
+*** 531,535 ****
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_reading_until, redir, REDIR_VARASSIGN);
+! 			  redir_stack[need_here_doc++] = $$;
+  			}
+  	|	LESS_LESS_MINUS WORD
+--- 536,540 ----
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_reading_until, redir, REDIR_VARASSIGN);
+! 			  push_heredoc ($$);
+  			}
+  	|	LESS_LESS_MINUS WORD
+***************
+*** 538,542 ****
+  			  redir.filename = $2;
+  			  $$ = make_redirection (source, r_deblank_reading_until, redir, 0);
+! 			  redir_stack[need_here_doc++] = $$;
+  			}
+  	|	NUMBER LESS_LESS_MINUS WORD
+--- 543,547 ----
+  			  redir.filename = $2;
+  			  $$ = make_redirection (source, r_deblank_reading_until, redir, 0);
+! 			  push_heredoc ($$);
+  			}
+  	|	NUMBER LESS_LESS_MINUS WORD
+***************
+*** 545,549 ****
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_deblank_reading_until, redir, 0);
+! 			  redir_stack[need_here_doc++] = $$;
+  			}
+  	|	REDIR_WORD  LESS_LESS_MINUS WORD
+--- 550,554 ----
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_deblank_reading_until, redir, 0);
+! 			  push_heredoc ($$);
+  			}
+  	|	REDIR_WORD  LESS_LESS_MINUS WORD
+***************
+*** 552,556 ****
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_deblank_reading_until, redir, REDIR_VARASSIGN);
+! 			  redir_stack[need_here_doc++] = $$;
+  			}
+  	|	LESS_LESS_LESS WORD
+--- 557,561 ----
+  			  redir.filename = $3;
+  			  $$ = make_redirection (source, r_deblank_reading_until, redir, REDIR_VARASSIGN);
+! 			  push_heredoc ($$);
+  			}
+  	|	LESS_LESS_LESS WORD
+***************
+*** 2508,2511 ****
+--- 2513,2531 ----
+  static int esacs_needed_count;
+  
++ static void
++ push_heredoc (r)
++      REDIRECT *r;
++ {
++   if (need_here_doc >= HEREDOC_MAX)
++     {
++       last_command_exit_value = EX_BADUSAGE;
++       need_here_doc = 0;
++       report_syntax_error (_("maximum here-document count exceeded"));
++       reset_parser ();
++       exit_shell (last_command_exit_value);
++     }
++   redir_stack[need_here_doc++] = r;
++ }
++ 
+  void
+  gather_here_documents ()
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 14
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 15
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-016
+
+Bug-Reported-by:	Michal Zalewski <lcamtuf@coredump.cx>
+Bug-Reference-ID:
+Bug-Reference-URL:
+
+Bug-Description:
+
+When bash is parsing a function definition that contains a here-document
+delimited by end-of-file (or end-of-string), it leaves the closing delimiter
+uninitialized.  This can result in an invalid memory access when the parsed
+function is later copied.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1.15/make_cmd.c	2009-09-11 17:26:12.000000000 -0400
+--- make_cmd.c	2014-10-02 11:29:35.000000000 -0400
+***************
+*** 690,693 ****
+--- 690,694 ----
+    temp->redirector = source;
+    temp->redirectee = dest_and_filename;
++   temp->here_doc_eof = 0;
+    temp->instruction = instruction;
+    temp->flags = 0;
+*** bash-4.1.15/copy_cmd.c	2009-09-11 16:28:02.000000000 -0400
+--- copy_cmd.c	2014-10-02 11:29:35.000000000 -0400
+***************
+*** 127,131 ****
+      case r_reading_until:
+      case r_deblank_reading_until:
+!       new_redirect->here_doc_eof = savestring (redirect->here_doc_eof);
+        /*FALLTHROUGH*/
+      case r_reading_string:
+--- 127,131 ----
+      case r_reading_until:
+      case r_deblank_reading_until:
+!       new_redirect->here_doc_eof = redirect->here_doc_eof ? savestring (redirect->here_doc_eof) : 0;
+        /*FALLTHROUGH*/
+      case r_reading_string:
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 15
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 16
+  
+  #endif /* _PATCHLEVEL_H_ */
+			     BASH PATCH REPORT
+			     =================
+
+Bash-Release:	4.1
+Patch-ID:	bash41-017
+
+Bug-Reported-by:	Michal Zalewski <lcamtuf@coredump.cx>
+Bug-Reference-ID:
+Bug-Reference-URL:
+
+Bug-Description:
+
+A combination of nested command substitutions and function importing from
+the environment can cause bash to execute code appearing in the environment
+variable value following the function definition.
+
+Patch (apply with `patch -p0'):
+
+*** bash-4.1.16/builtins/evalstring.c	2014-09-16 19:27:38.000000000 -0400
+--- builtins/evalstring.c	2014-10-04 15:08:26.000000000 -0400
+***************
+*** 262,271 ****
+  	      struct fd_bitmap *bitmap;
+  
+! 	      if ((flags & SEVAL_FUNCDEF) && command->type != cm_function_def)
+  		{
+! 		  internal_warning ("%s: ignoring function definition attempt", from_file);
+! 		  should_jump_to_top_level = 0;
+! 		  last_result = last_command_exit_value = EX_BADUSAGE;
+! 		  break;
+  		}
+  
+--- 262,284 ----
+  	      struct fd_bitmap *bitmap;
+  
+! 	      if (flags & SEVAL_FUNCDEF)
+  		{
+! 		  char *x;
+! 
+! 		  /* If the command parses to something other than a straight
+! 		     function definition, or if we have not consumed the entire
+! 		     string, or if the parser has transformed the function
+! 		     name (as parsing will if it begins or ends with shell
+! 		     whitespace, for example), reject the attempt */
+! 		  if (command->type != cm_function_def ||
+! 		      ((x = parser_remaining_input ()) && *x) ||
+! 		      (STREQ (from_file, command->value.Function_def->name->word) == 0))
+! 		    {
+! 		      internal_warning (_("%s: ignoring function definition attempt"), from_file);
+! 		      should_jump_to_top_level = 0;
+! 		      last_result = last_command_exit_value = EX_BADUSAGE;
+! 		      reset_parser ();
+! 		      break;
+! 		    }
+  		}
+  
+***************
+*** 332,336 ****
+  
+  	      if (flags & SEVAL_ONECMD)
+! 		break;
+  	    }
+  	}
+--- 345,352 ----
+  
+  	      if (flags & SEVAL_ONECMD)
+! 		{
+! 		  reset_parser ();
+! 		  break;
+! 		}
+  	    }
+  	}
+*** bash-4.1.16/parse.y	2014-09-30 19:36:03.000000000 -0400
+--- parse.y	2014-10-04 15:08:26.000000000 -0400
+***************
+*** 2410,2413 ****
+--- 2410,2423 ----
+  }
+  
++ char *
++ parser_remaining_input ()
++ {
++   if (shell_input_line == 0)
++     return 0;
++   if (shell_input_line_index < 0 || shell_input_line_index >= shell_input_line_len)
++     return '\0';	/* XXX */
++   return (shell_input_line + shell_input_line_index);
++ }
++ 
+  #ifdef INCLUDE_UNUSED
+  /* Back the input pointer up by one, effectively `ungetting' a character. */
+***************
+*** 3809,3814 ****
+    restore_parser_state (&ps);
+    reset_parser ();
+!   if (interactive)
+!     token_to_read = 0;
+  
+    /* Need to find how many characters parse_and_execute consumed, update
+--- 3819,3824 ----
+    restore_parser_state (&ps);
+    reset_parser ();
+! 
+!   token_to_read = 0;
+  
+    /* Need to find how many characters parse_and_execute consumed, update
+*** bash-4.1.16/shell.h	2009-08-14 16:32:52.000000000 -0400
+--- shell.h	2014-10-04 15:08:26.000000000 -0400
+***************
+*** 164,167 ****
+--- 164,169 ----
+  
+  /* Let's try declaring these here. */
++ extern char *parser_remaining_input __P((void));
++ 
+  extern sh_parser_state_t *save_parser_state __P((sh_parser_state_t *));
+  extern void restore_parser_state __P((sh_parser_state_t *));
+*** bash-4.1-patched/patchlevel.h	2009-10-01 16:39:22.000000000 -0400
+--- patchlevel.h	2010-01-14 09:38:08.000000000 -0500
+***************
+*** 26,30 ****
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 16
+  
+  #endif /* _PATCHLEVEL_H_ */
+--- 26,30 ----
+     looks for to find the patch level (for the sccs version string). */
+  
+! #define PATCHLEVEL 17
+  
+  #endif /* _PATCHLEVEL_H_ */

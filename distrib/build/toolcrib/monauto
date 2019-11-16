@@ -1,0 +1,42 @@
+#! /bin/bash
+
+  if [ $# -ne 0 -o `basename "$PWD"` != "build" ]; then
+    echo "Usage: monauto"
+    echo "  <CTRL/C> terminates monauto"
+    echo
+    echo " You must be in the build dir."
+    return
+  fi
+
+  trap 'rm -f crumbs/monpipe; if [ "$MONPID" != "" ]; then kill -9 $MONPID >/dev/null 2>&1; wait $MONPID >/dev/null 2>&1; fi' EXIT
+
+function killMon () {
+  if [ "$MONPID" != "" ]; then
+    kill -9 $MONPID
+    wait $MONPID >/dev/null 2>&1
+    MONPID=""
+  fi
+}
+
+  rm -f crumbs/monpipe
+  mkfifo crumbs/monpipe -m 600
+  MONPID=""
+  while true; do
+    read stage pkg third < crumbs/monpipe
+    if [ ! -z "$stage" -a ! -z "$pkg" ]; then
+      killMon
+      case $stage in
+        -1) stage="Stage_1"; shift;;
+        -2) stage="Stage_2"; shift;;
+        -3) stage="Stage_3"; shift;;
+        -f) stage="Final"; shift;;
+        -m) stage="Media.mediaISO"; shift;;
+        -u) pkg="updates/update$third"; stage="Update"; shift;;
+        Done) continue;; # do nothing else
+        *) continue;; # also do nothing else
+      esac
+      [ -f sources/$pkg/$stage.out ] || touch sources/$pkg/$stage.out
+      tail -f -s .1 sources/$pkg/$stage.out&
+      MONPID=$!
+    fi
+  done

@@ -1,0 +1,100 @@
+diff -Nurb ip_wccp-1.7/Makefile ip_wccp-1.7.new/Makefile
+--- ip_wccp-1.7/Makefile	2005-01-07 16:55:39.000000000 +0000
++++ ip_wccp-1.7.new/Makefile	2009-11-16 13:21:58.000000000 +0000
+@@ -21,14 +21,14 @@
+ VERSION_FILE := $(KERNELSRC)/include/linux/version.h
+ 
+ #check if config.h file exists
+-ifeq (,$(wildcard $(CONFIG_FILE)))
+-$(error Linux kernel source not configured - config.h not found)
+-endif
++#ifeq (,$(wildcard $(CONFIG_FILE)))
++#$(error Linux kernel source not configured - config.h not found)
++#endif
+ 
+ #check if version.h file exists
+-ifeq (,$(wildcard $(VERSION_FILE)))
+-$(error Linux kernel source not configured - version.h not found)
+-endif
++#ifeq (,$(wildcard $(VERSION_FILE)))
++#$(error Linux kernel source not configured - version.h not found)
++#endif
+ 
+ # check if the running kernel matches the source.
+ KERNEL_VERSION := $(shell $(CC) $(CFLAGS) -E -dM $(VERSION_FILE) | grep UTS_RELEASE | \
+diff -Nurb ip_wccp-1.7/ip_wccp.c ip_wccp-1.7.new/ip_wccp.c
+--- ip_wccp-1.7/ip_wccp.c	2005-01-07 17:26:33.000000000 +0000
++++ ip_wccp-1.7.new/ip_wccp.c	2009-11-17 15:17:38.000000000 +0000
+@@ -30,7 +30,7 @@
+  *              Original release
+  */
+ 
+-#include <linux/config.h>
++#include <linux/autoconf.h>
+ #include <linux/module.h>
+ #include <linux/types.h>
+ #include <linux/sched.h>
+@@ -63,7 +63,8 @@
+ 
+ static inline void ip_wccp_ecn_decapsulate(struct iphdr *outer_iph, struct sk_buff *skb)
+ {
+-	struct iphdr *inner_iph = skb->nh.iph;
++//	struct iphdr *inner_iph = skb->nh.iph;
++	struct iphdr *inner_iph = (struct iphdr *) skb_network_header(skb);
+ 
+ 	if (INET_ECN_is_ce(outer_iph->tos))
+ 	    IP_ECN_set_ce(inner_iph);
+@@ -74,16 +75,20 @@
+ {
+ 	u32  *gre_hdr;
+ 	struct iphdr *iph;
++	char *hdr;
+ 
+ 	if (!pskb_may_pull(skb, 16))
+ 		goto drop;
+ 
+-	iph = skb->nh.iph;
+-	gre_hdr = (u32 *)skb->h.raw;
++//	iph = skb->nh.iph;
++        iph = (struct iphdr *) skb_network_header(skb);
++//	gre_hdr = (u32 *)skb->h.raw;
++        gre_hdr = (u32 *)skb_transport_header(skb);
+ 	if(*gre_hdr != __constant_htonl(WCCP_PROTOCOL_TYPE)) 
+ 		goto drop;
+ 
+-	skb->mac.raw = skb->nh.raw;
++//	skb->mac.raw = skb->nh.raw;
++	skb_reset_mac_header(skb);
+ 
+ 	/* WCCP2 puts an extra 4 octets into the header, but uses the same
+ 	 * encapsulation type; if it looks as if the first octet of the packet
+@@ -91,10 +96,14 @@
+ 	 * This should be safe as these bits are reserved in the WCCPv2 header
+ 	 * and always zero in WCCPv2.
+ 	 */
+-	if ((skb->h.raw[WCCP_GRE_LEN] & 0xF0) != 0x40) {
+-		skb->nh.raw = pskb_pull(skb, WCCP_GRE_LEN + WCCP2_GRE_EXTRA);
++//	if ((skb->h.raw[WCCP_GRE_LEN] & 0xF0) != 0x40) {
++        hdr = skb_transport_header(skb);
++        if ((hdr[WCCP_GRE_LEN] & 0xF0) != 0x40) {
++//		skb->nh.raw = pskb_pull(skb, WCCP_GRE_LEN + WCCP2_GRE_EXTRA);
++		skb_set_network_header(skb, WCCP_GRE_LEN + WCCP2_GRE_EXTRA);
+ 	} else { 
+-		skb->nh.raw = pskb_pull(skb, WCCP_GRE_LEN);
++//		skb->nh.raw = pskb_pull(skb, WCCP_GRE_LEN);
++		skb_set_network_header(skb, WCCP_GRE_LEN);
+ 	}
+ 	if (skb->len <= 0) 
+ 		goto drop;
+@@ -103,8 +112,9 @@
+ 	skb->protocol = __constant_htons(ETH_P_IP);
+ 	skb->pkt_type = PACKET_HOST;
+ 
+-	dst_release(skb->dst);
+-	skb->dst = NULL;
++//	dst_release(skb->dst);
++//	skb->dst = NULL;
++	skb_dst_drop(skb);
+ #ifdef CONFIG_NETFILTER
+ 	nf_conntrack_put(skb->nfct);
+ 	skb->nfct = NULL;

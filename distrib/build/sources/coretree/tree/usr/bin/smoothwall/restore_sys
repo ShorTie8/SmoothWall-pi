@@ -1,0 +1,69 @@
+#! /bin/bash
+
+
+# AGCL/FS Backup
+#
+# Copyright 2011, Neal P. Murphy
+#
+# This program is licensed under the terms of the GNU Public License, version 2.
+#
+# restore_sys
+#   This script disables the daemon so you can plug in a backup medium,
+#   mount it, extract files from an archive, then unmount and unplug the
+#   medium. Upon exit, it re-enables the daemon.
+
+
+#############
+# Main code #
+#############
+
+# Prepare a bunch of shorthand vars
+ROOTDIR=/var/smoothwall
+
+# Set PATH for security
+PATH=/usr/smoothwall/bin:/bin:/usr/bin:/sbin:/usr/sbin
+
+relROOTDIR=${ROOTDIR/\//}
+BACK_DIR=${ROOTDIR}/backup
+DISABLE_FILE="${BACK_DIR}/DISABLE_DAEMON"
+
+REST_DIR="/tmp/RESTORE/`date +%Y%m%d-%H%M`"
+mkdir -p $REST_DIR
+
+# From /etc/bashrc
+colors=$(tput colors 2> /dev/null || echo 0)
+if [ "$TERM" = 'xterm' ] && [ "$colors" -ge 8 ]; then
+	colors=256
+fi
+if [ "$colors" -ge 8 ]; then
+	if [ "$colors" -ge 256 ]; then
+		# Express 256 color scheme
+		# (based on site colors of #812610 and #f8b74c, slightly red-boosted)
+		PS1PROMPT='\[\033[38;5;214m\]\[\033[01m\]Smoothwall\[\033[01;38;5;130m\] Restore\[\033[00;38;5;214m\]\$\[\033[00m\] '
+	else
+		# Express ANSI color scheme
+		PS1PROMPT='\[\033[33m\]Smoothwall \[\033[01m\]Restore\[\033[00;33m\]\$\[\033[00m\] '
+	fi
+fi
+alias ls='ls --color=tty -F -b -T 0'
+
+# Be sure the daemon is re-enabled
+trap "tput rmcup; rmdir $REST_DIR; rm -f ${ROOTDIR}/backup/DISABLE_DAEMON" 0
+
+tput smcup
+cat <<END
+Plug in the backup medium and mount it. Locate the archive you wish to restore
+from. Use:
+
+END
+echo -e "    tar xvf \033[4marchive\033[0m -C $REST_DIR ./file-fldr [ ... ]"
+cat <<END
+
+to extract files and/or folders from the archive.
+When finished, unmount the drive and unplug it. Then enter 'exit' or <CTRL/D>
+to exit this shell. The backup daemon will be re-enabled automatically.
+END
+
+touch $DISABLE_FILE
+PS1=$PS1PROMPT /bin/bash --norc
+rm -f $DISABLE_FILE

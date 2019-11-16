@@ -1,0 +1,98 @@
+#!/bin/sh
+
+# For update8, delete all old kernels
+OLD_KERNEL=
+KERNEL_VERSION=3.16.38
+
+echo "Install Update 8."
+
+# First delete old/dead files in case they'd be overwritten or if they've moved.
+echo " Delete old/dead files"
+(
+  cd /
+  while read FILE; do
+    if [ -d "$FILE" ]; then
+      rm -rf "$FILE"
+    else
+      rm -f "$FILE"
+    fi
+  done
+) < remove-old-files
+
+# Unpack the patch
+echo " Unpack the update"
+/usr/bin/tar xf patch.tar.gz -C /
+
+# Leave these for a few generations, just in case.
+echo "  Fix logrotate config file modes"
+chmod 644 /etc/logrotate.{base,conf,d/*}
+echo "  Remove unused file 'acl'"
+/bin/rm -f /var/smoothwall/proxy/acl
+echo "  Fix /var/run"
+chmod 1777 /var/run
+
+# Drop Alcatel-Thompson DSL modem
+rm -f /httpd/cgi-bin/alcateladslfw.cgi \
+      /usr/lib/smoothwall/menu/9000_Maintenance/2000_alcatel.list \
+      /usr/lib/smoothd/sysalcatel.so
+
+# For Update8, keep $KERNEL_VERSION; delete all others.
+echo "  Keep only the new ${KERNEL_VERSION} kernel; the old kernels shouldn't work"
+pushd /lib/modules >/dev/null 2>&1
+
+/bin/ls -dC1 [0-9.]* | \
+  /usr/bin/sed -e 's/\./ /g' -e 's=/$==' | \
+    /bin/sort -n -r -k 1 -k 2 -k 3 | \
+    /usr/bin/sed -e 's/ /./g' | \
+    while read a; do
+      if [ "$a" = "$KERNEL_VERSION" ]; then continue; fi
+      echo "        Archiving and deleting old kernel $a"
+      pushd / >/dev/null 2>&1
+      /usr/bin/find ./lib/modules/$a ./boot/initrd-$a.gz ./boot/{vmlinuz,System.map}-$a | \
+        /bin/cpio -o -H newc | \
+        /usr/bin/gzip > /root/linux-$a-archive.cpio.gz
+      /bin/rm -rf /lib/modules/$a
+      /bin/rm -f /boot/initrd-$a.gz
+      /bin/rm -f /boot/{vmlinuz,System.map}-$a
+      popd >/dev/null 2>&1
+    done
+
+popd >/dev/null 2>&1
+
+# Replace net-tools' hostname with that from inetutils
+ln -s /usr/bin/hostname /bin/hostname
+
+echo "Reinstall/update grub"
+# Reinstall grub
+. /usr/bin/installer/installgrub UPDATE
+# Update grub.conf
+perl ./update-grub-kernel-solo.pl $KERNEL_VERSION
+
+echo "Adjust initrd"
+# Adjust initrd
+OPWD=`pwd`
+HDTMP="/runtimeroot"
+
+# Unpack, update, repack
+mkdir -p $HDTMP; cd $HDTMP
+echo "    unpack"
+gunzip -c /boot/initrd-${KERNEL_VERSION}.gz | cpio -id
+echo "    update"
+mkdir -p -m 755 ${HDTMP}/etc/udev/rules.d
+cp -v /etc/udev/rules.d/*Smoothwall* ${HDTMP}/etc/udev/rules.d/
+
+grep harddisk4 /etc/fstab | sed -e 's= / = /harddisk =' > ${HDTMP}/etc/fstab
+>${HDTMP}/etc/modules
+grep ext4 /etc/fstab >/dev/null 2>&1 && echo ext4 >> ${HDTMP}/etc/modules
+grep reiserfs /etc/fstab >/dev/null 2>&1 && echo reiserfs >> ${HDTMP}/etc/modules
+chroot ${HDTMP} /sbin/depmod -a $KERNEL_VERSION
+
+echo "    re-pack"
+cd ${HDTMP}; find . | /bin/cpio -o -H newc | /usr/bin/gzip > /boot/initrd-${KERNEL_VERSION}.gz
+chmod 444 /boot/initrd-${KERNEL_VERSION}.gz
+
+cd ${OPWD}
+rm -rf ${HDTMP}
+
+
+echo "Update 8 install is complete."

@@ -1,0 +1,71 @@
+<p><font size='3'><strong><u>System Time Regulation</u></strong></font></p>
+
+<p>The <strong>time regulation</strong> feature allows the user to enable or
+disable Smoothwall's built in time server and to choose how to update the system
+clock. This time server, when running, services the GREEN and PURPLE firewall
+zones with the time using the standard NTP protocol. When the system boots and
+the RED (internet) zone is accessible, the system will set the clock once from
+pool.ntp.org or from the specified network time server, if selected; the
+purpose is to set the time fairly close as soon as possible in case the
+battery-powered clock is inaccurate or the battery has failed.</p>
+
+<p>The time regulation feature allows the admin to start and
+stop the time server and to set the time zone. It allows the admin to set the
+date/time manually with time fetched from an upstream server, to periodically
+set the system time using time fetched from another host, or to run the time
+daemon which will keep the clock synchronized to an upstream server.</p>
+
+<p>The time regulation feature serves three purposes. It synchronizes the
+system date/time and clock rate with that of an upstream server. Because
+crystal oscillators are only close to their specified frequencies, the time
+server adjusts the rate of the local system clock so that it maintains time
+more accurately.  And once synchronized, the time server will serve time to
+clients in the GREEN and PURPLE zones.</p>
+
+<p>The time regulation feature automatically adjusts between daylight savings
+time and standard time. When the admin sets dates and/or times on firewall
+rules, they will remain correct when local time changes to and from standard
+time.</p>
+
+<p>By default, the time regulation feature uses pool.ntp.org when the admin
+chooses to set the time periodically. Or if the admin chooses the automatic
+method, the feature uses 0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org and
+3.pool.ntp.org.  If the admin selects an upstream server that is
+potentially more accurate than those in the pool, the periodic method will use
+only that server while the automatic method will use that server in addition
+to the four pool servers. The time daemon will use the most accurate server of
+the four&ndash;or five&ndash;that it accesses when the 'automatic' method is
+chosen.</p>
+
+<p>Many computers and hosts rely on their system clocks. They can behave
+poorly when the clock jumps backward or forward. For these reasons, the admin
+should choose the 'automatic' method in nearly all cases.</p>
+
+<hr size='1pt' color='#555555' style='margin:2em;'>
+
+<p>The <strong>Enabled</strong> checkbox starts the periodic time adjustment task
+or the automatic time daemon (selected) or disables the service (not checked).</p>
+
+<p>The <strong>Timezone</strong> sets the desired time zone for the system.
+Select the appropriate time zone from the Timezone drop-down list box.</p>
+
+<p>The <strong>Method</strong> section contains the three ways the admin can
+set the system time:</p>
+<ul>
+<li>manual&mdash;the date/time is set once
+<li>periodic&mdash;the date/time is updated periodically
+<li>automatic&mdash;the system clock is synchronized with the best upstream
+server and kept very accurate
+</ul>
+<p>When the periodic and manual methods are chosen, the system does not
+service time requests from local clients because it would be a disservice to
+provide time that is very likely to be quite inaccurate.</p>
+
+<p>The <strong>Network time server</strong> section allows the admin to select
+an additional server to use. If set, only this server will be used when the
+admin chooses the 'periodic' method, and this server will be used when the
+system sets the time during system boot. If the server is not set, the
+periodic method and system boot will use 'pool.ntp.org'. If the server is set
+and the admin has chosen the 'automatic' method, the server will be used in
+addition to 0.pool.ntp.org, 1.pool.ntp.org, 2.pool.ntp.org, and
+3.pool.ntp.org.</p>

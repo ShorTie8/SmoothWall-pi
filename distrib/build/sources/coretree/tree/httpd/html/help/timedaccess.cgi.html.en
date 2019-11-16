@@ -1,0 +1,56 @@
+<P><FONT SIZE='3'><B><U>Timed Access</U></B></FONT></P>
+
+<p>The Smoothwall Express Timed Access feature provides the ability to allow
+or disallow Internet access at certain times of the day, for a specified group
+of IP addresses (local <u>and</u> remote). When the system time corsses into a
+'disallowed' time frame, all existing connections with specified IP addreses
+are immediately terminated when the firewall receives the next packet destined
+for that adddress or received from that address, and all new coinnections to
+and from that IP addresses are blocked.</p> 
+
+<p>If this ability is required, <strong>Enable</strong> it with the
+checkbox.</p>
+
+<p>Click <strong>Save</strong> to save the changes.</p>
+
+<p>Timed access works in one of two ways:</p>
+
+<ul>
+<li><strong>Allow at specified times:</strong> In this mode, access to and
+from the specified IP address(es) is allowed only at the times specified.</li>
+<li><strong>Reject at specified times:</strong> In this mode, access to and
+from the specified IP address(es) is blocked at the times specified.</li>
+</ul>
+
+<p>To specify a time to apply the rule, choose an hour and a minute
+<strong>From</strong> which to start the access rule and an hour and a minute
+<strong>To</strong> which to end the access rule.</p>
+
+<p>The <strong>From</strong> time must be chronologically before the
+<strong>To</strong> time. If you require, for example, the ability to block
+access between 21:00 one day and 07:00 the next, you should reverse the sense
+of the rule and instead allow access between 07:00 and 21:00. This will have
+the same effect.</p>
+
+<p><i>Be aware that the start time (hour:minute) begins at second '0' and that
+the end time (hour:minute) ends at second '59'.</i></p>
+
+<p>In addition to setting a range of times, the <strong>Days</strong> the rule
+is to apply for may also be selected. This enables you to block or allow
+access only on certain days of the week such as weekdays or school nights. If
+no days are specified, the rule applies to all days</p>
+
+<p>The timed access controls are only performed on the listed <strong>IP
+address(es)</strong>. Enter one IP address or network with netmask per line in
+the supplied text box. e.g. 192.168.168.0/24 will block/allow the entire range
+of 192.168.168.0 through 192.168.168.255; alternatively it can be entered
+192.168.168.0/255.255.255.0</p>
+
+<p>Click <strong>Enable</strong> to enable (check) or disable (uncheck) this
+feature.</p>
+
+<p>Click <strong>Save</strong> to save the changes.</p>
+
+<p><strong>Please note:</strong> All access to, from and through the Smoothwall
+firewall is blocked using this page, including the ability to administer the
+Smoothwall via its web interface.</p>

@@ -1,0 +1,57 @@
+#! /bin/bash
+
+ROOTDIR=/var/smoothwall
+BACK_FLAG=$ROOTDIR/backup/flag
+
+PATH=/bin:/usr/bin
+
+trap "tput rmcup" EXIT
+
+tput smcup
+#echo -e "Backup Progress:"
+echo -e "\033[1;1H\033[JBackup Progress:"
+cat ${BACK_FLAG}
+STATE="start"
+
+while :; do
+  CURRENT=`cat ${BACK_FLAG}`
+  if [ "$CURRENT" == "" ]; then
+    sleep .01
+    continue
+  else
+    set $CURRENT
+    # Unfurl the flag
+    #echo -e "$*"
+    echo -e "\033[2;0H\033[J$*"
+    if [ "$STATE" == "start" -a \( "$1 $2" == "Last backup:" -o "$1 $2" == "Backup scheduled:" \) ]; then
+      # Wait longer; change isn't imminent
+      sleep 1
+      continue
+    elif [ "$STATE" == "start" -a "$1 $2" != "Last backup:" -a "$1 $2" != "Backup scheduled:" ]; then
+      # Change to 'running'
+      sleep .01
+      STATE="run"
+      continue
+    elif [ "$STATE" == "run" -a "$CURRENT" == "Backup complete." ]; then
+      # Wait longer; change is less rapid
+      sleep .1
+      continue
+    elif [ "$STATE" == "run" -a "$1" == "Remove" ]; then
+      # Wait longer; really nothing to miss
+      sleep 1
+      continue
+    elif [ "$STATE" == "run" -a "$1" == "Last" ]; then
+      # Sentence is complete, get out of jail free.
+      break
+    else
+      # Probably active; catch many of the files
+      sleep .01
+      continue
+    fi
+  fi
+done #>/dev/null 2>&1
+
+#echo -e "Backup Complete. (<ENTER> or <CTRL/C> to exit...)"
+echo -e "\033[4;1H\033[JBackup Complete. (<ENTER> or <CTRL/C> to exit...)"
+read a
+tput rmcup

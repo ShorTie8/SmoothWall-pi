@@ -1,0 +1,24 @@
+#! /bin/bash -x
+
+# Given an IF, return its driver's module description
+
+if [ "$1" != "" ]; then
+  # Get the NIC name
+  NIC="/sys/class/net/$1"
+
+  # Put the NIC's parent device in $1
+  ethPATH=`udevadm info --query=property --path="${NIC}" | grep DEVPATH | \
+      sed -e "s/.*='*//" -e 's=/net/.*=='`
+
+  # Get the driver name
+  DRIVER=`udevadm info --query=property --path="$ethPATH" | grep DRIVER | \
+      sed -e 's/.*=//' -e "s/'//g"`
+
+  # Get the description
+  DESC=`modinfo $DRIVER | egrep '^description' | sed -e 's/[^:]*:[ 	]*//'`
+
+  echo -n "$DESC"
+else
+  # Is unset, return hyphen
+  echo -n "-"
+fi

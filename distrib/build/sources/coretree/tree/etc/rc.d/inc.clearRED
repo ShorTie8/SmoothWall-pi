@@ -1,0 +1,9 @@
+# Prepare red files
+(
+  redDIR="/var/smoothwall/red"
+  rm -f $redDIR/*
+  touch $redDIR/local-ipaddress $redDIR/remote-ipaddress $redDIR/iface
+  touch $redDIR/dhcp-netmask $redDIR/dns1 $redDIR/dns2
+  chown nobody:nobody $redDIR/*
+)
+

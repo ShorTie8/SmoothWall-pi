@@ -1,0 +1,160 @@
+#! /bin/bash
+
+# Copyright Neal Murphy.
+# Licensed under the GNU GPL license that governs the Smoothwall Express source code.
+
+# initramfs: if a new persistent-net rules file exists, copy it to /harddisk/dev
+#   This happens to be a convenient writable place to put it while / is RO.
+# After root change-over, rc.sysinit runs this script.
+
+#############
+#
+# Theory of operation
+#   - if there is a persistent-net rules file in /dev, then the NICs have changed. So:
+#     - move the persistent file from /dev to /tmp
+#     - gather the current and previous MAC addresses into files, sort, and compare them
+#     - if they differ, update the custom NIC rules file, prepare the flag file, and tidy
+#
+#   - if the flag file exists, setup must be run to re-assign NICs to zones
+#     - if 5 tries fail, power down to let the admin try another hour
+#     - if reassignment succeeded, remove the flag file and exit
+#       
+#############
+
+# runtime initramfs copies the persistent rules file--if it exists--to /dev (the only
+# writable dir at that time)
+
+# Shorthand
+persNetRules=70-persistent-net.rules
+custNICRules=/etc/udev/rules.d/70-Smoothwall-custom-NIC.rules
+
+###
+# If there are any changes, handle them.
+# A new persistent-net.rules files is a poor choice for change flag, since it
+#   does not detect removed NICs.
+###
+
+# Gather the previous MAC addrs (NICs only)
+grep SUBSYSTEM $custNICRules | \
+  sed -e 's/.*ATTR{address}=="//' -e 's/".*//' | \
+  sort > /tmp/oldMACs
+
+# Gather the current MAC addrs (NICs only)
+cd /sys/class/net
+NICS=`/bin/ls -C1 | egrep -v "ipsec|tun|tap|mast|teq"`
+for i in $NICS; do
+  addr=`cat $i/address`
+  if [ "$addr" != "" -a \
+       "$addr" != "00:00:00:00:00:00" -a \
+       -e $i/device ]; then
+    echo "$addr";
+  fi
+done | sort >/tmp/curMACs
+cd /
+
+# Different?
+if ! diff /tmp/oldMACs /tmp/curMACs >/dev/null 2>&1; then
+  declare -A NICs
+  declare -i j
+
+  # Prep new names in MAC addr order
+  j=0
+  while read MAC; do
+    NICs["eth$j"]=$MAC
+    j=j+1
+  done < /tmp/curMACs
+  lastNIC=$j
+
+  # Append current NIC rules file to persistent file in /tmp
+  if [ -e /etc/udev/rules.d/$persNetRules ]; then
+    # If exists, then NIC(s) added and maybe removed
+    mv /etc/udev/rules.d/$persNetRules /tmp
+    sed -e '1,6d' $custNICRules \
+      >> /tmp/$persNetRules
+  else
+    # No persNetRules, then NIC(s) removed
+    cp $custNICRules /tmp/$persNetRules
+  fi
+
+  # Yank the drivers
+  DRIVERS=`echo /sys/class/net/*/device/driver/module/drivers/* | sed -e 's/.*://' | sort | uniq`
+  for i in $DRIVERS; do
+    rmmod $i
+  done
+
+  # Change all 'ethN' to 'FRESHNIC'
+  sed -i -e 's/, NAME=".*/, NAME="FRESHNIC"/' /tmp/$persNetRules
+
+  # Set names for current NICs
+  j=0
+  while [ $j -lt $lastNIC ]; do
+    sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/eth'$j'/' /tmp/$persNetRules
+    j=j+1
+  done
+  # Delete unset (removed) NICs)
+  sed -e '/^$/N; N; /FRESHNIC/d;' /tmp/$persNetRules >$custNICRules
+
+  # Sleep; maybe udev needs to rest
+  sleep 2
+
+  # Trigger udev to INS the drivers, thus changing the names
+  /sbin/udevadm control --reload
+  /sbin/udevadm trigger
+  /sbin/udevadm settle
+
+  # Set flag file, clean up other files
+  touch /var/smoothwall/ethernet/NICS-changed
+  rm -f /tmp/$persNetRules /dev/$persNetRules
+fi
+rm -f /tmp/oldMACs /tmp/curMACs
+
+###
+# If there are unhandled changes, insist on running setup
+###
+
+# As long as the flag file exists, the system will insist the admin run setup.
+if [ -e  /var/smoothwall/ethernet/NICS-changed ]; then
+
+  # There are unhandled NIC changes.
+  echo -e "\007\n\n\nYour NICs have changed; you must run setup to set their assignments."
+  
+  export SUSHELL="/usr/sbin/susetup"
+  trap "" INT
+  declare -i i; i=0
+  
+  # Loop trying; give up after cinco de Niles
+  while true; do
+    sulogin
+    # susetup exits with status 243; <CTRL/D> exits with status 0
+    [ $? -eq 243 ] && break
+
+    echo -e "\007You must run setup!\007"
+    sleep 3
+    i=i+1
+    # After 5 failed attempts to entice the user to run setup,
+    #   tune out and turn off.
+    if [ $i -eq 5 ]; then
+      /sbin/shutdown -h -P now
+    fi
+  done
+
+  # If we make it here, setup ran and exited with success.
+  # Update the initramfs
+  mkdir -p /root/tmp
+  OLDPWD=${PWD}
+  cd /root/tmp
+  INITRAMFS="/boot/initrd-`uname -r`.gz"
+  if [ ! -e ${INITRAMFS}-ORIG ]; then
+    cp -a ${INITRAMFS} ${INITRAMFS}-ORIG
+  fi
+  gunzip < $INITRAMFS | cpio -id
+  cp -a ${custNICRules} ${custNICRules/\//}
+  find . | cpio -o -H newc | gzip > $INITRAMFS
+  cd ${OLDPWD}
+  rm -rf /root/tmp
+
+  # Remove the flag file
+  rm -f /var/smoothwall/ethernet/NICS-changed
+fi
+
+# Return and proceed with bootup.

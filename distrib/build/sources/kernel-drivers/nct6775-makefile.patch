@@ -1,0 +1,18 @@
+--- nct6775-v1.1/Makefile-ORIG	2015-05-03 16:18:10.000000000 -0400
++++ nct6775-v1.1/Makefile	2015-05-03 16:22:01.000000000 -0400
+@@ -3,12 +3,12 @@
+ HOME=$(shell pwd)
+ # Or for a specific version
+ #TARGET		:= 2.6.33.5
+-KERNEL_MODULES	:= /lib/modules/$(TARGET)
++KERNEL_MODULES	:= /lib/modules/$(KERNEL_VER)
+ # KERNEL_BUILD	:= $(KERNEL_MODULES)/build
+-KERNEL_BUILD	:= /usr/src/linux-headers-$(TARGET)
++KERNEL_BUILD	:= $(KSRC)
+ 
+ #SYSTEM_MAP	:= $(KERNEL_BUILD)/System.map
+-SYSTEM_MAP	:= /boot/System.map-$(TARGET)
++SYSTEM_MAP	:= /boot/System.map-$(KERNEL_VER)
+ 
+ DRIVER := nct6775
+ 

@@ -1,0 +1,108 @@
+To auto-run the daemon at startup, append the following to /etc/inittab:
+
+----snip----
+# Run the backup daemon
+BD:12345:respawn:/usr/bin/backup_daemon
+# Run the backup Monitor on tty11
+BM:12345:respawn:/usr/bin/backup_mon </dev/tty11 >/dev/tty11 2>/dev/tty11
+----snip----
+
+Use a different TTY as you prefer. Then 'init q' to make it take effect.
+
+The default is to back up files at 1AM. Edit /var/smoothwall/backup/settings to
+change (for normal systems) timeINCREMENTAL, timeFULL and/or (for AGCL/FW)
+timeVARTOTAL. Valid values are 'at' or 'now'. Change delayUntil to change the
+time when the backup will run if you have chosen 'at'; be careful: 'now'
+really means 'the next time this hour:minute occurs.'
+
+The default is to back up the entire tree. Modify toSAVE and toSKIP in the
+settings file to change the files and folders that are included and excluded
+from the backup. Each variable is a space-separated list of absolute path
+names (beginning with a '/').
+
+Pert near any medium that can be hot-plugged can be used for backup. Best
+tested are hot-plugged SATA drives and USB thumb drives. External USB, SATA,
+IDE, and FireWire drives should work well.
+
+Standard GNU/Linux filesystems should work well; EXT[234] and VFAT have been
+tested. Be aware that NTFS can be problematic. Be sure you've installed
+NTFS-3G so the backup system will have read/write access to the filesystem.
+
+WARNING: VFAT limits maximum file size to 4GiB. If your archive will be larger,
+you are advised to use another filesystem; the EXT[234] family without journal
+works well.
+
+Cards that plug into a card reader may not be detected. Drives plugged into
+SATA interfaces that do not support hot plug (some Dell computers do this)
+will not be detected.
+
+To add a medium as an incremental device, run
+  backup_sys -i
+and follow the prompts.
+
+To add a medium as a full device, run
+  backup_sys -f
+and follow the prompts.
+
+To add a medium as a var/total device (if running Smoothwall), run
+  backup_sys -v
+and follow the prompts.
+
+To remove a medium from any list, edit the file 'settings'. There is no
+CLI program for this purpose yet.
+
+There is no semi-automated CLI restore mechanism as yet. Until then, use the
+following manual procedure:
+
+----snip----
+/var/agcl/bin/restore_sys
+# plug in backup medium and mount it
+# use /var/agcl/bin/tar to extract the files/folders you need to restore
+# unmount the backup medium and unplug it
+# Type <CTRL/D> or exit to exit the shell and re-enable the daemon.
+exit
+----snip----
+
+That's all. The rest is plug-n-play.
+
+
+
+Hardware notes:
+  - the Highpoint 620A, a Marvell card, is not very compatible with the Dell
+    Optiplex 390. It worked for a few days, then stopped. The hotplug stopped
+    working, and the system wouldn't start grub if a drive was connected to
+    the card. The Best Connectivity 2 port SATA II RAID card (1 lane PCI-E),
+    while slower, does work well. It is SIL3132 card. The card was needed
+    because the Opti-390 doesn't do SATA hotplug.
+
+
+Reminders:
+  - This applies to ordinary GNU/Linux systems. Smoothwall systems typically
+    do not have a way to send emails.
+  - If you want the system to remind you, create /root/bin/backup_remind with
+    the following content:
+---SNIP---
+#! /bin/bash
+
+export TO="user@host_or_FQDN"
+export EMAIL="System Backup <${TO}>"
+
+echo "This is your weekly reminder to be sure my records are backed up.
+
+Be sure to choose the correct medium, be it a monthly (full) or
+weekly (incremental) backup.
+
+Your faithful server,
+`hostname`
+" | \
+  /usr/bin/mutt -s "Backup reminder" ${TO}
+---SNIP---
+
+    Then run 'crontab -e' and add the following to the end:
+---SNIP---
+* 11 * * 1 /bin/bash /root/bin/backup_remind
+---SNIP---
+    to send out a reminder email Monday mornings at 11.
+  - The package, mutt, must be installed and configured to send email
+    from the localhost.
+  - The package, exim4, must be installed and configured to relay email.

@@ -1,0 +1,51 @@
+--- a/programs/setup/setup.in-	2018-01-25 15:19:46.000000000 -0500
++++ b/programs/setup/setup.in	2018-03-02 14:44:28.326251010 -0500
+@@ -46,6 +46,8 @@
+     initsystem=openrc
+ elif [ -x /etc/init.d/ipsec ]; then
+     initsystem=sysv
++elif [ -x /etc/rc.d/ipsec ]; then
++    initsystem=smoothwall
+ fi
+ 
+ case "$1" in
+@@ -78,6 +80,9 @@
+ 	elif [ ${initsystem} = sysv ]; then
+ 	    echo "Redirecting to: /etc/init.d/ipsec start"
+ 	    exec /etc/init.d/ipsec start
++	elif [ ${initsystem} = smoothwall ]; then
++	    echo "Redirecting to: /etc/rc.d/ipsec start"
++	    exec /etc/rc.d/ipsec start
+ 	else
+ 	    echo "Unknown init system in use - aborted"
+ 	    exit 3
+@@ -102,6 +107,9 @@
+ 	elif [ ${initsystem} = sysv ]; then
+ 	    echo "Redirecting to: /etc/init.d/ipsec stop"
+ 	    exec /etc/init.d/ipsec stop
++	elif [ ${initsystem} = smoothwall ]; then
++	    echo "Redirecting to: /etc/rc.d/ipsec stop"
++	    exec /etc/rc.d/ipsec stop
+ 	else
+ 	    echo "Unknown init system in use - aborted"
+ 	    exit 3
+@@ -138,6 +146,9 @@
+ 	elif [ ${initsystem} = sysv ]; then
+ 	    echo "Redirecting to: /etc/init.d/ipsec status"
+ 	    exec /etc/init.d/ipsec status
++	elif [ ${initsystem} = smoothwall ]; then
++	    echo "Redirecting to: /etc/rc.d/ipsec status"
++	    exec /etc/rc.d/ipsec status
+ 	else
+ 	    echo "Unknown init system in use - aborted"
+ 	    exit 3
+@@ -171,6 +182,9 @@
+ 	elif [ ${initsystem} = sysv ]; then
+ 	    echo "Redirecting to: /etc/init.d/ipsec restart"
+ 	    exec /etc/init.d/ipsec restart
++	elif [ ${initsystem} = smoothwall ]; then
++	    echo "Redirecting to: /etc/rc.d/ipsec restart"
++	    exec /etc/rc.d/ipsec restart
+ 	else
+ 	    echo "Unknown init system in use - aborted"
+ 	    exit 3

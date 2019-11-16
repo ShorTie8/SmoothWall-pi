@@ -1,0 +1,74 @@
+# SmoothWall Build system.
+#
+# (c) SmoothWall Ltd 2005
+#
+# This code is distributed under the terms of the GPL v2.
+
+export KERNEL_DIR = $(SOURCES_DIR)/linux$(KERNEL_TYPE)/linux
+
+PACKAGE = linux$(KERNEL_TYPE)
+
+COMPILER = /usr/bin/gcc
+
+download:
+	@$(DL_CMD) $(KERNEL_URL)
+
+unpack: download
+	@tar -xvf $(DOWNLOADS_DIR)/linux-$(K_RAW_VERSION).tar.xz
+
+
+prepare: unpack
+	rm -f linux
+	ln -s linux-$(K_RAW_VERSION) linux
+
+	make -C linux mrproper
+
+	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
+
+	make -C linux CC=$(COMPILER) clean prepare
+
+
+compile-kernel: prepare
+	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
+
+	make -C linux CC=$(COMPILER) clean
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) bzImage
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
+
+
+package-kernel: compile-kernel
+	mkdir -p $(PKG_ROOT)
+	(cd $(PKG_ROOT); \
+	make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install; \
+	mkdir -p boot; \
+	cp $(KERNEL_DIR)/arch/x86/boot/bzImage boot/vmlinuz-$(K_SWE_VERSION); \
+	cp $(KERNEL_DIR)/System.map boot/System.map-$(K_SWE_VERSION); \
+	rm -f lib/modules/$(K_SWE_VERSION)/build; \
+	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(mARCH).new)
+
+
+build-tarball: package-kernel $(PACKAGES)
+	@(cd $(PKG_ROOT); \
+	tar -zcvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz .; \
+	tar -xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /);
+
+
+clean:
+	@echo -n " $(PACKAGE)"
+	@rm -f linux
+	@rm -rf linux-$(KERNEL_VER)
+	@rm -rf $(FREESWAN_TYPE)-$(FREESWAN_VER)
+	@rm -rf $(PKG_ROOT)
+
+
+cleanall: clean build-tarball
+
+
+all: build-tarball
+
+
+packageinfo.html:
+	@echo "<li><span style='font-size:large;'>$(PACKAGE) $(VERSION)</span><br>" >>/tmp/packageinfo.html
+	@cp -avR $(DOWNLOADS_DIR)/linux-$(KERNEL_VER).tar.bz2 /tmp/downloads
+	@echo "(<a href='downloads/linux-$(KERNEL_VER)'>Local mirror</a>)<br>" >>/tmp/packageinfo.html

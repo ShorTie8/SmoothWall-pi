@@ -1,0 +1,46 @@
+#! /bin/sh
+
+# Adjust the new runtime initramfs to reflect the just installed system
+
+. /harddisk/var/smoothwall/main/kernel
+
+  # Initialize some vars
+  if [ ! -z "$FS" ]; then
+    set -- $FS
+    FSTYPE=$2
+    if [ "$FSTYPE" == "reiserfs" ]; then
+      OPTION="notail$ATIME        "
+    else
+      OPTION="defaults$ATIME"
+    fi
+  else
+    OPTION="defaults,noatime"
+  fi
+  OPWD=`pwd`
+  HDTMP="/harddisk/runtimeroot"
+  do_or_die () {
+    eval "$1" || exit 1
+  }
+
+
+  # Unpack, update, repack
+  mkdir -p $HDTMP; cd $HDTMP
+  echo "    unpack"
+  do_or_die "gunzip -c /harddisk/boot/initrd-${KERNEL_VER}${KERNEL_TYPE}.gz | cpio -id"
+  echo "    update"
+  do_or_die "mkdir -p -m 755 ${HDTMP}/etc/udev/rules.d"
+  do_or_die "cp -v /etc/udev/rules.d/*Smoothwall* ${HDTMP}/etc/udev/rules.d/"
+
+  (
+    echo "/dev/harddisk4        /harddisk       ext4 $OPTION         0       1"
+  ) >${HDTMP}/etc/fstab
+  echo "ext4" >${HDTMP}/etc/modules
+  do_or_die "/bin/chroot ${HDTMP} /sbin/depmod -a"
+
+  echo "    re-pack"
+  do_or_die "cd ${HDTMP}; find . | /bin/cpio -o -H newc | /usr/bin/gzip > /harddisk/boot/initrd-${KERNEL_VER}${KERNEL_TYPE}.gz"
+  do_or_die "chmod 444 /harddisk/boot/initrd-${KERNEL_VER}${KERNEL_TYPE}.gz"
+
+  cd ${OPWD}
+  rm -rf ${HDTMP}
+

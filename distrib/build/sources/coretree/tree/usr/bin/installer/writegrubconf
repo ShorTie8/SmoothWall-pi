@@ -1,0 +1,46 @@
+#! /bin/bash
+
+. /harddisk/var/smoothwall/main/kernel
+
+# Copy the backdrop
+cp /cdrom/boot/grub/express_boot_protect.xpm.gz /harddisk/boot/grub/
+
+# Write the config
+  cat > /harddisk/boot/grub/grub.conf <<END
+# Begin /boot/grub/grub.conf
+
+# Set up to output to both VGA console and serial port; grub'll
+#   use the first one to see a keypress. Or it'll time out and
+#   use the default from installation (the first one in the command).
+#   Change the order of them if you manually change between serial
+#   and vesa.
+
+# See media/installroot/etc/exec-install.rc.src for full grub.conf
+
+# For SWE3.1, use only VESA with the binary installer
+# Preparing the serial console requires the Advanced Installer
+
+terminal console
+
+default 0
+
+# Allow 10 seconds before booting the default.
+timeout 5
+
+# Official backdrop
+splashimage=/grub/express_boot_protect.xpm.gz
+foreground=cfcfcf
+background=222222
+
+# Boot using VESA console
+title Smoothwall Express (VESA Console)
+root (hd0,0)
+kernel /vmlinuz-${KERNEL_VER}${KERNEL_TYPE} root=/dev/harddisk4 ro quiet
+initrd /initrd-${KERNEL_VER}${KERNEL_TYPE}.gz
+
+# Try to boot VESA console using kernel params to work around odd hardware/firmware
+title Smoothwall Express (VESA Console, Odd Hardware)
+root (hd0,0)
+kernel /vmlinuz-${KERNEL_VER}${KERNEL_TYPE} root=/dev/harddisk4 ro quiet iommu=soft nomodeset
+initrd /initrd-${KERNEL_VER}${KERNEL_TYPE}.gz
+END

@@ -1,0 +1,95 @@
+# If any files need to be moved or should be removed to avoid clobbering
+#   customized files, create bash script 'pre-tar-setup' in the update
+#   dir to perform the work. If it exists, it will be executed just before
+#   the distrib tree is stripped and tarred.
+
+include ../../Makefile
+
+include ../../Makefile.conf
+
+include ../../Makefile.flags-arch
+
+TARGET_DIR = ../../../target
+
+OUTPUT_FILENAME = $(BASENAME)-$(UPDATE_NAME)-$(mARCH).tar.gz
+
+all: updateinfo $(OUTPUT_FILENAME)
+
+patch.tar.gz: ../../../crumbs/Final.built
+	# Prep the tree
+	mkdir distrib distrib/boot review
+	unset TAR_OPTIONS; (for I in \
+		$(UPDATE_PACKAGES) \
+	; do \
+ 		echo "Unpacking $$I ..."; \
+		if [ -f "$$I.list" ]; then \
+			Toption=" -T $$I.list -T $$I.dirs"; \
+			while read path; do \
+				path=`dirname $$path`; \
+				while [ "$$path" != "." ]; do \
+					echo $$path; \
+					path=`dirname $$path`; \
+				done; \
+			done < $$I.list | sort | uniq > $$I.dirs; \
+		else \
+			Toption=""; \
+		fi; \
+		TAR_OPTIONS= tar xf $(TARGET_DIR)/smoothwall-$$I.tar.gz -C distrib$$Toption; \
+		mkdir review/$$I; \
+		TAR_OPTIONS= tar xf $(TARGET_DIR)/smoothwall-$$I.tar.gz -C review/$$I$$Toption; \
+		( find review/$$I -name \*.la -print \
+		               -o -name \*.a -print \
+		               -o -name include -print \
+		               -o -name doc -print \
+		               -o -name man -print \
+		               -o -name info -print) | while read filnam; do \
+		    rm -rf $$filnam; done; \
+		tar cfz review/$$I-$(mARCH).tar.gz -C review/$$I .; \
+		rm -rf review/$$I; \
+	done; \
+	);
+	# Bump kernel version as needed
+	if [ "$(KERNEL)" != "" ]; then \
+		cp -av ../../media/distrib/boot/initrd* distrib/boot/; \
+		TAR_OPTIONS= tar -xf $(TARGET_DIR)/smoothwall-coretree.tar.gz -C distrib ./var/smoothwall/main/kernel; \
+	fi;
+	# Clear ClamAV files as needed
+	if [ "$(CLAMAV)" != "" ]; then \
+		rm -f distrib/var/clamav/*; \
+	fi;
+	# Move files as needed; delete files that shouldn't be clobbered
+	@echo "Special file handling, if needed ..."
+	@if [ -e pre-tar-setup ]; then . ./pre-tar-setup; fi
+	# Strip most binaries
+	@echo "Cleaning tree ..."
+	../../../toolcrib/striptree distrib/$(UPDATE_DIR)
+	# Build the patchball
+	@echo "Building patch.tar.gz, stand by ..."
+	tar cfz patch.tar.gz -C distrib .
+
+updateinfo:
+	@echo "Building update information file ..."	
+	@echo "$(UPDATE_ID)|$(UPDATE_NAME)-$(mARCH)" >information
+	# ----
+
+$(OUTPUT_FILENAME): patch.tar.gz updateinfo
+	@echo "Making update and inspection tarballs ..."
+ifdef KERNEL
+	cp ../update-grub-kernel.pl .
+	tar cfz $(OUTPUT_FILENAME) patch.tar.gz setup information update-grub-kernel.pl $(EXTRA_UPDATE_FILES)
+	tar cfz inspection-$(mARCH).tar.gz patch.tar.gz setup information update-grub-kernel.pl review $(EXTRA_UPDATE_FILES)
+else
+	tar cfz $(OUTPUT_FILENAME) patch.tar.gz setup information $(EXTRA_UPDATE_FILES)
+	tar cfz inspection-$(mARCH).tar.gz patch.tar.gz setup information review $(EXTRA_UPDATE_FILES)
+endif
+
+clean:
+	@rm -rf distrib review Update.out *.dirs tzdata*.tar.gz
+	@rm -f patch.tar.gz inspection-$(mARCH).tar.gz
+	@rm -f $(OUTPUT_FILENAME)
+	@rm -f updateinfo
+	@rm -f information
+	@rm -f update-grub-kernel.pl update-grub-kernel-solo.pl
+
+download:
+	@true

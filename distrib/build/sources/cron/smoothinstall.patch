@@ -1,0 +1,97 @@
+--- cron-3.0pl1.orig/database.c.orig	2018-11-15 16:27:30.952298940 -0500
++++ cron-3.0pl1.orig/database.c	2018-11-15 16:32:35.448350799 -0500
+@@ -27,6 +27,7 @@
+ #define __USE_GNU /* For O_NOFOLLOW */
+ #include <fcntl.h>
+ #undef __USE_GNU
++#include <glob.h>
+ #include <sys/stat.h>
+ #include <sys/file.h>
+ #include <time.h>
+@@ -183,42 +184,57 @@
+ 
+ #ifdef DEBIAN
+ 	/* Read all the package crontabs. */
+-	if (!(dir = opendir(SYSCRONDIR))) {
+-		log_it("CRON", getpid(), "OPENDIR FAILED", SYSCRONDIR);
+-	}
++	/* Smoothwall additions adapted from Steve McNeill's SmoothInstall work. */
++
++	int i;
++	glob_t cronDotD;
+ 
+-	while (dir != NULL && NULL != (dp = readdir(dir))) {
+-		char	fname[MAXNAMLEN+1],
+-		        tabname[PATH_MAX+1];
++	/* First get /etc/cron.d/ */
++	glob(SYSCRONDIR, GLOB_ONLYDIR|GLOB_NOMAGIC, NULL, &cronDotD);
++	/* Now get all the mods' cron.d/ dirs */
++	glob("/var/smoothwall/mods/*/etc/cron.d", GLOB_ONLYDIR|GLOB_APPEND, NULL, &cronDotD);
++		
++	for (i=0; i<cronDotD.gl_pathc; i++) {
++		log_it( "CRON", getpid(), "Processing ", cronDotD.gl_pathv[i]);
+ 
++		if (!(dir = opendir(cronDotD.gl_pathv[i]))) {
++			log_it("CRON", getpid(), "OPENDIR FAILED", cronDotD.gl_pathv[i]);
++		}
+ 
+-		/* avoid file names beginning with ".".  this is good
+-		 * because we would otherwise waste two guaranteed calls
+-		 * to stat() for . and .., and also because package names
+-		 * starting with a period are just too nasty to consider.
+-		 */
+-		if (dp->d_name[0] == '.')
++		while (dir != NULL && NULL != (dp = readdir(dir))) {
++			char	fname[MAXNAMLEN+1],
++				tabname[PATH_MAX+1];
++
++
++			/* avoid file names beginning with ".".  this is good
++			* because we would otherwise waste two guaranteed calls
++			* to stat() for . and .., and also because package names
++			* starting with a period are just too nasty to consider.
++			*/
++			if (dp->d_name[0] == '.')
++				continue;
++
++			/* skip file names with letters outside the set
++			* [A-Za-z0-9_-], like run-parts.
++			*/
++			if (!valid_name(dp->d_name))
+ 			continue;
+ 
+-		/* skipfile names with letters outside the set
+-		 * [A-Za-z0-9_-], like run-parts.
+-		 */
+-		if (!valid_name(dp->d_name))
+-		  continue;
+-
+-		/* Generate the "fname" */
+-		(void) strcpy(fname,"*system*");
+-		(void) strcat(fname, dp->d_name);
+-		sprintf(tabname,"%s/%s", SYSCRONDIR, dp->d_name);
+-
+-		/* statbuf is used as working storage by process_crontab() --
+-		   current contents are irrelevant */
+-		process_crontab(SYSUSERNAME, fname, tabname,
+-				&statbuf, &new_db, old_db);
++			/* Generate the "fname" */
++			(void) strcpy(fname,"*system*");
++			(void) strcat(fname, dp->d_name);
++			sprintf(tabname,"%s/%s", cronDotD.gl_pathv[i], dp->d_name);
++
++			/* statbuf is used as working storage by process_crontab() --
++			current contents are irrelevant */
++			process_crontab(SYSUSERNAME, fname, tabname,
++					&statbuf, &new_db, old_db);
+ 
++		}
++		if (dir)
++			closedir(dir);
+ 	}
+-	if (dir)
+-		closedir(dir);
++	globfree(&cronDotD);
+ #endif
+ 
+ 	/* we used to keep this dir open all the time, for the sake of

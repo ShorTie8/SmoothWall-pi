@@ -1,0 +1,13 @@
+#!/bin/sh
+
+echo "Update 1 installing."
+
+tar xvf patch.tar.gz -C /
+
+# Change the mode of logrotate conf files; logrotate silently fails.
+chmod 644 /etc/logrotate.conf /etc/logrotate.d/*
+
+# Clear out bad entries from traffic's settings. They will be added with the next save.
+sed -i -e '/^[UD]RATE=/ d
+/^[UD]CEIL=/ d
+/^PRIO=/ d' /var/smoothwall/traffic/settings

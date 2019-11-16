@@ -1,0 +1,11 @@
+--- udev-136.old/udev/udev-util.c	2008-12-19 23:03:14.000000000 +0000
++++ udev-136/udev/udev-util.c	2011-01-26 13:12:15.000000000 +0000
+@@ -89,7 +89,7 @@
+ 		if (errno == ENOENT)
+ 			retval = 0;
+ 		if (retval) {
+-			if (errno == ENOTEMPTY)
++			if (errno == ENOTEMPTY || errno == EBUSY)
+ 				return 0;
+ 			err(udev, "rmdir(%s) failed: %m\n", p);
+ 			break;

@@ -1,0 +1,13 @@
+./etc/cron.weekly/logrotate
+./etc/rc.d/rc.firewall.up
+./etc/rc.d/rc.netaddress.up
+./etc/rc.d/rc.sysinit
+./httpd/cgi-bin/bandwidthbars.cgi
+./httpd/cgi-bin/graphs.cgi
+./httpd/cgi-bin/register.cgi
+./usr/bin/smoothwall/writeapcupsdconf.pl
+./usr/bin/smoothwall/smoothinfo.pl
+./usr/lib/smoothwall/header.pm
+./usr/lib/smoothwall/smoothtype.pm
+./usr/lib/smoothwall/langs/alertboxes.en.pl
+./var/smoothwall/patches/installed

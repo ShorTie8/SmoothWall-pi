@@ -1,0 +1,6 @@
+/var/log/debug.log {
+    postrotate
+	/usr/bin/killall -HUP syslogd
+    endscript
+}
+

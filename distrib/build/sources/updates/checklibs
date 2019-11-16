@@ -1,0 +1,15 @@
+#! /bin/bash
+
+cd
+
+ldd `find / -executable` 2>/dev/null > liblist
+
+grep "not found" liblist | sort | uniq > liblist.missing
+
+if [ ! -z "`cat liblist.missing`" ]; then
+  echo "Some libs are missing. Track down those dependencies and update them as well."
+  echo "Look for 'not found' in /root/liblist."
+  echo -en "Missing libs:\n"
+  sed -e 's/^/  /' liblist.missing
+  exit 1
+fi

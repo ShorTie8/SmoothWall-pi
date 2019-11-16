@@ -1,0 +1,226 @@
+#!/bin/bash 
+
+# Taken from Kay Seiver's example
+getarg() {
+  local o line
+  for o in $cmdline; do
+    if test "$o" = "$1"; then echo $1; break; fi
+    if test "${o%%=*}" = "${1%=}"; then echo ${o#*=}; break; fi
+  done
+}
+# Fetch the kernel's command line
+read cmdline < /proc/cmdline
+
+CLS="\033[0;0f\033[2J"
+BO="\033[1m"
+UL="\033[4m"
+BOUL="\033[1;4m"
+NO="\033[0m"
+set `stty size`
+ROWS=$1
+COLS=$2
+
+# do-sid executes a program in a CTTY environment
+#
+function do-sid {
+  case $3 in
+    "")
+      setsid sh -c "exec $1 </dev/tty$2 >/dev/tty$2 2>&1"
+      ;;
+    "BG")
+      setsid sh -c "exec $1 </dev/tty$2 >/dev/tty$2 2>&1"&
+      return $!
+      ;;
+    "EXEC")
+      exec setsid sh -c "exec $1 </dev/tty$2 >/dev/tty$2 2>&1"
+      ;;
+  esac
+}
+
+# rsr() clears the scrolling region and restores the saved cursor position
+#
+function rsr {
+  echo -ne "\033[r\033[20;1f\033[J\033"
+  echo -ne "8"
+}
+# ssr() saves the cursor position and sets the scrolling region
+#
+function ssr {
+  echo -ne "\033"
+  echo -ne "7\033[21;${ROWS}r"
+  echo -ne "\033[20;1fExecuting: "
+  echo -n $1
+  echo -ne "\033[21;1f"
+}
+
+# do_or_die() executes the given command in a sub-scrolling region. If the
+#   command fails, the user is notified and the system can reboot
+#
+function do_or_die {
+  ssr "$1"
+  eval "$1"
+  exitcode=$?
+  rsr
+  
+  if [ $exitcode -ne 0 ]; then
+    echo "FAILED: \"$1\""
+    echo "  exit code: $exitcode"
+    echo
+    echo "Type <CTRL/C> to try again."
+    echo "Press <ENTER> to reboot the system and try again."
+    read a </dev/tty
+    reboot -f
+  fi
+}
+
+# undo_alot() unmounts, unswaps, kills udevd, and other stuff
+function undo_alot {
+  umount /harddisk/var/log >/dev/null 2>&1
+  umount /harddisk/boot >/dev/null 2>&1
+  umount /harddisk >/dev/null 2>&1
+  umount /cdrom >/dev/null 2>&1
+  umount /restore >/dev/null 2>&1
+
+  rm -f /etc/udev/rules.d/*
+
+  swapoff -a >/dev/null 2>&1
+
+  echo "0 0 0 0" > /proc/sys/kernel/printk
+}
+
+
+function kill_udev() {
+  # Stop udevd, we may miss a few events while we run init, but we'll catch up
+  udevadm control --exit
+}
+
+
+# The shell calls EXITTRAP() when init (this script) exits; it attempts to restore
+#   the operating state so that init (this script) can be restarted.
+#   
+function EXITTRAP {
+  trap - EXIT
+
+  echo "Unexpected exit! Restarting..."
+  sleep 2
+
+  # Reverse a bunch of stuff
+  undo_alot
+
+  echo "Press <ENTER> to try again..."
+  read a </dev/tty
+}
+
+echo -e "${BOUL}Wait for udev to settle${NO}"
+/sbin/udevadm hwdb --update
+/sbin/udevadm settle
+
+typeset -i tries WORK_IDX
+tries=0
+WORKING[0]="|"
+WORKING[1]="/"
+WORKING[2]="-"
+WORKING[3]="\\\\"
+WORK_IDX=0
+TIME_START=`date +"%s"`
+
+# Time out, for rare times when udev doesn't create the file
+PersistentNetRule="/etc/udev/rules.d/70-persistent-net.rules"
+echo -e "${BOUL}Wait for persistent net rules to appear${NO}"
+while [ ! -e ${PersistentNetRule} ]; do
+  echo -en "${WORKING[$WORK_IDX]}\r"
+  WORK_IDX=WORK_IDX+1
+  [ $WORK_IDX -eq 4 ] && WORK_IDX=0
+
+  usleep 100000
+  tries=tries+1
+  if [ $tries -gt 60 ]; then touch ${PersistentNetRule}; fi
+done
+unset tries WORK_IDX
+
+# Sort and rename NICs
+. /etc/eth-addr-sort
+
+sleep 2
+
+# Load FSen
+for i in ext2 vfat isofs udf; do
+  modprobe $i&
+done
+wait >/dev/null 2>&1
+
+echo "1 4 1 7" >/proc/sys/kernel/printk
+
+# If init (this script) exits for any reason, it will be trapped
+trap EXITTRAP EXIT
+
+[ -t 0 ] || (echo "STDIN not a tty"; exit)
+
+echo "Configuring installer"
+. /etc/config-install.rc
+
+# Prepare in case of restore: if the NICs have changed, setup must be run
+#   at least to re-assign the NICs. In the case of dev testing, much may
+#   need changing to avoid conflicting with another active system.
+mustRunSetup=0
+autoSetup=" firstInstall"
+
+echo "Executing installer"
+. /etc/exec-install.rc
+
+if [ $mustRunSetup -eq 1 ]; then
+  # NICs changed, so force setup, but not auto mode
+  restore=1
+  autoSetup=" auto"
+  echo "    network devices have changed"
+  echo "      press <ENTER> to run setup"
+  read ans
+fi
+
+case $restore in
+  1)
+    echo -e "$TITLE"
+    echo
+    echo "Preparing Setup"
+    echo
+      echo "  cleaning up"
+        trap - EXIT
+        export TERM=linux
+        udevadm control --log-priority="none"
+
+      echo "  run setup"
+        mount -n -o move /dev /harddisk/dev
+        mount -n -o move /dev/pts /harddisk/dev/pts
+        mount -n -o move /sys /harddisk/sys
+        mount -n -o move /proc /harddisk/proc
+
+        cd /harddisk
+        echo $(getarg console) | \
+            awk '{if ($1 ~ /ttyS0,[0-9]+$/) { exit 0 } else { exit 1 }}'
+        if [ $? -eq 0 ]; then
+          # Use VT101 on serial port
+          chroot . /bin/bash -c "TERM=vt101 /usr/sbin/setup /dev/tty2${autoSetup}"
+        else
+          # VESA console behaves better
+          chroot . /usr/sbin/setup /dev/tty2${autoSetup}
+        fi
+
+      echo -ne $CLS
+      echo; echo;
+      echo "  setup complete"
+    ;;
+  2)
+    echo -ne $CLS
+    echo; echo;
+    echo "  install and restore complete"
+    ;;
+  3)
+    echo -ne $CLS
+    echo; echo;
+    echo "  total restore complete"
+    ;;
+esac
+
+echo "  clean up and reboot"
+  undo_alot
+  /sbin/reboot -f

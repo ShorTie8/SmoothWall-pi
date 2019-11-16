@@ -1,0 +1,31 @@
+# inc.rc-functions
+#
+# This file contains some functions commonly useful in RC scripts.
+
+# Enable/disable optional output
+if [ -f /var/run/debug-bootup ]; then
+  export DEBUG="e"
+  export crDEBUG="E"
+else
+  export DEBUG=""
+  export crDEBUG=""
+fi
+if [ -f /var/run/debug-dhcpcd ]; then
+  export DEBUG="e"
+  export crDEBUG="E"
+  export DEBUG_DHCPCD="d"
+else
+  # Don't clear DEBUG/crDEBUG in case they were explicitly requested.
+  export DEBUG_DHCPCD=""
+fi
+
+# Function echolog() directs feedback to any of three locations
+
+function echolog () {
+  [ "$1" == "e" ] && echo "$4"
+  [ "$1" == "E" ] && echo -e "$4\r"
+  [ "$2" == "s" ] && logger -t smoothwall "$4"
+  [ "$3" == "d" ] && logger -t dhcpcd -p local6.debug "$4"
+
+  return 0
+}

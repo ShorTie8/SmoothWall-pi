@@ -1,0 +1,22 @@
+#! /bin/bash
+
+# Always install the boot loader whether installing, restoring var or
+#   doing a total restore
+
+# If $1 = "UPDATE", we're updating, so don't chroot.
+if [ "$1" = "UPDATE" ]; then
+  HARDDISK=
+  CHROOT=
+else
+  HARDDISK="/harddisk"
+  CHROOT="/sbin/chroot /harddisk "
+fi
+
+cat<<END >${HARDDISK}/tmp/grub.cmds
+device (hd0) /dev/harddisk
+root (hd0,0) 
+setup (hd0) 
+quit
+END
+
+${CHROOT}/usr/sbin/grub --batch <${HARDDISK}/tmp/grub.cmds || exit 1

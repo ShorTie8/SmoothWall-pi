@@ -1,0 +1,401 @@
+#! /tools/bin/bash +h
+#
+# SmoothWall Build system.
+#
+# Parts (c) SmoothWall Ltd 2005
+# Parts (c) Neal P. Murphy, 2009
+#
+# This code is distributed under the terms of the GPL v2.
+
+# Turn off path caching.
+set +h
+
+# First, look for /build. If it ain't found, this probably is not a chroot
+#   jail, it was probably run manually, so die.
+#
+if [ ! -d "/build" ]; then
+  exit 1
+fi
+
+PATH=$PATH:${PWD}/toolcrib
+
+# At this point, we must assume we are in a chroot jail.
+
+# Now trap on exit, to be sure proc is unmounted. Note that this does not change
+#   the exit status of the shell (only an explicit exit would do that).
+#   This is needed so the host OS doesn't complain when shutting down.
+#
+trap "echo; echo \"Unmounting /proc\"; /tools/bin/umount /proc" EXIT
+
+# If an argument specified, build only that item. Otherwise, build everything.
+#
+if [ "$#" -eq 2 ]; then
+  TO_BUILD="$1"
+  THE_TARGET="$2"
+elif [ "$#" -eq 1 ]; then
+  TO_BUILD="$1"
+  THE_TARGET=""
+else
+  TO_BUILD=""
+  THE_TARGET=""
+fi
+
+# The right place, the right phase
+#
+cd /build
+export BUILD_PHASE="Final"
+
+# Permanent: ensure {,u}mount are not setuid in /tools.
+/tools/bin/chmod u-s /tools/bin/{,u}mount
+
+# Be sure /proc is mounted
+#
+if /tools/bin/grep proc /etc/mtab; then /tools/bin/umount /proc >/dev/null 2>&1; fi
+/tools/bin/mount -t proc proc /proc
+
+# Get our functions
+#
+source toolcrib/environment
+source toolcrib/functions
+
+set_build_environment
+
+# Set up parallel make
+#
+export JOBS_UP="-j 1"
+export JOBS_MP
+cpu_count
+
+# If unwinding, do so and exit
+#
+if [ "$TO_BUILD" == "--unwind" ]; then
+  bash toolcrib/final_tc_adjustment --unwind
+  exit $?
+fi
+
+# If building only a specific package, do so and exit
+#
+if [ "$TO_BUILD" != "" ]; then
+
+  # Build only the specified package
+  JOBS=$JOBS_MP
+  build $TO_BUILD $THE_TARGET
+  exit $?
+fi
+
+# Must be building all of the final stage
+#
+  JOBS=$JOBS_MP
+  beginTIME=`date +%s`
+
+  if [ -e crumbs/Final.compiled ]; then
+    echo -e "\n    Final phase packages already compiled"
+  else
+    echo
+    if [ -e crumbs/Final.grp1.compiled ]; then
+      echo -e "  Final group 1 packages (basic) already built"
+    else
+      echo
+      echo -e "  Final group 1 packages (basic)"
+      build kernel-headers
+      build glibc
+      other_cmd "crumbs/$BUILD_PHASE.toolchain.adjusted" \
+                "final toolchain adjustment" \
+                "bash -x toolcrib/final_tc_adjustment" \
+                "crumbs/$BUILD_PHASE.adjustment.out"
+      build binutils
+      build gmp
+      build mpfr
+      build mpc
+      build zlib
+      build gcc
+      other_cmd "crumbs/$BUILD_PHASE.toolchain.verified" \
+                "final toolchain verification" \
+                "bash toolcrib/final_tc_check" \
+                "crumbs/$BUILD_PHASE.verification.out"
+      build gcc libgcc
+      build coreutils
+      build gdbm
+      build mktemp
+      build device-ids
+      build iana-etc
+      build findutils
+      build gawk
+      build ncurses
+      build vim
+      build nano
+      build m4
+      build bison
+      build less
+      build groff
+      build man
+      build man-pages
+      build sed
+      build flex
+      build dejagnu
+      build gettext
+      build pkg-config
+      build inetutils
+      touch crumbs/Final.grp1.compiled
+    fi
+
+    if [ -e crumbs/Final.grp2.compiled ]; then
+      echo -e "  Final group 2 packages (libs) already built"
+    else
+      echo
+      echo -e "  Final group 2 packages (libs)"
+      build libxml2
+      build libxslt
+      build strace
+      build attr
+      build libcap
+      build pcre
+      build libpcap
+      build expat
+
+      # udev depends on util-linux and kmod
+      build util-linux
+      build e2fsprogs
+      build kmod
+      # libusb depends on libudev
+      build gperf
+      build eudev
+      build libusb
+      build libusb-compat
+      build cgilib
+      build freetype
+      build fontconfig
+      build libpng
+      build libdnet
+      build pixman
+      build libffi
+      build freefont
+      build cairo
+      build openssl
+      build Python
+      build libcap-ng
+      build glib
+      build pango
+      build sqlite
+      build unbound
+      build libevent
+      build nspr
+      build nss
+      build curl
+      build neon
+      build libosip2
+      build libmnl
+      build libnl
+      build libnet
+      build libnfnetlink
+      build libnetfilter_acct
+      build libnetfilter_conntrack
+      build libnetfilter_cthelper
+      build libnetfilter_cttimeout
+      build libnetfilter_log
+      build libnetfilter_queue
+      build libnftnl
+      build LuaJIT
+      JOBS=$JOBS_UP
+      build slang
+      JOBS=$JOBS_MP
+      build popt
+      build dialog
+      build newt
+      build gd
+      touch crumbs/Final.grp2.compiled
+    fi
+
+    if [ -e crumbs/Final.grp3.compiled ]; then
+      echo -e "  Final group 3 packages (essential) already built"
+    else
+      echo
+      echo -e "  Final group 3 packages (essential)"
+      build sysfsutils
+      build iputils
+      build perl
+      build texinfo
+      build autoconf
+      build automake
+      build bash
+      build bc
+      build file
+      build libtool
+      build readline
+      build xz
+      build bzip2
+      build diffutils
+      build kbd
+      build grep
+      build gzip
+      build make
+      build module-init-tools
+      build patch
+      build procinfo-ng
+      build procps-ng
+      build which
+      build GeoIP
+      JOBS=$JOBS_UP
+      build acpica
+      JOBS=$JOBS_MP
+      build nasm
+      touch crumbs/Final.grp3.compiled
+    fi
+
+    if [ -e crumbs/Final.grp4.compiled ]; then
+      echo -e "  Final group 4 packages (system) already built"
+    else
+      echo
+      echo -e "  Final group 4 packages (system)"
+      build psmisc
+      build shadow
+      build sysklogd
+      build sysvinit
+      build tar
+      build joe
+      build db
+      build openldap
+      build wget
+      build sudo
+      build linux
+      #build linux-backports
+      build linux-firmware
+      build kernel-drivers
+      build iptables
+      build ipset
+      build xtables-addons
+      build ipbatch
+      build klibc
+      build linux-atm
+      touch crumbs/Final.grp4.compiled
+    fi
+
+    if [ -e crumbs/Final.grp5.compiled ]; then
+      echo -e "  Final group 5 packages (core) already built"
+    else
+      echo
+      echo -e "  Final group 5 packages (core)"
+      build usbutils
+      build pciutils
+      build hdparm
+      build hddtemp
+      build iproute2
+      build beep2
+      build tcpdump
+      build dosfstools
+
+      build rrdtool
+
+      # As more of the internet changes to SSL, openssl, perl-mods and
+      #   cacert_bundle will have to be built sooner.
+
+      # cacert-bundle depends on openssl and on perl-mods which depends
+      #   on rrdtool.
+      build perl-mods
+      build cacert-bundle
+
+      # daq (and snort) version check depend on cacert-bundle
+      build daq
+      build httpd
+      build cron
+      JOBS=$JOBS_UP
+      build at
+      JOBS=$JOBS_MP
+      build lm_sensors
+      build dnsmasq
+      build whois
+      build logrotate
+      build ethtool
+      build iftop
+
+      build listtables
+      build smoothd
+      build libsmooth+setup
+      build trafficstats
+      build setuids
+      build install
+      build coretree
+
+      build openssh
+      build ntp
+      build openntpd
+
+      build squid
+
+      build ppp
+      build isdn4k-utils
+      build rp-pppoe
+      build ibod
+      build dhcpcd
+      build eciadsl-synch_bin
+      build eciadsl-usermode
+      touch crumbs/Final.grp5.compiled
+    fi
+
+    if [ -e crumbs/Final.grp6.compiled ]; then
+      echo -e "  Final group 6 packages (last utils) already built"
+    else
+      echo
+      echo -e "  Final group 6 packages (last utils)"
+      build mtools
+      build cdrtools
+      build busybox
+
+      build dhcp
+      build snort
+      build oinkmaster
+      build libreswan
+      build wireless_tools
+      build wpa_supplicant
+
+      build noip
+      build ez-ipupdate
+
+      build imspector
+
+      build clamav
+      build p3scan
+
+      build tcl
+      build git
+      build screen
+      build gdb
+      build lynx
+      build rsync
+      build samba
+
+      build siproxd
+
+      build miniupnpd
+      build inotify
+      build cpio
+      build grub
+      build reiserfsprogs
+      build parted
+      build pcmciautils
+      build yaml
+      build suricata
+      build smartmontools
+      build squidguard
+      build subversion
+      build qemu
+      build ntop
+      build iperf
+      build fping
+      build apcupsd
+      build setkerneltz
+      build c_icap
+      build c_icap_modules
+      build squidclamav
+      build usb-modeswitch
+      build zip
+
+      touch crumbs/Final.grp6.compiled
+    fi
+
+    touch crumbs/Final.compiled
+  fi
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME final build complete"
+  echo

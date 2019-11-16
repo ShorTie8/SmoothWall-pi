@@ -1,0 +1,32 @@
+--- a/linux/include/openswan/ipsec_kversion.h.orig	2014-08-15 11:35:03.619598180 +0200
++++ a/linux/include/openswan/ipsec_kversion.h	2014-08-15 10:32:29.693841060 +0200
+@@ -477,6 +477,15 @@
+ # define DEFINE_RWLOCK(x) rwlock_t x = RW_LOCK_UNLOCKED
+ #endif
+ 
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,10)
++# define IP_SELECT_IDENT_NEW
++#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,17)
++# define IP_SELECT_IDENT_NEW
++#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,11,0) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,53)
++# define IP_SELECT_IDENT_NEW
++#elif LINUX_VERSION_CODE < KERNEL_VERSION(3,5,0) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,4,103)
++# define IP_SELECT_IDENT_NEW
++#endif
+ 
+ #endif /* _OPENSWAN_KVERSIONS_H */
+ 
+--- a/linux/include/openswan/ipsec_param2.h.orig	2014-08-15 11:34:50.670847969 +0200
++++ a/linux/include/openswan/ipsec_param2.h	2014-08-15 10:06:43.950228239 +0200
+@@ -23,7 +23,11 @@
+ #define netdev_priv(dev) (dev->priv)
+ #endif
+ 
++#if defined(IP_SELECT_IDENT_NEW)
++#define KLIPS_IP_SELECT_IDENT(iph, skb) __ip_select_ident(iph, 1)
++#else
+ #define KLIPS_IP_SELECT_IDENT(iph, skb) __ip_select_ident(iph, skb_dst(skb), 0)
++#endif
+ 
+ #if !defined(HAVE_CURRENT_UID)
+ #define current_uid() (current->uid)

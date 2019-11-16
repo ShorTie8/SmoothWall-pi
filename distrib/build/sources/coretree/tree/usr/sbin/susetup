@@ -1,0 +1,6 @@
+#! /bin/bash
+
+# Copyright Neal Murphy.
+# Licensed under the GNU GPL license that governs the Smoothwall Express source code.
+
+/usr/sbin/setup /dev/tty2 networkingOnly && exit 243

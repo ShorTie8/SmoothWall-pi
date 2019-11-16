@@ -1,0 +1,676 @@
+#! /bin/bash
+
+>/tmp/hd.list
+>/tmp/cd.list
+>/tmp/nic.list
+
+# Display aesthetics
+CLS="\033[0;0f\033[2J"
+BO="\033[1m"
+UL="\033[4m"
+BOUL="\033[1;4m"
+NO="\033[0m"
+SC="\0337"
+RC="\0338"
+CE="\033[J"
+
+# Drive types
+CDs="ide:m-cdrom|scsi:t-0x05"
+HDs="ide:m-disk|scsi:t-0x00"
+
+# Device IDs
+PCI_IDS="/etc/filled.pci.ids"
+
+# Uber title
+BACKTITLE="Smoothwall PRODUCT_NAME PRODUCT_VERSIONPRODUCT_EXTRA (mARCH) -- http://smoothwall.org"
+TITLE="${CLS}                      ${BOUL}$BACKTITLE${NO}"
+
+dlgCmd="--backtitle '$BACKTITLE' --title 'Begin Advanced Installation'"
+dlgCmd="${dlgCmd} --msgbox '\n\\ZbConnect all hot-plugged drives (especially archives) \\Z1NOW\\Zn.\n"
+dlgCmd="${dlgCmd}\nThis is the sequence of operations:\n"
+dlgCmd="${dlgCmd}  - Enter all installation parameters\n"
+dlgCmd="${dlgCmd}  - Verify selections\n"
+dlgCmd="${dlgCmd}  - Install software & prepare system\n"
+dlgCmd="${dlgCmd}  - Configure the new system (if a fresh install) or\n"
+dlgCmd="${dlgCmd}  - Reconfigure the restored system (if the NICs changed)\n"
+dlgCmd="${dlgCmd}  - Reboot & start the firewall\n"
+dlgCmd="${dlgCmd}\nHit <ENTER> to continue...' 0 0"
+rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+
+echo -e "${CLS}${BACKTITLE}"; echo
+#echo "Preparing lists of CDROM and hard drives and NICs"
+echo "Preparing lists of CDROMs and hard drives"
+OPWD=$PWD
+cd /sys/block
+
+typeset -i tries cd_cnt hd_cnt WORK_IDX sum size TIME_START TIME_NOW TIME_DELTA
+tries=0
+WORKING[0]="|"
+WORKING[1]="/"
+WORKING[2]="-"
+WORKING[3]="\\\\"
+WORK_IDX=0
+TIME_START=`date +"%s"`
+
+# Loop until we have enough drives or concede obsequiously
+#
+while [ 1 -eq 1 ]; do
+  # Start empty each time
+  >/tmp/hd.list
+  >/tmp/cd.list
+  ALT_CD=0
+
+  # Find all disks and optical drives
+  for device in *; do
+    DEVNAM=
+    ID_TYPE=
+    model=
+    serial=
+    size=
+
+    # Skip floppy drives; double-bracket needed for =~
+    if [[ "$device" =~ "fd[0-9]*" ]]; then continue; fi
+
+    if [ -e "${device}/device" ]; then
+      UDEVINFO="/sbin/udevadm info --path=${PWD}/${device} --query=all"
+      ID_TYPE=`$UDEVINFO | grep ID_TYPE | sed -e 's/.*=//'`
+      # virtio disks don't follow the custom
+      if [ -z "$ID_TYPE" ]; then
+        if $UDEVINFO | egrep "DEVPATH.*virtio" >/dev/null 2>&1; then
+          ID_TYPE="disk"
+          model="VIRTIO"
+        fi
+      fi
+      DEVNAM=`$UDEVINFO | grep DEVNAM | sed -e 's|.*=/dev/||'`
+      set `cat ${device}/size`
+      if [ $1 -gt 0 ]; then
+        size=$1
+      else
+        size=0
+      fi
+      [ -z "$model" ] && model=`$UDEVINFO | grep ID_MODEL= | sed -e 's/.*=//'`
+      [ -z "$model" ] && model=`cat ${device}/device/model 2>&1 | sed -e 's/ /-/g'`
+      [ -z "$model" ] && model="UNK_MODEL"
+
+      # First try ID_SERIAL_SHORT; if not found, 'serial' will remain blank. This should work for
+      #   all plain non-RAID SCSI/SATA/IDE drives
+      serial=`$UDEVINFO | grep ID_SERIAL_SHORT | sed -e 's/.*=//'`
+
+      # Now try ID_SCSI; again, if not found, 'serial' will remain blank. This should set a 'serial #'
+      #   for the Fusion MPT driver, if not all SCSI RAID 'drives'.
+      [ -z "$serial" ] && serial=`$UDEVINFO | grep ID_SCSI | sed -e 's/.*=//'`
+
+      # If serial is still blank, neither ID_SERIAL_SHORT nor ID_SCSI are available.
+      if [ -z "$serial" ]; then
+        # non-virtio disks
+        [ -f "${device}/device/serial" ] && serial=`cat ${device}/device/serial 2>&1 | sed -e 's/ /-/g'`
+        # virtio disks don't follow the custom
+        [ -f "${device}/serial" ] && serial=`cat ${device}/serial 2>&1 | sed -e 's/ /-/g'`
+      fi
+      [ -z "$serial" ] && serial="UNK_SERIAL"
+      case $ID_TYPE in
+        cd)
+          # if an optical drive, add it to /tmp/cd.list
+          echo "$DEVNAM $size $model $serial" >> /tmp/cd.list
+          ;;
+        disk|generic)
+          # 'generic' added per Formesyn's testing using a SanDisk Ultra II CF.
+          # if a disk drive with size>0, add it to /tmp/hd.list
+          if [ $size -gt 0 ]; then
+            echo "$DEVNAM $size $model $serial" >> /tmp/hd.list
+          fi
+      esac
+    fi
+  done
+
+  # Find anything?
+  set `wc -l /tmp/hd.list`
+  hd_cnt=$1
+  set `wc -l /tmp/cd.list`
+  cd_cnt=$1
+
+  # Search for hot-plugged drives for 6 seconds
+  # Short-circuit the counting if there are inexplicable delays
+  TIME_NOW=`date +"%s"`
+  TIME_DELTA=TIME_NOW-TIME_START
+  if [ $TIME_DELTA -gt 6 ]; then tries=30; fi
+
+  case $tries in
+    5|10|15|20|25) echo -e -n " \r" ;;
+    30)
+      echo -e -n "\033[0J\r"
+      case $hd_cnt in
+        0) echo -en "\r\nNo writable drives found. ";;
+        1) echo -en "\r\nOne writable drive found. ";;
+        *) echo -en "\r\nTwo or more writable drives found. ";;
+      esac
+      case $cd_cnt in
+        0) echo -n "No optical drives found. " ;;
+        1) echo "One optical drive found.";;
+        *) echo "Two or more optical drives found.";;
+      esac
+      sum=`expr $hd_cnt + $cd_cnt`
+      if [ $sum -lt 2 ]; then
+        echo -e "\nI do apologize. I cannot continue without at least two writable drives,"
+        echo -e "or a writable drive and a CD/DVD drive.\n" 
+        echo "Hard drives found:"; sed -e 's/^/  /' /tmp/hd.list
+        echo "Optical drives found:"; sed -e 's/^/  /' /tmp/cd.list
+        exit 1
+      fi
+      break
+      ;;
+  esac
+
+  echo -en "${WORKING[$WORK_IDX]}\r"
+  WORK_IDX=WORK_IDX+1
+  [ $WORK_IDX -eq 4 ] && WORK_IDX=0
+
+  usleep 200000
+  tries=tries+1
+done
+cd $OPWD
+
+echo "Finished finding drives"
+if [ $hd_cnt -gt 1 ]; then
+  echo -e "\nBooting/installing from flash?"
+  echo -e "Be sure to correctly select the boot drive!\n"
+fi
+sleep 5
+
+# Always show remaining writable drives as potential sources
+ALT_CD=1
+
+# skip NICs until setup works
+if [ 1 -lt 0 ]; then
+OPWD=$PWD;cd /sys/class/net
+ls -C1 | while read a; do
+  VNDNO=""; VND=""; DEVNO=""; DEV=""; MAC=""
+  if [ -e $a/device/vendor ]; then
+    VNDNO=`cat $a/device/vendor | sed -e 's/0x//'`
+    VND=`egrep "^$VNDNO  " $PCI_IDS | head -1 | sed -e 's/'"$VNDNO  "'//'`
+    if [ "$VND" == "" ]; then VND="0x$VNDNO"; fi
+  fi
+  if [ -e $a/device/device ]; then
+    DEVNO=`cat $a/device/device | sed -e 's/0x//'`
+    DEV=`egrep "$VNDNO	$DEVNO|$VNDNO		$VNDNO $DEVNO" $PCI_IDS | head -1 | sed -e 's/.*'"$DEVNO  "'//'`
+    if [ "$DEV" == "" ]; then DEV="0x$DEVNO"; fi
+  fi
+  MAC=`cat $a/address | sed -e 's/://g'`
+  if [ "$MAC" != "000000000000" -a "$MAC" != "" ]; then
+    echo "$a|$MAC|$VND|$DEV"
+  fi
+done > /tmp/nic.list
+cd $OPWD
+fi
+  
+
+# Now get the config info
+
+while [ 1 -eq 1 ]; do
+  # Hard Drive selection
+  menuMsg="Choose the drive upon which SWE3.1 will be installed. Note"
+  menuMsg="$menuMsg that this drive will be repartitioned; \\Zball\\ZB data will be lost."
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Target Disk Drive Selection'"
+  dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+
+  unset b
+  typeset -i i b h
+  i=1
+  while read a b c d; do
+    b=b/2/1024
+    hd_dev[$i]=$a
+    hd_size[$i]=$b
+    hd_model[$i]=$c
+    hd_id[$i]=$d
+    dlgCmd="$dlgCmd $i. '$a - ${hd_size[$i]}MiB (${hd_model[$i]} ${hd_id[$i]})'"
+    i=i+1
+  done < /tmp/hd.list
+  HD_CNT=$i
+
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  hd=${rsp/\./}
+  if [ "$hd" != "" ]; then driveMiB="${hd_size[$hd]}"; break; fi
+done
+
+# Get the by-id name
+set `head -$hd /tmp/hd.list|tail -1`
+hd_sel=$1
+set `ls -ls /dev/disk/by-id | egrep $hd_sel"$" | head -1`
+shift 9
+hd_dev=$1
+
+while [ 1 -eq 1 ]; do
+  # CD/DVD Drive selection
+  menuMsg="Choose the drive that contains the Smoothwall distribution."
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Source Medium Selection'"
+  dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+
+  i=1
+  while read a b c d; do
+    b=b/2/1024
+    cd_dev[$i]=$a
+    cd_size[$i]=$b
+    cd_model[$i]=$c
+    cd_id[$i]=$d
+    dlgCmd="$dlgCmd $i. '$a - ${cd_size[$i]}MiB (${cd_model[$i]} ${cd_id[$i]})'"
+    i=i+1
+  done < /tmp/cd.list
+  OPTI_CNT=$i
+  if [ $ALT_CD -eq 1 ]; then
+    h=1
+    while read a b c d; do
+      if [ $h -ne $hd ]; then
+        b=b/2/1024
+        cd_dev[$i]=$a
+        cd_size[$i]=$b
+        cd_model[$i]=$c
+        cd_id[$i]=$d
+        dlgCmd="$dlgCmd $i. '$a - ${cd_size[$i]}MiB ${cd_model[$i]} (${cd_id[$i]})'"
+        i=i+1
+      fi
+      h=h+1
+    done < /tmp/hd.list
+  fi
+
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  CD=${rsp/\./}
+  if [ "$CD" != "" ]; then break; fi
+done
+
+while [ 1 -eq 1 ]; do
+  # restore selection
+  if [ `wc -l </tmp/hd.list` -gt 1 ]; then
+    menuMsg="Choose to perform a fresh, clean install or to perform a config or"
+    menuMsg="$menuMsg a complete, full restore.\n\nIf restoring, be sure the backup"
+    menuMsg="$menuMsg medium is already connected (it can be the install medium.)"
+  else
+    menuMsg="\\ZbOnly one writable drive found; cannot restore.\\ZB\n"
+    menuMsg="$menuMsg\nPerform a fresh, clean install."
+  fi
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Install or Restore'"
+  dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+
+  dlgCmd="$dlgCmd 1. 'Fresh install \\ZbONLY\\ZB'"
+  if [ `wc -l </tmp/hd.list` -gt 1 ]; then
+    dlgCmd="$dlgCmd 2. 'Restore \\Zbvariable\\ZB data'"
+    dlgCmd="$dlgCmd 3. '\\ZbComplete\\ZB restoration'"
+  fi
+
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  restore=${rsp/\./}
+  if [ "$restore" != "" ]; then break; fi
+done
+
+# Set the restore type
+case "$restore" in
+  "2") backupType="var";;
+  "3") backupType="total";;
+  *) backupType="";;
+esac
+
+# Get the medium and tarball only if restoring
+if [ $restore -gt 1 ]; then
+  # Get the drive
+  while [ 1 -eq 1 ]; do
+    # Select the disk to restore from
+    dlgCmd="--backtitle '$BACKTITLE' --title 'Select restore medium'"
+    dlgCmd="$dlgCmd --default-item '1.' --menu '' 0 0 0"
+
+    unset b
+    typeset -i i b h
+    i=1
+    while read a b c d; do
+      if [ "$a" != "${hd_dev[$hd]}" ]; then
+        b=b/2/1024
+        rd_dev[$i]=$a
+        rd_size[$i]=$b
+        rd_model[$i]=$c
+        rd_id[$i]=$d
+        dlgCmd="$dlgCmd $i. '$a - ${rd_size[$i]}MiB (${rd_id[$i]})'"
+        i=i+1
+      fi
+    done < /tmp/hd.list
+    RD_CNT=$i
+
+    rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+    rd=${rsp/\./}
+    if [ "$rd" != "" ]; then break; fi
+  done
+
+  # Get the list of tarballs
+  if [ "${rd_dev[$rd]}" == "$cd_dev[$CD]}" ]; then
+    # Using source medium
+    mount /dev/${rd_dev[$rd]}1 /cdrom
+    (cd /cdrom; ls -C1tr *.tar.* >/tmp/archive.list 2>/dev/null)
+    umount /cdrom
+  else
+    # Using separate medium
+    mkdir -p /restore
+    mount /dev/${rd_dev[$rd]}1 /restore
+    (cd /restore; ls -C1tr *.tar.* >/tmp/archive.list 2>/dev/null)
+    umount /restore
+  fi
+
+  # If no archives were found, notify the user and reboot
+  egrep "_${backupType}.tar.gz" /tmp/archive.list >/dev/null 2>&1
+  if [ $? -ne 0 ]; then
+    dlgCmd="--backtitle '$BACKTITLE' --title '\\Z1Archive not found\\Zn'"
+    dlgCmd="${dlgCmd} --msgbox '\nNo archives of type \"${backupType}\" were found on the"
+    dlgCmd="${dlgCmd} selected drive. Be sure"
+    dlgCmd="${dlgCmd} the backup medium is plugged in before the installer"
+    dlgCmd="${dlgCmd} starts.\n\nHit <ENTER> to reboot and try again.' 0 0"
+    rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+    umount -a >/dev/null 2>&1
+    reboot
+  fi
+
+  while [ 1 -eq 1 ]; do
+    # Select the disk to restore from
+    menuMsg="Choose the archive to restore from."
+    dlgCmd="--backtitle '$BACKTITLE' --title 'Archive selection (5 latest)'"
+    dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+
+    unset b
+    typeset -i i b h
+    i=1
+    grep "_${backupType}.tar.gz" /tmp/archive.list | tail -5 >/tmp/temp.list
+    while read a; do
+        archive_id[$i]=$a
+        dlgCmd="$dlgCmd $i. '$a'"
+        i=i+1
+    done < /tmp/temp.list
+    ARCHIVE_CNT=$i
+
+    rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+    archive=${rsp/\./}
+    if [ "$archive" != "" ]; then break; fi
+  done
+fi
+
+# Don't offer to install stuff that ain't there.
+
+# Confuser: First try to mount the whole medium as an ISO9660 CD-/DVD-ROM;
+# failing that, try mounting partition #1 read-write, letting mount figure
+# out which FS it is. (Same in exec-install.)
+CDMNTLOG="/cdmount.log"
+> $CDMNTLOG
+offerDEV=1
+menuMsg="The development and documentation archives were not found."
+menuMsg="$menuMsg They cannot be installed."
+
+mount -t iso9660  /dev/${cd_dev[$CD]}  /cdrom -o ro >> $CDMNTLOG 2>&1 \
+|| mount /dev/${cd_dev[$CD]}1 /cdrom -o rw >> $CDMNTLOG 2>&1
+if [ $? -eq 0 ]; then
+  # Now see if the tarballs are there.
+  ls /cdrom/smoothdev.tgz /cdrom/smoothdoc.tgz >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    menuMsg="Choose whether or not to install the development and"
+    menuMsg="$menuMsg documentation archives."
+    offerDEV=0
+  fi
+  umount /cdrom >/dev/null 2>&1
+fi
+
+while [ 1 -eq 1 ]; do
+  # Dev Pkgs
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Development packages'"
+  dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+
+  dlgCmd="$dlgCmd 1. 'Do \\Zbnot\\ZB install'"
+  if [ $offerDEV -eq 0 ]; then
+    dlgCmd="$dlgCmd 2. '\\ZbInstall\\ZB development packages'"
+  fi
+
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  dev=${rsp/\./}
+  if [ "$dev" != "" ]; then break; fi
+done
+
+while [ 1 -eq 1 ]; do
+  # Disk Partitioning
+
+  typeset -i hd_size[$hd]  driveMiB  maxMiB
+  minMiB=4000
+  menuMsg=""
+  if [ $driveMiB -le $minMiB ]; then
+    menuMsg="The selected disk is very small (${driveMiB}MiB) and is too small to build"
+    menuMsg="$menuMsg Smoothwall Express.\n\nPress <ENTER> to use the entire disk."
+    dlgCmd="--backtitle '$BACKTITLE' --title 'Disk Utilization'"
+    dlgCmd="$dlgCmd --msgbox '$menuMsg' 0 0"
+    rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+    maxMiB=$driveMiB
+    # Always done.
+    break;
+
+  else
+
+    if [ $driveMiB -lt 24000 ]; then
+      menuMsg="The selected disk is too small (${driveMiB}MiB) to \\Zbbuild\\ZB Smoothwall Express.\n\n"
+      menuMsg="${menuMsg}Press <ENTER> to use the entire disk or enter a number between"
+      menuMsg="$menuMsg $minMiB and $driveMiB to limit disk usage to that many MiB.\n\n"
+      seed=${driveMiB}
+    else
+      menuMsg="Press <ENTER> to use 24000MiB or enter another number between"
+      menuMsg="$menuMsg $minMiB and $driveMiB to limit disk usage to that many MiB.\n\n"
+      seed=24000
+    fi
+    menuMsg="${menuMsg}Any unused space will be available for later use."
+    menuMsg="${menuMsg}\n\n\\Z1Initial disk space to use (in MiB):\\Z0"
+    dlgCmd="--backtitle '$BACKTITLE' --title 'Disk Utilization'"
+    dlgCmd="$dlgCmd --inputbox '$menuMsg' 0 0 ${seed}"
+    rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+    maxMiB=${rsp}
+
+    # Within range? Done.
+    if [ $maxMiB -le $driveMiB -a $maxMiB -ge $minMiB ]; then break; fi
+    # Eval's to zero? Use seed. Done.
+    if [ $maxMiB -eq 0 ]; then maxMiB=$seed; break; fi
+
+  fi
+done
+
+menuMsg="Choose how to size the partitions: traditional split, 1GiB for / (root) and"
+menuMsg="$menuMsg the rest for logs, or 1GiB for logs and the rest for / (root)."
+while [ 1 -eq 1 ]; do
+  # Select partition scheme
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Partition Sizing'"
+  dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+
+  dlgCmd="$dlgCmd 1. '\\ZbTraditional\\ZB split'"
+  dlgCmd="$dlgCmd 2. 'Maximize \\Zb/var/log\\ZB space for logs'"
+  dlgCmd="$dlgCmd 3. 'Maximize / (root) space for \\Zbdevelopment\\ZB'"
+
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  partSplit=${rsp/\./}
+  if [ "$partSplit" != "" ]; then break; fi
+done
+
+while [ 1 -eq 1 ]; do
+  # Filesystem
+  menuMsg="Choose the filesystem to use."
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Filesystem'"
+  dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+  dlgCmd="$dlgCmd 1. EXT4"
+  dlgCmd="$dlgCmd 2. ReiserFS"
+
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  filesys=${rsp/\./}
+
+  if [ "$filesys" != "" ]; then break; fi
+done
+
+while [ 1 -eq 1 ]; do
+  # Activate serial port for booting and/or getty
+  menuMsg="Choose how the system will use the serial console."
+  dlgCmd="--backtitle '$BACKTITLE' --title 'Serial Console Use'"
+  dlgCmd="$dlgCmd --default-item '4.' --menu '$menuMsg' 0 0 0"
+  dlgCmd="$dlgCmd 1. Boot"
+  dlgCmd="$dlgCmd 2. Login"
+  dlgCmd="$dlgCmd 3. 'Boot & Login'"
+  dlgCmd="$dlgCmd 4. 'Do Not Use'"
+  rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+  serialport=${rsp/\./}
+  if [ "$serialport" != "" ]; then break; fi
+done
+
+if [ $serialport -ne 4 ]; then
+  while [ 1 -eq 1 ]; do
+    # Choose baud rate
+    menuMsg="Choose the desired baud rate."
+    dlgCmd="--backtitle '$BACKTITLE' --title 'Serial Port Baud Rate'"
+    dlgCmd="$dlgCmd --default-item '1.' --menu '$menuMsg' 0 0 0"
+    dlgCmd="$dlgCmd 1. 115200"
+    dlgCmd="$dlgCmd 2. 19200"
+    dlgCmd="$dlgCmd 3. 9600"
+    rsp=`eval dialog --colors $dlgCmd 2>&1 >/dev/tty`
+    serialbaud=${rsp/\./}
+    if [ "$serialbaud" != "" ]; then break; fi
+  done
+fi
+
+# Only use grub. LILO sucks.
+#
+loader=2
+
+# Never record file access times. Working OK on SWE3.0 Update 9 without
+# complaints. Amen.
+#
+noatime=2
+
+
+# setup is limited to eth[0-3]; so skip NIC renaming for now.
+#
+if [ 1 -lt 0 ]; then
+typeset -i nic_cnt
+nic_cnt=1
+OIFS="$IFS"; IFS="|"
+while read a; do
+  set $a
+  DEV[$nic_cnt]="$1"
+  MAC[$nic_cnt]="$2"
+  VND[$nic_cnt]="$3"
+  MDL[$nic_cnt]="$4"
+  CLR[$nic_cnt]="not named"
+  nic_cnt=nic_cnt+1
+done < /tmp/nic.list
+IFS="$OIFS"
+
+while [ 1 -eq 1 ]; do
+  # NIC names
+  echo -en "$TITLE"
+  echo
+  echo
+  echo -e "${BO}Assign Persistent NIC names${NO}"
+  echo -e "  Assign names to your Network Interface Cards. It is recommended you use"
+  echo -e "  standard interface colors; however, you may use (almost) any names you wish."
+  echo
+
+  i=1
+  while [ $i -lt $nic_cnt ]; do
+    echo -e "  $i. ${BO}${DEV[$i]}${NO} -> ${BO}${CLR[$i]}${NO}"
+    echo -e "        (${MAC[$i]}|${VND[$i]}|${MDL[$i]})"
+    i=i+1
+  done < /tmp/nic.list
+  echo "  F. Finished naming NICs"
+  echo
+
+  echo -n "           Selection: "
+  read nic #</dev/tty
+  if [ "$nic" == "" ]; then continue; fi
+  if [ $nic -gt $nic_cnt ]; then continue; fi
+  if [ $nic -lt 1 ]; then continue; fi
+  if [ "$nic" == "F" ]; then break; fi
+  echo -n "                Name: "
+  read CLR[$nic] #</dev/tty
+done
+fi # skipping NIC rename
+
+while [ 1 == 1 ]; do
+  echo -e "${CLS}${BACKTITLE}"
+  echo
+  echo
+
+  echo "Confirm installation configuration"
+  echo
+  echo -e "  Installing on target ${BO}/dev/disk/by-id/${hd_id[$hd]}${NO}"
+  echo -e "  Booting from source drive ${BO}/dev/${cd_dev[$CD]}${NO}"
+  case $restore in
+    1) echo -e "  ${BO}Fresh${NO} install"
+       ;;
+    2) echo -e "  Fresh install ${BO}with${NO} variable data restore"
+       echo -e "        drive: ${rd_dev[$rd]}"
+       echo -e "      archive: ${archive_id[$archive]}"
+       ;;
+    3) echo -e "  ${BO}Restore${NO} from total backup"
+       echo -e "        drive: ${rd_dev[$rd]}"
+       echo -e "      archive: ${archive_id[$archive]}"
+       ;;
+  esac
+  if [ $dev -eq 1 ]; then
+    echo -e "  ${BO}Skipping${NO} development packages"
+  else
+    echo -e "  ${BO}Installing${NO} development packages"
+  fi
+  if [ "$maxMiB" == "0" ]; then
+    echo -e "  Using ${BO}whole disk${NO} (${hd_size[$hd]}MiB)"
+  else
+    echo -e "  Using first ${BO}${maxMiB}MiB${NO} of hard drive"
+  fi
+  case $partSplit in
+    1) echo -e "  Using ${BO}traditional${NO} 2/3 (root) & 1/3 /var/log split";;
+    2) echo -e "  Maximizing ${BO}/var/log${NO} space";;
+    3) echo -e "  Maximizing space for ${BO}development${NO}";;
+  esac
+  if [ "$filesys" == "1" ]; then
+    echo -e "  Making ${BO}EXT4${NO} filesystems"
+  else
+    echo -e "  Making ${BO}ReiserFS${NO} filesystems"
+  fi
+  case $serialbaud in
+    1) BAUD=115200;;
+    2) BAUD=19200;;
+    3) BAUD=9600;;
+  esac
+  case $serialport in
+    1) echo -e "  Using serial port for ${BO}boot console only @$BAUD 8N1${NO}";;
+    2) echo -e "  Using serial port for ${BO}normal login only @$BAUD 8N1${NO}";;
+    3) echo -e "  Using serial port for both ${BO}boot & login @$BAUD 8N1${NO}";;
+    4) echo -e "  ${BO}Not using${NO} serial port"
+  esac
+  echo -e "  Installing ${BO}GRUB${NO} boot loader"
+  echo -e "  ${BO}NOT${NO} recording file access times"
+  echo
+
+  # Skip NIC renaming for now
+  #
+  if [ 1 -lt 0 ]; then
+  typeset -i ypos
+  ypos=6
+  echo -e "\033[${ypos};40f  Assigning persistent NIC names:"
+  ypos=ypos+1
+  i=1;
+  while [ $i -lt $nic_cnt ]; do
+    if [ "${CLR[$i]}" != "not named" ]; then
+      echo -e "\033[${ypos};40f    ${DEV[$i]} -> ${BO}${CLR[$i]}${NO}"
+      ypos=ypos+1
+    fi
+    i=i+1
+  done
+  fi # skip NIC renaming
+
+  echo -en "\033[20;0fIf this is OK, type yes."
+  echo -en "\033[21;0fTo restart, type no."
+  echo -en "\033[23;0fOK? "
+  read a #</dev/tty
+  if [ "$a" == "yes" ]; then
+    export hd CD dev maxMiB filesys loader noatime restore archive_id archive
+    break;
+  elif [ "$a" == "no" ]; then
+    echo "Restarting installation configuration..."
+    sleep 1
+    exit
+  else
+    echo -en "\007 ??"
+    sleep 2
+  fi
+done

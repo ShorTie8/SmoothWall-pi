@@ -1,0 +1,41 @@
+#!/bin/sh
+
+DIR=/usr/src/smoothwall
+
+case $1 in
+  -?|-h|--help)
+    echo "Usage: $0 [dir]"
+    echo "    'dir' is the path to your build tree (default is '/usr/src/smoothwall')"
+    echo
+    echo "Notes:"
+    echo "  Express v3.0 must be built in /usr/src/smoothwall."
+    echo "  Express v3.1 and later may be built anywhere."
+    echo
+    echo "Examples:"
+    echo "  '$0'"
+    echo "  '$0 /usr/src/smoothwall'"
+    echo "  '$0 /home/fest3er/smoothwall'"
+    echo "  '$0 /proj/express-next"
+    echo "  '$0 my-tree"
+    exit 1
+    ;;
+esac
+
+if [ "$1" != "" ]; then
+  DIR=$1
+fi
+
+cat<<END
+echo "=== BUILD START ==="
+date
+
+cd `dirname ${DIR}`
+
+cd `basename ${DIR}`/distrib/build
+
+make predownload
+make build
+
+echo "=== BUILD END ==="
+date
+END

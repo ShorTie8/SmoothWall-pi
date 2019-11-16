@@ -1,0 +1,45 @@
+#! /bin/bash
+
+. /etc/rc.d/inc.rc-functions
+
+# File: inc.links-up
+# The purpose of this is to delay bringing the NICs in service until the
+#   firewall is ready to process all traffic. It works in combination
+#   with the ingress policers.
+# Technically, the ingress policers are needed only for RED because RED
+#   can be brought up automatically (via DHCP or PPPoX) before the firewall
+#   is ready. GREEN, PURPLE and ORANGE stay down until they are explicitly
+#   brought up by rc.sysinit (during boot) or rc.netaddress.up (while running).
+
+# The items in nicsToUP are NICs (eth*, et al), and an IP addr (the
+#   default gateway) if RED is static. This file is sourced into the running
+#   script; nicsToUp is automatically available.
+
+for i in $nicsToUp; do
+  case $i in
+
+    [0-9]*.[0-9]*.[0-9]*.[0-9]*)
+      # The default gateway
+      /usr/sbin/ip route add default via $i
+      ;;
+
+    *)
+      # A network interface (usually a NIC)
+      /usr/sbin/ip link set dev $i up
+      ;;
+  esac
+done
+
+if [ "$RED_TYPE" = "STATIC" ]; then
+  # If RED_TYPE is STATIC, update the RED settings (pick up the default gateway)
+  . /etc/rc.d/rc.updatered
+
+elif [ "$RED_TYPE" != "DHCP" ]; then
+  # If RED_TYPE is neither DHCP nor STATIC, it is PPP; so up it.
+  . /var/smoothwall/ppp/settings
+  if [ "$AUTOCONNECT" = "on" ]; then
+    echolog "e" "s" "" "  Bringing up modem/ISDN link"
+    /usr/bin/smoothcom updown UP
+  fi
+fi
+# otherwise, RED is DHCP, and dhcpcd runs rc.updatered.

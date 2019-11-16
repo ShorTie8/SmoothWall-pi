@@ -1,0 +1,82 @@
+#!/bin/bash 
+
+# Right off the bat, set a udev lock file, since we can't do much until
+#   udev has handled the devices
+touch /tmp/trigger-lock
+
+# Taken from Kay Seiver's example
+getarg() {
+  local o line
+  for o in $cmdline; do
+    if test "$o" = "$1"; then echo $1; break; fi
+    if test "${o%%=*}" = "${1%=}"; then echo ${o#*=}; break; fi
+  done
+}
+
+# Get initial devices
+first_dev() {
+  # Mount proc, sys, dev
+  echo "Mounting /proc, /sys"
+  /bin/mount -t proc proc /proc
+  /bin/mount -t sysfs sysfs /sys
+
+  echo "Mounting devtmpfs"
+  /bin/mount -t devtmpfs devtmpfs /dev
+  /bin/mkdir -p /dev/pts
+  /bin/mount -t devpts -o gid=5,mode=620 devpts /dev/pts
+
+  # Need USB here for kbd
+  echo "Starting USB"
+  /sbin/modprobe xhci-hcd
+  /sbin/modprobe ehci-hcd
+  /sbin/modprobe ohci-hcd
+  /sbin/modprobe uhci-hcd
+  /sbin/modprobe usbhid
+}
+
+# Prep initial sys FSen
+first_dev
+
+echo "Loading, please wait..."
+
+[ -d /root ] || mkdir -m 0700 /root
+[ -d /tmp ] || mkdir -m 0777 /tmp
+[ -d /var/lock ] || mkdir -p -m 0755 /var/lock
+
+/sbin/depmod -a
+
+# Fetch the kernel's command line
+read cmdline </proc/cmdline;
+
+# Doing serial? Activate bash and install on the serial port (ttyS0)
+echo $(getarg console) | awk '{if ($1 ~ /ttyS0,[0-9]+$/) { exit 0 } else { exit 1 }}'
+
+if [ $? -eq 0 ]; then
+  cp /etc/inittab /a.a
+  sed -e 's/^SB:S1:off/SB:S1:respawn/' \
+      -e 's/^SF:3:off/SF:3:respawn/' \
+      -e 's/^SR:4:off/SR:4:respawn/' \
+      -e 's/^I:2:respawn/I:2:off/' \
+      -e 's/^F:3:respawn/F:3:off/' \
+      -e 's/^R:4:respawn/R:4:off/' </a.a >/etc/inittab
+  rm /a.a
+fi
+
+# Determine what to do
+RUNLEVEL="2"
+if [ "$(getarg single)" == "single" ]; then RUNLEVEL="S"; fi
+if [ "$(getarg explore)" == "explore" ]; then RUNLEVEL="1"; fi
+if [ "$(getarg install)" == "install" ]; then RUNLEVEL="2"; fi
+if [ "$(getarg flash)" == "flash" ]; then RUNLEVEL="3"; fi
+if [ "$(getarg install-rs)" == "install-rs" ]; then RUNLEVEL="4"; fi
+cp /etc/inittab /b.b
+sed -e 's/^DR:.:/DR:'${RUNLEVEL}':/' </b.b >/etc/inittab
+rm /b.b
+kill -1 1
+
+# Set run level
+init ${RUNLEVEL}
+case $RUNLEVEL in
+  2|3|4) echo "1 4 1 7" >/proc/sys/kernel/printk
+     ;;
+esac

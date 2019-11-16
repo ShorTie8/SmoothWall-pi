@@ -1,0 +1,64 @@
+#!/bin/sh
+#
+# Copyright 2004-2010 SmoothWall Ltd
+
+echo "Mounting everything"
+/bin/mount -a
+
+echo "Preparing driver daemon"
+tar zxf /dev.tar.gz -C /
+mv /sbin/hotplug.dormant /sbin/hotplug
+
+echo "Starting driver daemon"
+/sbin/udevd --daemon
+echo "Probing for drivers"
+/sbin/udevadm trigger
+echo "Waiting..."
+/sbin/udevadm settle
+echo "Starting RAID.........."
+modprobe raid1
+/bin/raidautorun /dev/md0
+echo "Waiting..."
+/sbin/udevadm settle
+
+echo "Killing driver daemon"
+/bin/killall udevd 2>/dev/null
+sleep 1
+
+INIT=/sbin/init
+ROOT=/dev/hda1
+
+for I in $(cat /proc/cmdline); do
+	case $I in
+		root\=*)
+			ROOT=${I#root=}
+			;;
+		init\=*)
+			INIT=${I#init=}
+			;;
+	esac
+done
+
+case $ROOT in
+	UUID\=*)
+		ROOT=/dev/disk/by-uuid/${ROOT#UUID=}
+		;;
+	LABEL\=*)
+		ROOT=/dev/disk/by-label/${ROOT#LABEL=}
+		;;
+	*)
+		;;
+esac
+
+/bin/mount -o ro $ROOT /harddisk
+
+echo "ROOT=$ROOT INIT=$INIT"
+
+if [ -x "harddisk/$INIT" ]; then
+	echo "Starting the real init"
+	exec switch_root /harddisk $INIT "$@" 2>&1
+fi
+
+echo "Unable to find init, dropping to a shell"
+/sbin/modprobe usbhid
+exec /bin/sh

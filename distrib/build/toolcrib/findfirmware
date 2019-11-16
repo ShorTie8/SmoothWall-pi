@@ -1,0 +1,10 @@
+#! /bin/sh
+
+MOD_DIR="../../../lib/modules/${KERNEL_VER}"
+
+find ${MOD_DIR} -name \*.ko | while read module; do
+  MODLIST=`/sbin/modinfo $module | egrep "^firmware:"`
+  if [ $? -eq 0 ]; then
+    echo -e $MODLIST | sed -e 's/firmware: //g' -e 's/ /\n/g'
+  fi
+done

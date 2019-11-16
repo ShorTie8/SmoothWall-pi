@@ -1,0 +1,112 @@
+# 2013/11/10, NPMurphy - Document a piece of the toolchain philosophy. This is here
+#   because this file is used to determine the various bits and flags needed
+#   to build everything.
+#
+# The purpose of the toolchain is to build a set of build tools that contains
+# no trace of the host system's tools. This is done in three stages.
+#
+# Stage 1:
+#   PATH is set to check the build's /tools dir(s) before the host's dirs;
+#   newly-built tools will be chosen over the host's tools.
+#   Build unique binutils and gcc such that the host's tools CANNOT be
+#   mistaken for them. For example, regardless of the host, we want to build
+#   binutils and gcc cross-tools for $(mARCH)-tc-linux-gnu for both 32- and
+#   64-bit; $(SWE_TGT) is set appropriately. Glibc is built on 'host' SWE_TGT
+#   to run on FINAL_TGT targetting FINAL_TGT.
+# Stage 2:
+#   PATH is set to the build's /tools dir(s) before the host's dirs.
+#   Build binutils and gcc using the $(SWE_TGT)-* tools; these
+#   names cannot accidentally pick up the host's build tools. The resulting
+#   tools will have no trace of the host; they will use only themselves and the
+#   glibc and kernel headers built in stage 1. Binutils and gcc are built with
+#   host/build/target=$(FINAL_TGT).
+# Stage 3:
+#   Like stage 2, build the minimal utilities to make the initial parts of the
+#   final stage.
+# Final Stage:
+#   Enter a chroot jail and build all the pkgs needed for the product. The jail
+#   ensure that none of the host's software is used, included, or referenced.
+#   PATH is set to read the jail's */bin before /tools/bin so that newly-built
+#   pkgs replace those in the toolchain. Glibc, binutils and gcc are built with
+#   host/build/target=$(FINAL_TGT).
+#
+# In addition, a number of pkgs check host and build system types. Adding
+#   "--host=$(FINAL_TGT) --build=$(FINAL_TGT)" to CONFIG_OPTS (other than
+#   binutils/gcc/glibc) should get pkgs to stop guessing that the
+#   host is the target.
+
+# I think part of my build problems have involved cached paths, in that make
+# and the shell remember and use the host's tools instead of the tools
+# that have just been built, thus polluting the final product with some of
+# the build host.
+
+# Handle I/O redirection sanely.
+export BUILD_IN := $(shell if test -t 0; then echo "/proc/self/fd/0"; else echo "/dev/null"; fi)
+export BUILD_OUT := $(shell if test -t 0; then echo "/proc/self/fd/0"; else echo "crumbs/build-progress.out"; fi)
+
+# If desired, build with db in mind; else just optimize.
+ifeq ($(GLOBALDEBUG), ON)
+export OPT_FLAGS = -g -O0
+else
+export OPT_FLAGS = -O2
+endif
+
+# There are some contortions here. But the ARCH must be set early so the build
+#   environment is correctly set and passed to all subprocedures.
+
+# Define the default ARCHs.
+ifndef ARCH32
+export ARCH32 = i586
+endif
+ifndef ARCH64
+export ARCH64 = x86_64
+endif
+
+# What ARCH do we seem to be?
+ifndef mARCH
+export mARCH = $(shell uname -m | sed -e 's/i.86/$(ARCH32)/')
+endif
+
+export mTUPLE = $(mARCH)
+
+
+# See what we can build; that is, see if the chosen mARCH is possible.
+# If building on a multilib host, both will be zero. If building on pure i686
+# CANx86_64 will be non-zero. If building on pure 64-bit, CANi686
+# should be non-zero.
+export ARCHset =
+CANx86_64 = $(shell setarch x86_64 sh -c "exit" 2>/dev/null; echo $$?)
+CANi686 = $(shell setarch i686 sh -c "exit" 2>/dev/null; echo $$?)
+
+# Only ARCH32 and ARCH64 targets are supported (see above), but only on hosts
+# that can build them.
+
+ifeq ($(mARCH),$(ARCH64))
+  export ARCH_OK = yes
+  export BITS_64 = yes
+  export SWE_TGT = $(mTUPLE)-tc-linux-gnu
+  export FINAL_TGT = $(mTUPLE)-linux-gnu
+  export CFLAGS = $(OPT_FLAGS) -m64 -fPIC
+  ifeq ($(CANx86_64), 0)
+    export ARCHset = linux64
+  endif
+  # This is for building 32-bit grub with a cross-compiler
+  # It isn't presently used, as we don't build a 32-bit env on 64-bit.
+  export SWE32_TGT = $(ARCH32)-pc-linux-gnu
+endif
+
+ifeq ($(mARCH),$(ARCH32))
+  export ARCH_OK = yes
+  export BITS_32 = yes
+  export SWE_TGT = $(mTUPLE)-tc-linux-gnu
+  export FINAL_TGT = $(mTUPLE)-pc-linux-gnu
+  export CFLAGS = $(OPT_FLAGS) -m32 -march=$(ARCH32) -mtune=generic
+  ifeq ($(CANi686), 0)
+    export ARCHset = linux32
+  endif
+endif
+
+ifeq ($(ARCHset),)
+  $(info Cannot build for architecture $(mARCH) on this host!)
+  $(error FAIL)
+endif

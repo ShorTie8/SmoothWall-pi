@@ -1,0 +1,92 @@
+#! /bin/sh
+
+# The straight and narrow
+PATH=/usr/sbin:/sbin:/bin:/usr/bin:/usr/bin/smoothwall
+
+# Get the local timezone
+. /var/smoothwall/time/settings
+# Comand line can override
+if [ ! -z $1 ]; then TIMEZONE=$1; fi
+
+logger -t "kerneltz" "Checking for DST changes for '$TIMEZONE'..."
+
+# Get this year
+thisYear=`date +%Y`
+
+# Get the desired info, if it is there
+/usr/sbin/zdump -v $TIMEZONE | grep $thisYear |
+(
+  # get the first pre-changeover
+  cronFirst=""
+  read a;
+  if [ ! -z "$a" ]; then
+    set $a
+    shift 9
+    month=$1
+    day=$2
+    time=$3
+    mon=`/bin/date -d "1 $month" +%m`
+    OIFS=$IFS; IFS=":"; set $time; IFS=$OIFS
+    hr=$1
+    mn=$2
+    cronFirst="$mn $hr $day $mon * root /usr/bin/smoothwall/updkerneltz 2>&1 | logger -t \"kerneltz\"\n"
+    
+    # skip the first post-changeover
+    read a
+  
+    # get the second pre-changeover
+    cronSecond=""
+    read a
+    if [ ! -z "$a" ]; then
+      set $a
+      shift 9
+      month=$1
+      day=$2
+      time=$3
+      mon=`/bin/date -d "1 $month" +%m`
+      OIFS=$IFS; IFS=":"; set $time; IFS=$OIFS
+      hr=$1
+      mn=$2
+      cronSecond="$mn $hr $day $mon * root /usr/bin/smoothwall/updkerneltz 2>&1 | logger -t \"kerneltz\"\n"
+    fi
+  
+    # skip the rest
+    cat > /dev/null
+  
+    if [ ! -z "$cronFirst$cronSecond" ]; then
+      # At least one changeover exists, so create the file
+      rm -f /tmp/kerneltz
+      (
+        echo -e "# /etc/cron.d/kerneltz"
+        echo -e "# DST changeover(s) for timezone '$TIMEZONE'"
+        echo
+        echo -en "$cronFirst$cronSecond"
+      )> /tmp/kerneltz
+    fi
+  fi
+)
+
+if [ -f /tmp/kerneltz  -a ! -f /etc/cron.d/kerneltz ]; then
+    # Creation is needed
+    mv /tmp/kerneltz /etc/cron.d/kerneltz
+    chown root:root /etc/cron.d/kerneltz
+    chmod 444 /etc/cron.d/kerneltz
+    logger -t "kerneltz" "Created /etc/crond./kerneltz"
+
+elif [ -f /tmp/kerneltz ]; then
+  if ! diff /tmp/kerneltz /etc/cron.d/kerneltz >/dev/null 2>&1; then
+    # Copy if they differ
+    mv /tmp/kerneltz /etc/cron.d/kerneltz
+    chown root:root /etc/cron.d/kerneltz
+    chmod 444 /etc/cron.d/kerneltz
+    logger -t "kerneltz" "Replaced /etc/crond./kerneltz"
+  fi
+
+elif [ ! -f /tmp/kerneltz ]; then
+  # No DST changeovers for this TZ
+  rm -f /etc/cron.d/kerneltz
+  logger -t "kerneltz" "Removed /etc/crond./kerneltz"
+fi
+
+# Bus the table, Justin Case
+rm -f /tmp/kerneltz

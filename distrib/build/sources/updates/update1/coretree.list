@@ -1,0 +1,17 @@
+./etc/crontab
+./etc/httpd/conf/httpd.conf
+./etc/rc.d/inc.links-up
+./etc/rc.d/rc.netaddress.up
+./etc/rc.d/rc.network
+./etc/rc.d/rc.updatered
+./httpd/cgi-bin/bandwidthbars.cgi
+./httpd/cgi-bin/help.cgi
+./httpd/cgi-bin/interfaces.cgi
+./httpd/cgi-bin/logs.cgi/log.dat
+./httpd/cgi-bin/status.cgi
+./usr/bin/smoothwall/smoothinfo.pl
+./usr/bin/smoothwall/run-parts
+./usr/bin/smoothwall/trafficloader.pl
+./usr/lib/smoothwall/header.pm
+./usr/lib/smoothwall/langs/en.pl
+./usr/lib/smoothwall/services/apcupsd

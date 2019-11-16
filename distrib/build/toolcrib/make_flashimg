@@ -1,0 +1,161 @@
+#! /bin/bash
+
+# Won't work as a mere mortal
+if [ $UID -ne 0 ]; then
+  echo "This script MUST be run as root. Please su or sudo and try again!"
+  echo
+  exit 1
+fi
+
+# Find the next available drive node name
+for i in a b c d e f g h i j k l m n o p q r s t u v w x y z; do
+  [ -e /dev/sd$i ] && continue;
+  export DISKDEV=/dev/sd$i
+  break;
+done
+
+export MOUNT_OPT="-o loop,ro "
+export ORIG_DIR=${PWD}
+export FLASHNAME=sources/media/$RELEASE.img
+export ZIPNAME=target/isos/$RELEASE.zip
+
+rm -f $FLASHNAME $ZIPNAME
+
+# Function to unmount and clean up
+function cleanup {
+  cd $ORIG_DIR
+  umount ./$1
+  rmdir $1
+  umount ./$2
+  rmdir $2
+  losetup -d $LOOPDEV
+  rm -f ${DISKDEV}*
+}
+
+# User prompts, collect info
+# Stuff you need to know
+echo
+echo "         Smoothwall Express ISO TO FLASH IMAGE CONVERTER"
+echo
+echo "$0 is a script that copies a Smoothwall Express 3.1 install ISO image"
+echo "to an image file that can be written onto a flash or hard drive."
+echo "The resulting image will have one partition--#1--which will be formatted"
+echo "with EXT-2. The runtime ISO will be used. The serial console baud rate"
+echo "will be preset to 115200."
+echo "The flash image, $ZIPNAME, will be stored with the ISO images."
+
+echo
+tput smso; echo "Build flash image"; tput rmso;
+
+# List ISOs, get desired
+# Use only the runtime ISO
+isoname=`ls -C1 target/isos/*.iso 2>/dev/null | egrep -v "dev|offroad"`
+
+echo
+tput smso; echo "..Use '$isoname'"; tput rmso;
+
+# Serial port baud rate, get desired
+BAUD=115200
+
+echo
+tput smso; echo "..Set 115200 baud rate"; tput rmso;
+
+echo
+tput smso; echo "..Create 7GiB image file"; tput rmso;
+
+# Holes are OK
+rm -f $FLASHNAME
+dd if=/dev/zero of=$FLASHNAME bs=1024k seek=7167 count=1
+
+echo
+tput smso; echo "..Create partition table and filesystem"; tput rmso;
+
+fdisk -u=s $FLASHNAME <<END
+n
+p
+1
+
+
+a 1
+w
+END
+
+echo
+tput smso; echo "..Create loop device"; tput rmso;
+
+LOOPDEV=`losetup --show -f -P $FLASHNAME`
+cp -av ${LOOPDEV} $DISKDEV
+cp -av ${LOOPDEV}p1 ${DISKDEV}1
+chown root:disk ${DISKDEV}*
+chmod 664 ${DISKDEV}*
+fldev="$DISKDEV"
+
+echo
+tput smso; echo "..Make EXT2 FS"; tput rmso;
+
+mke2fs ${DISKDEV}1
+
+# Shorthand
+CD="isomnt${RANDOM}"
+FL="flmnt${RANDOM}"
+
+# Be sure the ISO and flash are unmounted and the mount point deleted
+#   if the script abends.
+trap "cleanup $CD $FL; exit" EXIT SIGINT SIGQUIT
+if [ `basename ${PWD}` == 'build' ]; then
+  # Assume 'make media' and use the target grub
+  GRUB="${ORIG_DIR}/.."
+else
+  # Assume on booted Roadster, use the natural grub
+  GRUB=""
+fi
+
+echo
+tput smso; echo "..Prepare"; tput rmso;
+
+# Make the mount points
+mkdir -p $CD || \
+    { echo "Couldn't make '$CD' ISO mount point!"; exit 1; }
+mkdir -p $FL || \
+    { echo "Couldn't make '$FL' flash mount point!"; exit 1; }
+
+# Mount the ISO and flash; allow any known FS for flash
+mount -t iso9660 ${isoname} $CD ${MOUNT_OPT} || \
+    { echo "Couldn't mount the CD or ISO image!"; exit 1; }
+mount ${fldev}1 $FL || \
+    { echo "Couldn't mount flash partition #1!"; exit 1; }
+
+echo
+tput smso; echo "..Copy"; tput rmso;
+
+# Copy the ISO contents to flash
+cp -a $CD/* $FL
+
+echo
+tput smso; echo "..Wrench"; tput rmso;
+
+# Stuff needed for grub
+PRT=`echo "find /smoothwall.tgz" | ${GRUB}/usr/sbin/grub --batch 2>&- | egrep "\([^ ]*\)"`
+DRV=`echo $PRT | sed -e 's/,[0-9]*//'`
+sed -i -e "s/(cd)/(hd0,0)/" -e 's/115200/'$BAUD'/' ${FL}/boot/grub/*.conf
+sed -i -e '/Install Smoothwall Express$/,/^$/d' ${FL}/boot/grub/main.conf
+echo -e "root ${PRT}\nsetup ${DRV}" | ${GRUB}/usr/sbin/grub --batch
+
+echo
+tput smso; echo "..Clean up"; tput rmso;
+
+# Unmount them
+cleanup $CD $FL
+
+# Clear the exit booby trap
+trap "" EXIT
+
+echo
+tput smso; echo "..Zip"; tput rmso;
+
+zip -D -j $ZIPNAME $FLASHNAME
+
+echo
+echo "iso2flashimg complete."
+
+exit;

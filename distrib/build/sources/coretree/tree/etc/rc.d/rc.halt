@@ -1,0 +1,54 @@
+#!/bin/sh
+
+. /etc/rc.d/inc.rc-functions
+
+. /var/smoothwall/ethernet/settings
+
+echo "shutdown" > /var/run/STARTSTOP
+
+echolog "e" "s" "" "Shutting down..."
+
+# Block all inbound packets on all NICs
+. /etc/rc.d/inc.block-ingress
+
+# Squid can take a while to write swap.state, so it rides
+#   the short bus.
+
+echolog "e" "s" "" "Stop squid (if running)..."
+smoothcom squidstop
+
+echolog "e" "s" "" "Send all processes the TERM signal..." 
+/sbin/killall5 -15
+sleep 3
+echolog "e" "s" "" "Send all processes the KILL signal..."
+/sbin/killall5 -9
+sleep 3
+
+echolog "e" "s" "" "Turn off swap"
+/sbin/swapoff -a
+echolog "e" "s" "" "Unmount others"
+umount -l /var/log
+umount -l /boot
+
+rm -f /var/run/STARTSTOP
+
+echolog "e" "s" "" "Remount root RO"
+mount -n -o remount,ro /
+
+echo -ne \\a >/dev/console 
+
+/usr/bin/sounds/haltsound
+
+if [ "$1" == "halt" ]; then
+	unset ENABLE KILLPOWER
+	. /var/smoothwall/apcupsd/settings
+	if [ "$ENABLE" == "on" -a "$KILLPOWER" == "on" -a -f "/etc/apcupsd/powerfail" ]; then
+		# This is a powerfail situation, so turn off the UPS.
+		/sbin/apcupsd --killpower
+	fi
+	# If the above 'killpower' executed, we may or may not reach here. No matter;
+	#   / is RO and the plug's about to be 'pulled' anyway.
+	/sbin/halt -i -d -p
+else
+	/sbin/reboot -i -d
+fi

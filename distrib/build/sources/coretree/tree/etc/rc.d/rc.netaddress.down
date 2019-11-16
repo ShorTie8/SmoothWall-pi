@@ -1,0 +1,45 @@
+#!/bin/sh
+
+. /var/smoothwall/ethernet/settings
+
+# Take the IPSEC VPN down first, then kill the traffiClogger
+# Note, add conditional hooks to take down other VPNs (OpenVPN, SSH, et alia).
+/etc/rc.d/rc.vpn.down
+/usr/bin/killall trafficlogger
+
+# Take down dialup, ISDN or stutterpox
+if [ "$RED_TYPE" != 'STATIC' -a "$RED_TYPE" != 'DHCP' ]; then
+  /usr/bin/smoothcom updown down
+  # Add this for good measure, Justin Case.
+  /etc/ppp/ip-down
+fi
+
+# Take GREEN down, if allowed.
+if [ "$1" != "NOTGREEN" ]; then
+  (
+    # Down the link and give it to Thomas
+    /usr/sbin/ip link set dev $GREEN_DEV down
+    /usr/sbin/ip addr flush dev $GREEN_DEV
+  ) >/dev/null 2>&1
+fi
+
+# Take the others down, if defined
+for i in $ORANGE_DEV $PURPLE_DEV $RED_DEV; do
+  (
+    # Down the link and give it to Thomas
+    /usr/sbin/ip link set dev $i down
+    /usr/sbin/ip addr flush dev $i
+  ) >/dev/null 2>&1
+done
+
+# Kill RED's DHCP client daemon and any others that might (still) be running
+for i in /var/run/dhcpcd-*.pid; do
+  # Pid files could be deleted *just then* and/or pid file could be empty; also
+  #   `cmd`s don't inherit stderr. So thoroughly mute the kill.
+  kill `cat $i 2>/dev/null` >/dev/null 2>&1
+done
+
+# Prepare red files
+. /etc/rc.d/inc.clearRED
+
+/usr/bin/smoothcom dnsproxystop

@@ -1,0 +1,102 @@
+<P><FONT SIZE='3'><B><U>URL Filter</U></B></FONT></P>
+
+<p>
+Smoothwall Express' URL Filter feature allows admins to block web pages based
+on the contents of the URL or parts of the URL. In stock form, it works only
+with HTTP; it cannot monitor the data inside SSL-encrypted HTTPS accesses.
+There is a mod available that allows the proxy to decrypt and recrypt HTTPS
+connections.
+</p>
+<p>
+Smoothwall can download and deploy categorized blacklists of web sites via
+the built-in SquidGuard web proxy plugin.  This allows the admin to block
+access to different categories of web sites; for example, the Shalla Secure
+Services blacklist has almost 80 categories that can be blocked individually.
+The admin can block certains types of files, such as executables. Internal IP
+addresses can be allowed unfiltered access or they can be blocked from
+accessing web sites. There are more option that allow the admin to more finely
+control which systems can access which web sites.
+</p>
+
+<h3>URL Filter</h3>
+<p>
+This box displays the status of URL Filter (enabled or not). It also displays
+the status of the proxy server (enabled or not); URL Filter cannot work unless
+the web proxy is enabled.
+</p>
+
+<h3>Block Categories</h3>
+<p>
+This box contains all of the categories that can be blocked. The number of
+entries depends on which blacklist has been enabled. Click to select a
+checkbox to block that category of sites. Click to deselect a checkbox to stop
+blocking that category of web sites.
+</p>
+
+<h3>URL Filter Control</h3>
+<p>
+Click the <b>Save</b> button to save changes made to the configuration. Click
+the <b>Save and restart</b> button to save the changes and restart URL Filter
+(SquidGuard).
+</p>
+<p>
+Several of these boxes are included in the display for the admin's convenience.
+</p>
+
+<h3>Custom blacklist</h3>
+<p>
+These fields allow the admin to block specified domains (FQDNs) and specific
+URLs.  Select the <b>Enable</b> checkbox to enable these blacklisted hosts and
+sites. Enter one domain name per line in the <u>Blocked domains</u> box. Enter
+one URL per line in the <u>Blocked URLs</u> box. Click <b>Save</b> or <b>Save
+and restart</b> to save the changes or to save and re-run SquidGuard, respectively.
+</p>
+
+<h3>Custom whitelist</h3>
+<p>
+These fields allow the admin to allow specified domains (FQDNs) and specific
+URLs.  Select the <b>Enable</b> checkbox to enable these whitelisted hosts and
+sites. Enter one domain name per line in the <u>Allowed domains</u> box. Enter
+one URL per line in the <u>Allowed URLs</u> box. Click <b>Save</b> or <b>Save
+and restart</b> to save the changes or to save and re-run SquidGuard, respectively.
+</p>
+
+<h3>Custom expression list</h3>
+<p>
+This field allows the admin to block specific URLs using regular expressions. 
+For example, <i>.*[Dd][Oo][Oo][Bb].*</i> would block every URL that contains
+the letters 'doob' in uppercase, lowercase or mixed case. Internal hosts could
+not perform web searches for 'doob', visit any site that contains 'doob' in
+the hostname, or visit any URL that contains 'doob' anywhere in it. This
+includes information on people named Doob, doobies, The Doobie Brothers, and
+Doob 3D printing. It's powerful but, as with all uses of regular expressions,
+it can wide reaching effects.
+</p>
+<p>
+Select the <b>Enable</b> checkbox to enable these blocked expressions. Enter
+one regular expression per line in the <u>Blocked expressions</u> box. Click
+<b>Save</b> or <b>Save and restart</b> to save the changes or to save and
+re-run SquidGuard, respectively.
+</p>
+
+<h3>File extension blocking</h3>
+<p>
+In this box, the admin can choose to block executable files (primarily
+Windows<sup>®</sup> programs and scripts), audio/video files, and or
+compressed archive files programs and scripts), audio/video files, and/or
+compressed archive files. Choose the type fo files to block and click
+<b>Save</b>.
+</p>
+
+<h3>Network based access control</h3>
+<p>
+The admin can use this box to specify internal IP addresses that are exempt
+from URL Filter (unfilters addresses) or are banned from accessing web sites.
+Enter IP addresses for hosts that are not to be filtered in the Unfiltered IP
+Addresses box, one per line. Enter IP addreses for hosts that are prohibited
+from accessing internet-based web sites, one per line. Click <b>Save</b> or
+<b>Save and restart</b>, as desired.
+</p>
+<p>
+Note that banned hosts can be allowed to access specific URLs as needed.
+</p>

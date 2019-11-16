@@ -1,0 +1,58 @@
+#! /bin/sh
+
+# Get necessary settings
+. /var/smoothwall/main/productdata
+. /var/smoothwall/ethernet/settings
+OIFS=$IFS; IFS="="
+while read var value; do
+  case $var in
+    UPLOAD_SPEED) UPLOAD_SPEED=$value;;
+    DOWNLOAD_SPEED) DOWNLOAD_SPEED=$value;;
+  esac
+done </var/smoothwall/traffic/settings
+IFS=$OIFS
+displayVersion=`perl -e 'use lib "/usr/lib/smoothwall";use header qw( :standard ); print $displayVersion;'`
+displayVersion="Smoothwall${displayVersion/ /-}"
+
+if [ ! -z $UPLOAD_SPEED ]; then UPLOAD_SPEED="bitrate_up=$UPLOAD_SPEED"; fi
+if [ ! -z $DOWNLOAD_SPEED ]; then DOWNLOAD_SPEED="bitrate_down=$DOWNLOAD_SPEED"; fi
+
+# Get RED stuff
+EXT_IP=`cat /var/smoothwall/red/local-ipaddress`
+EXT_IFNAME=`cat /var/smoothwall/red/iface`
+
+# Get GREEN stuff
+LISTENING_IP="listening_ip=$GREEN_ADDRESS"
+ALLOW="allow 1024-65535 $GREEN_NETADDRESS/$GREEN_NETMASK 1024-65535"
+
+# Get PURPLE, if it exists
+if [ "$PURPLE_ADDRESS" != "" ]; then
+  LISTENING_IP="$LISTENING_IP\nlistening_ip=$PURPLE_ADDRESS"
+  ALLOW="$ALLOW\nallow 1024-65535 $PURPLE_NETADDRESS/$PURPLE_NETMASK 1024-65535"
+fi
+
+# Set model, UUID and Pres. URL
+UUID=`cat /etc/miniupnpd.uuid`
+PRES_URL="presentation_url=https://$GREEN_ADDRESS:441/cgi-bin/index.cgi"
+MODEL_NAME="model_name=$displayVersion"
+
+# Get 'friendly' name
+FRIENDLY_NAME=friendly_name=`hostname`
+
+# Presence of the default 'ALLOW' should be controlled in the UI.
+(
+  # 'edit' miniupnpd.conf.template
+  sed -e 's/EXT_IFNAME/ext_ifname='$EXT_IFNAME'/' \
+      -e 's/EXT_IP/ext_ip='$EXT_IP'/' \
+      -e "s#LISTENING_IP#$LISTENING_IP#" \
+      -e 's/RED_BITRATE_UP/'$UPLOAD_SPEED'/' \
+      -e 's/RED_BITRATE_DOWN/'$DOWNLOAD_SPEED'/' \
+      -e "s#PRES_URL#$PRES_URL#" \
+      -e 's/FRIENDLY_NAME/'$FRIENDLY_NAME'/' \
+      -e 's/MODEL_NAME/'$MODEL_NAME'/' \
+      -e 's/UUID/uuid='$UUID'/' < /etc/miniupnpd.conf.template
+
+  # Dump the rules
+  echo -e $ALLOW
+  echo "deny 0-65535 0.0.0.0/0 0-65535"
+) > /etc/miniupnpd.conf

@@ -1,0 +1,4 @@
+/proc		/proc	proc
+/sys		/sys	sysfs
+/tmp		/tmp	tmpfs
+/dev		/dev	tmpfs

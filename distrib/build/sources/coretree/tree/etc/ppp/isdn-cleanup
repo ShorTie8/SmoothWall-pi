@@ -1,0 +1,7 @@
+#!/bin/sh
+
+/usr/sbin/ip link set dev ippp0 down
+/usr/bin/killall ippp0
+/sbin/rmmod hisax
+/sbin/rmmod hisax_st5481
+/usr/bin/killall ibod

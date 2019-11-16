@@ -1,0 +1,33 @@
+#! /bin/bash
+
+/sbin/iptables -t mangle -F account
+
+if [ "$GREEN_DEV" != "" ] ; then
+	/sbin/iptables -t mangle -A account -i $GREEN_DEV -j ACCOUNT \
+		--addr $GREEN_NETADDRESS/$GREEN_NETMASK --tname GREEN
+	/sbin/iptables -t mangle -A account -o $GREEN_DEV -j ACCOUNT \
+		--addr $GREEN_NETADDRESS/$GREEN_NETMASK --tname GREEN
+fi
+if [ "$ORANGE_DEV" != "" ] ; then
+	/sbin/iptables -t mangle -A account -i $ORANGE_DEV -j ACCOUNT \
+		--addr $ORANGE_NETADDRESS/$ORANGE_NETMASK --tname ORANGE
+	/sbin/iptables -t mangle -A account -o $ORANGE_DEV -j ACCOUNT \
+		--addr $ORANGE_NETADDRESS/$ORANGE_NETMASK --tname ORANGE
+fi
+if [ "$PURPLE_DEV" != "" ] ; then
+	/sbin/iptables -t mangle -A account -i $PURPLE_DEV -j ACCOUNT \
+		--addr $PURPLE_NETADDRESS/$PURPLE_NETMASK --tname PURPLE
+	/sbin/iptables -t mangle -A account -o $PURPLE_DEV -j ACCOUNT \
+		--addr $PURPLE_NETADDRESS/$PURPLE_NETMASK --tname PURPLE
+fi
+
+if [ -e /var/smoothwall/red/active ]; then
+	pushd /var/smoothwall/red
+	RED_ADDR=`cat local-ipaddress`
+	RED_MASK=`cat dhcp-netmask`
+	popd
+	/sbin/iptables -t mangle -A account -i $RED_DEV -j ACCOUNT \
+	    --addr $RED_ADDR/$RED_MASK --tname RED
+	/sbin/iptables -t mangle -A account -o $RED_DEV -j ACCOUNT \
+	    --addr $RED_ADDR/$RED_MASK --tname RED
+fi

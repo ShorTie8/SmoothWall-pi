@@ -1,0 +1,9 @@
+#!/bin/sh
+
+. /var/smoothwall/ethernet/settings
+. /var/smoothwall/vpn/settings
+
+# If RED is up and IPSEC is enabled, start it
+if [ -f /var/smoothwall/red/active -a "$ENABLED" == "on" ]; then
+	/usr/bin/smoothcom ipsecrestart
+fi

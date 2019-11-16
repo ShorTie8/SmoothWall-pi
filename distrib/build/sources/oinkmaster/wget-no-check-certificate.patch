@@ -1,0 +1,17 @@
+--- oinkmaster-2.0/oinkmaster.pl.old	2010-07-27 16:23:43.000000000 +0100
++++ oinkmaster-2.0/oinkmaster.pl	2010-07-27 16:25:21.000000000 +0100
+@@ -901,12 +901,12 @@
+ 
+         if ($config{verbose}) {
+             print STDERR "\n";
+-            my @wget_cmd = ("wget", "-v", "-O", $localfile, $url, @user_agent_opt);
++            my @wget_cmd = ("wget", "--no-check-certificate", "-v", "-O", $localfile, $url, @user_agent_opt);
+             clean_exit("could not download from $obfuscated_url")
+               if (system(@wget_cmd));
+ 
+         } else {
+-            my @wget_cmd = ("wget", "-v", "-o", $log, "-O", $localfile, $url, @user_agent_opt);
++            my @wget_cmd = ("wget", "--no-check-certificate", "-v", "-o", $log, "-O", $localfile, $url, @user_agent_opt);
+             if (system(@wget_cmd)) {
+                 my $log_output;
+                 open(LOG, "<", "$log")

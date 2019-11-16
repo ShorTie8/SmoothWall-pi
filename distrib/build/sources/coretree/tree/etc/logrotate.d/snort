@@ -1,0 +1,9 @@
+/var/log/snort/alert {
+    su snort snort
+    weekly
+    rotate 1
+    copytruncate
+    compress
+    notifempty
+    missingok
+}

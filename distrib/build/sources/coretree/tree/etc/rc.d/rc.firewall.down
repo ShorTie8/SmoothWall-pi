@@ -1,0 +1,31 @@
+#!/bin/sh
+
+/sbin/iptables -F
+/sbin/iptables -X
+
+/sbin/iptables -P INPUT DROP
+/sbin/iptables -P FORWARD DROP
+/sbin/iptables -P OUTPUT DROP
+
+/sbin/iptables -A INPUT -j LOG
+/sbin/iptables -A FORWARD -j LOG
+/sbin/iptables -A OUTPUT -j LOG
+
+/sbin/iptables -t nat -F
+/sbin/iptables -t nat -X
+
+/sbin/iptables -t mangle -F
+/sbin/iptables -t mangle -X
+
+# IPV6: Set default policy to DROP everything
+/usr/sbin/ip6tables -F
+/usr/sbin/ip6tables -X
+for j in INPUT FORWARD OUTPUT; do
+  /usr/sbin/ip6tables -P $j DROP
+done
+
+/usr/sbin/ip6tables -t mangle -F
+/usr/sbin/ip6tables -t mangle -X
+for j in PREROUTING INPUT FORWARD OUTPUT POSTROUTING; do
+  /usr/sbin/ip6tables -t mangle -P $j DROP
+done

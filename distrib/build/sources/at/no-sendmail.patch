@@ -1,0 +1,14 @@
+--- atd/atd.c-ORIG	2014-05-04 01:39:36.000000000 -0400
++++ atd/atd.c	2014-05-04 01:39:49.000000000 -0400
+@@ -505,10 +505,8 @@
+ 
+ #if defined(SENDMAIL)
+ 	    execl(SENDMAIL, "sendmail", "-i", mailname, (char *) NULL);
+-#else
+-#error      "No mail command specified."
+-#endif
+ 	    perr("Exec failed for mail command");
++#endif
+ 
+ 	PRIV_END
+     }

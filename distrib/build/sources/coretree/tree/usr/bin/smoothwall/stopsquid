@@ -1,0 +1,37 @@
+#! /bin/bash
+
+# This only does something if squid is running
+if [ -f /var/run/squid.pid ] && [ -d /proc/`cat /var/run/squid.pid` ]; then
+
+  # Get the conf file location
+  SQUID_CONF="$1"
+  if [ -z "$SQUID_CONF" ]; then
+    echo "stopsquid did not receive the path to squid.conf; no action taken." >&2
+    logger -t smoothwall "stopsquid did not receive the path to squid.conf; no action taken."
+    exit 1
+  fi
+
+  # Look for swap.state being written and closed in the background
+  inotifywait -e close_write /var/spool/squid/cache/swap.state >/dev/null 2>&1 &
+  INWpid=$!
+
+  # Give it a moment to start
+  sleep .01
+
+  # Prevent new connections; allow existing conns to continue
+  /usr/sbin/squid -f "$SQUID_CONF" -k shutdown
+
+  # Enough time for squid to return from the signal handler
+  sleep .01
+
+  # Close all existing connections, write swap.state, and exit
+  /usr/sbin/squid -f "$SQUID_CONF" -k shutdown
+
+  # Wait for inotifywait to receive the close_write notice and exit
+  wait $INWpid
+
+  # And wait 10ms for squid to finish exiting
+  sleep .01
+
+  logger -t smoothwall "Squid stopped"
+fi

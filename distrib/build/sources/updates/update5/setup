@@ -1,0 +1,78 @@
+#!/bin/sh
+
+OLD_KERNEL=3.4.109
+KERNEL_VERSION=3.4.110
+
+echo "Update 5 installing."
+
+# Unpack the patch
+/usr/bin/tar xvf patch.tar.gz -C /
+
+echo "  Fix logrotate config file modes"
+chmod 644 /etc/logrotate.{conf,d/*}
+
+# Leave this for a few generations, just in case.
+echo "  Remove unused file 'acl'"
+/bin/rm -f /var/smoothwall/proxy/acl
+
+echo "  Fix /var/run"
+chmod 1777 /var/run
+
+# Update the new initramfs
+echo "  Update the initramfs"
+mkdir /root/upd5-initramfs-unpack
+pushd /root/upd5-initramfs-unpack >/dev/null 2>&1
+
+echo "    Unpack"
+/usr/bin/zcat /boot/initrd-${KERNEL_VERSION}.gz | /bin/cpio -id
+
+echo "    Copy udev disk/NIC rules"
+pushd etc/udev/rules.d >/dev/null 2>&1
+rm -f *
+/bin/cp /etc/udev/rules.d/* .
+popd >/dev/null 2>&1
+
+echo "    Copy the root mount info"
+/bin/grep harddisk4 /etc/fstab | /usr/bin/sed -e 's=[ \t][ \t]*/[ \t][ \t]*= /harddisk =' > etc/fstab
+
+echo "    Keep only current and one previous kernels"
+pushd /lib/modules >/dev/null 2>&1
+
+/bin/ls -dC1 [0-9.]* | \
+  /usr/bin/sed -e 's/\./ /g' -e 's=/$==' | \
+  /bin/sort -n -r -k 1 -k 2 -k 3 | \
+  /usr/bin/sed -e 's/ /./g' | \
+  /usr/bin/tail -n +3 | \
+  while read a; do
+    echo "        Archiving and deleting old kernel $a"
+    pushd / >/dev/null 2>&1
+    /usr/bin/find ./lib/modules/$a ./boot/initrd-$a.gz ./boot/vmlinuz-$a | \
+        /bin/cpio -o -H newc | \
+        /usr/bin/gzip > /root/linux-$a-archive.cpio.gz
+    /bin/rm -rf /lib/modules/$a
+    /bin/rm -f /boot/initrd-$a.gz
+    /bin/rm -f /boot/vmlinuz-$a
+    popd >/dev/null 2>&1
+  done
+
+popd >/dev/null 2>&1
+
+echo "    Repack"
+/usr/bin/find . | /bin/cpio -o -H newc | /usr/bin/gzip > /boot/initrd-${KERNEL_VERSION}.gz
+chmod 644 /boot/initrd-${KERNEL_VERSION}.gz
+
+echo "    Tidy"
+rm -rf /root/upd5-initramfs-unpack
+
+popd >/dev/null 2>&1
+
+echo "  Update grub"
+/usr/bin/perl update-grub-kernel.pl $OLD_KERNEL $KERNEL_VERSION
+
+echo "  Repair upsd event scripts as needed"
+(
+  . /var/smoothwall/apcupsd/settings
+  if [ "$ENABLE" == "on" ]; then
+    /usr/bin/smoothwall/writeapcupsdconf.pl
+  fi
+)

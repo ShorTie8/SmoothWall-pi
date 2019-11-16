@@ -1,0 +1,287 @@
+#! /bin/bash
+
+# SmoothWall Build system.
+#
+# Parts (c) SmoothWall Ltd 2005
+# Parts (c) Neal P. Murphy, 2009-2012
+#
+# This code is distributed under the terms of the GPL v2.
+
+# Track pkg build times (sort-of: display the seconds since the build stage
+#   began that the pkg begins to build)
+declare -i beginTIME startTIME
+
+# function adjust()
+#   perform the specific tool chain adjustment and check to be sure it was done right
+
+function adjust()
+{
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  if [ -e "crumbs/${BUILD_PHASE}.adjusted" ]; then
+    echo "    $displayTIME (${BUILD_PHASE}) adjustment already made" >>${BUILD_OUT}
+  else
+    echo "    $displayTIME adjusting tool chain, ${BUILD_PHASE}" >>${BUILD_OUT}
+    ( docommand "adjusting stage $1" "bash toolcrib/stage$1_tc_adjustment") \
+          > crumbs/${BUILD_PHASE}.adjusting.out 2>&1
+    status=$?
+    if [ $status -eq 0 ]; then
+      touch crumbs/${BUILD_PHASE}.adjusted
+    else
+      exit 1
+    fi
+  fi
+}
+
+
+# function build()
+#   Compile the specified module for the final build, and be tidy about it.
+#   $1 -> package; $2 -> target (optional)
+
+function build()
+{
+  export PKG_ROOT="$PKG_ROOT_PATH/$1"
+  if [ -n "$2" ]; then
+    TGT="-$2"
+    TGTP=" ($2)"
+  else
+    TGT=""
+    TGTP=""
+  fi
+  VERSION=`make --no-print-directory -C sources/$1 show_version 2>&1`
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  if [ -e "sources/$1/$BUILD_PHASE$TGT.built" ]; then
+    echo "    $displayTIME $1$TGTP ($VERSION) already built" >>${BUILD_OUT}
+  else
+    if [ -p crumbs/monpipe ]; then echo "-f $1" > crumbs/monpipe; fi
+    echo "    $displayTIME $1$TGTP ($VERSION): PKG_ROOT:$PKG_ROOT" >>${BUILD_OUT}
+    ( docommand "$1::$2" "make -C sources/$1 $2") > sources/$1/$BUILD_PHASE$TGT.out 2>&1
+    status=$?
+    if [ -p crumbs/monpipe ]; then echo "Done End" > crumbs/monpipe; fi
+    if [ $status -eq 0 ]; then
+      touch sources/$1/$BUILD_PHASE$TGT.built
+    else
+      exit 1
+    fi
+  fi
+}
+
+
+# function buildenv()
+#   Compile the specified module for the tool chain, and be tidy about it.
+
+function buildenv()
+{
+  VERSION=`make --no-print-directory -C sources/$1 show_version 2>&1`
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  if [ -e "sources/$1/$BUILD_PHASE.built" ]; then
+    echo "    $displayTIME $1 ($VERSION) already built" >>${BUILD_OUT}
+  else
+    if [ -p crumbs/monpipe ]; then echo "-${BUILD_PHASE/Stage_/} $1" > crumbs/monpipe; fi
+    echo "    $displayTIME $1 ($VERSION) "
+    ( docommand "$1" "make -C sources/$1 clean install") > sources/$1/$BUILD_PHASE.out 2>&1
+    status=$?
+    if [ -p crumbs/monpipe ]; then echo "Done End" > crumbs/monpipe; fi
+    if [ $status -eq 0 ]; then
+      touch sources/$1/$BUILD_PHASE.built
+    else
+      exit 1
+    fi
+  fi
+}
+
+
+# function build_tc_stage_1()
+#   Build the first stage of the tool chain, and make the adjustments
+
+function build_tc_stage_1() {
+  export BUILD_PHASE="Stage_1"
+  set_build_environment
+
+  export JOBS=$JOBS_MP 
+  beginTIME=`date +%s`
+  buildenv binutils 1
+  buildenv gcc 1
+  buildenv kernel-headers 1
+  buildenv glibc 1
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME $BUILD_PHASE build complete"
+  #exit 111
+}
+
+
+# function build_tc_stage_2()
+#   Build the second stage of the tool chain, and make the adjustments
+
+function build_tc_stage_2() {
+  export BUILD_PHASE="Stage_2"
+  set_build_environment
+
+  export JOBS=$JOBS_MP
+  beginTIME=`date +%s`
+  buildenv binutils 2
+  buildenv gcc 2
+  check 2 gcc
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME $BUILD_PHASE build complete"
+  #exit 222
+}
+
+
+# function build_tc_stage_3()
+#   Build the third (last) stage of the tool chain
+
+function build_tc_stage_3() {
+  export BUILD_PHASE="Stage_3"
+  set_build_environment
+
+  export JOBS=$JOBS_MP
+  beginTIME=`date +%s`
+  buildenv tcl 1
+  buildenv expect 1
+  buildenv dejagnu 1
+  buildenv ncurses 1
+  buildenv flex 1
+  buildenv bash 1
+  buildenv xz 1
+  buildenv bzip2 1
+  buildenv zlib 1
+  buildenv coreutils 1
+  buildenv diffutils 1 
+  buildenv e2fsprogs 1 
+  buildenv findutils 1
+  buildenv gawk 1
+  buildenv gettext 1
+  buildenv grep 1
+  buildenv gzip 1
+  buildenv joe 1
+  buildenv m4 1
+  buildenv make 1
+  buildenv patch 1
+  buildenv perl 1
+  buildenv openssl 1
+  buildenv sed 1
+  buildenv tar 1
+  buildenv texinfo 1
+  buildenv util-linux 1
+  buildenv wget 1
+  buildenv git 1
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  echo "    $displayTIME $BUILD_PHASE build complete"
+}
+
+
+# function check()
+#   perform the specific tool chain check to be sure it was done right
+
+function check()
+{
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  if [ -e "crumbs/${BUILD_PHASE}_${2}.checked" ]; then
+    echo "    $displayTIME ${BUILD_PHASE} $2 already checked" >>${BUILD_OUT}
+  else
+      echo "    $displayTIME checking tool chain, ${BUILD_PHASE}" >>${BUILD_OUT}
+      ( docommand "checking ${BUILD_PHASE} ${2}" "bash toolcrib/stage${1}_${2}_check") \
+            > crumbs/${BUILD_PHASE}_${2}_check.out 2>&1
+    status=$?
+    if [ $status -eq 0 ]; then
+      touch crumbs/${BUILD_PHASE}_${2}.checked
+    else
+      exit 1
+    fi
+  fi
+}
+
+
+# function cpu_count()
+#   Figure out how many CPUs we have (real or HT).
+
+function cpu_count() {
+  typeset -i phy_max cor_max cores cpus
+
+  if egrep -i "^physical id" /proc/cpuinfo >/dev/null 2>&1; then
+    phy_max=`egrep -i "^physical id" /proc/cpuinfo|sed -e 's/.*: //'|sort|tail -1`+1
+    cor_max=`egrep -i "^core id" /proc/cpuinfo|sed -e 's/.*: //'|sort|tail -1`+1
+    cpus=`egrep -i "^processor" /proc/cpuinfo|sed -e 's/.*: //'|sort|tail -1`+1
+    cores=cor_max*phy_max
+  else
+    cores=`grep processor /proc/cpuinfo|wc -l`
+  fi
+
+  JOBS_MP="-j $cores"
+
+  unset phy_max cor_max cores cpus
+}
+
+
+# function docommand()
+
+function docommand() {
+  echo "= Running: $1 ======================================"
+  $2
+  status=$?
+  if [ $status != 0 ]; then
+    a=$1; pkg=`IFS=":";set $a;echo $1`; unset a
+    (
+      if [ -f "sources/$pkg/$BUILD_PHASE$TGT.out" ]; then
+        echo "Failed:"
+        tail sources/$pkg/$BUILD_PHASE$TGT.out | sed -e 's/^/      /'
+      fi
+      echo "$1 FAILED"
+    ) >>${BUILD_OUT}
+    exit $status
+    echo "$1 FAILED"
+  else
+    echo "$1 success"
+  fi
+  echo
+}
+
+
+# function mso ()
+#   Turn inverse video on/off; patterned on 'tput smso/rmso'
+
+function mso () {
+  ESC="\e"
+  SMSO="[7m"
+  RMSO="[0m"
+  if [ "$1" == "ON" ]; then
+    echo -ne "$ESC$SMSO"
+  else
+    echo -ne "$ESC$RMSO"
+  fi
+}
+
+
+# function other_cmd()
+#   Execute a non-compile command
+
+other_cmd()
+{
+  startTIME=`date +%s`-beginTIME
+  displayTIME=`perl -e "printf('%6d', $startTIME);"`
+  if [ -e "$1" ]; then
+    echo "    $displayTIME $2 already done"
+  else
+    if [ "$BUILD_PHASE" == "Final" ]; then
+      export PKG_ROOT="$PKG_ROOT_PATH/other"
+      echo "    $displayTIME $2: PKG_ROOT:$PKG_ROOT"
+    else
+      echo "    $displayTIME $2"
+    fi
+    ( docommand "$2" "$3") > "$4" 2>&1
+    
+    status=$?
+    if [ $status -eq 0 ]; then
+      touch "$1" ;
+    else
+      exit 1
+    fi
+  fi
+}

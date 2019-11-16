@@ -1,0 +1,25 @@
+# This file causes Linux RAID (mdadm) block devices to be checked for
+# further filesystems if the array is active.
+# See udev(8) for syntax
+
+SUBSYSTEM!="block", GOTO="mdadm_end"
+KERNEL!="md[0-9]*", GOTO="mdadm_end"
+ACTION!="add|change", GOTO="mdadm_end"
+
+# Check array status
+ATTR{md/array_state}=="|clear|inactive", GOTO="mdadm_end"
+
+# Obtain array information
+IMPORT{program}="/sbin/mdadm --detail --export $tempnode"
+ENV{MD_NAME}=="?*", SYMLINK+="disk/by-id/md-name-$env{MD_NAME}"
+ENV{MD_UUID}=="?*", SYMLINK+="disk/by-id/md-uuid-$env{MD_UUID}"
+
+# by-uuid and by-label symlinks
+IMPORT{program}="vol_id --export $tempnode"
+OPTIONS="link_priority=-100"
+ENV{ID_FS_USAGE}=="filesystem|other|crypto", ENV{ID_FS_UUID_ENC}=="?*", \
+			SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
+ENV{ID_FS_USAGE}=="filesystem|other", ENV{ID_FS_LABEL_ENC}=="?*", \
+			SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+
+LABEL="mdadm_end"

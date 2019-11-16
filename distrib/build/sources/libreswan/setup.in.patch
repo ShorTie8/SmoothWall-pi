@@ -1,0 +1,22 @@
+--- openswan-2.6.39/programs/setup/setup.in-ORIG	2013-11-29 13:44:02.959250550 -0500
++++ openswan-2.6.39/programs/setup/setup.in	2013-11-29 13:46:35.425590693 -0500
+@@ -84,7 +84,7 @@
+ umask 022
+ 
+ mkdir -p /var/run/pluto
+-chmod 700 /var/run/pluto
++chmod 701 /var/run/pluto
+ 
+ RETVAL=0
+ 
+@@ -120,6 +120,10 @@
+     (
+     ipsec _realsetup start
+     RETVAL=$? 
++
++    if test -e /proc/net/ipsec/eroute/all; then
++      chmod 444 /proc/net/ipsec/eroute/all
++    fi
+     ) 2>&1 | logger -s -p $IPSECsyslog -t ipsec_setup 2>&1  
+     return $RETVAL
+ }

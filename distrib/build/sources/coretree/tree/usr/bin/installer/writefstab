@@ -1,0 +1,15 @@
+#! /bin/sh
+
+(
+  echo "proc            /proc        proc         defaults           0       0"
+  echo "sys             /sys         sysfs        defaults           0       0"
+  echo "dev             /dev         devtmpfs     defaults           0       0"
+  echo "devpts          /dev/pts     devpts       defaults           0       0"
+  echo "/dev/harddisk2  none         swap         sw                 0       0"
+  echo
+  echo "/dev/harddisk4  /            ext4         defaults,noatime   0       1"
+  echo "/dev/harddisk1  /boot        ext4         defaults,noatime   0       2"
+  echo "/dev/harddisk3  /var/log     ext4         defaults,noatime   0       2"
+) >/harddisk/etc/fstab
+echo "ext4" >/harddisk/etc/modules
+

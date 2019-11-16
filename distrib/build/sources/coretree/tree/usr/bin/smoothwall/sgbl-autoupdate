@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. /var/smoothwall/urlfilter/autoupdate/autoupdate.conf
+
+# If custom, get the custom URL
+if [ "$UPDATE_SOURCE" == "custom" ]; then
+  UPDATE_SOURCE="$CUSTOM_UPDATE_URL"
+fi
+
+# Was a source URL selected?
+if [ -z "$UPDATE_SOURCE" ]; then
+  /usr/bin/logger -i "URLFilter" "Autoupdate failed: no source URL selected."
+  exit 1
+fi
+
+/usr/bin/smoothwall/autoupdate.pl "$UPDATE_SOURCE"

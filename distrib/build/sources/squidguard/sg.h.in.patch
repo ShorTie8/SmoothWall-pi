@@ -1,0 +1,34 @@
+--- squidGuard-1.5-beta/src/sg.h.in	2010-09-08 07:57:18.000000000 -0400
++++ squidGuard-1.5-beta-FRESH/src/sg.h.in	2013-09-30 00:14:30.000000000 -0400
+@@ -80,24 +80,24 @@
+ #define WARNING_LOGFILE "squidGuard.log"
+ #define ERROR_LOGFILE   "squidGuard.error"
+ 
+-#define DEFAULT_CONFIGFILE "@prefix@/squidGuard/squidGuard.conf"
+-#define DEFAULT_LOGDIR "@prefix@/squidGuard/log"
+-#define DEFAULT_DBHOME "@prefix@/squidGuard/db"
+-#define EXEC_PROGRAM "@prefix@/bin/squidGuard"
++#define EXEC_PROGRAM "@sbindir@/squidGuard"
+ 
+ #ifdef ACCONFIG
+-#undef DEFAULT_CONFIGFILE
+ #define DEFAULT_CONFIGFILE "@sg_config@"
++#else
++#define DEFAULT_CONFIGFILE "/var/smoothwall/urlfilter/squidGuard.conf"
+ #endif
+ 
+ #ifdef ACLOGDIR
+-#undef DEFAULT_LOGDIR
+ #define DEFAULT_LOGDIR "@sg_logdir@"
++#else
++#define DEFAULT_LOGDIR "/var/log/squidGuard"
+ #endif
+ 
+ #ifdef ACDBHOME
+-#undef DEFAULT_DBHOME
+ #define DEFAULT_DBHOME "@sg_dbhome@"
++#else
++#define DEFAULT_DBHOME "/var/smoothwall/urlfilter/blacklists"
+ #endif
+ 
+ #define INVALID_IP_ADDR 1

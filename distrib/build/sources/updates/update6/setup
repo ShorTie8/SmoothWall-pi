@@ -1,0 +1,34 @@
+#!/bin/sh
+
+echo "Update 6 installing."
+
+# If the module is there, assume the quick fix is already in place and there
+#   is little to do. Otherwise, unpack, catalog, activate, then restart VPN.
+
+if [ -e /lib/modules/3.4.110/kernel/net/ipsec/ipsec.ko ]; then
+
+  # Just make sure the correct module is in place
+
+  # Unpack the patch
+  /usr/bin/tar xvf patch.tar.gz -C /
+
+  # Catalog it
+  /sbin/depmod -a
+
+  # The next reboot will ensure that the 'correct' module is used.
+
+else
+
+  # Unpack the patch
+  /usr/bin/tar xvf patch.tar.gz -C /
+
+  # Catalog it
+  /sbin/depmod -a
+
+  # INS it
+  /sbin/modprobe ipsec
+
+  # Restart VPNs
+  /usr/bin/smoothcom ipsecrestart
+
+fi

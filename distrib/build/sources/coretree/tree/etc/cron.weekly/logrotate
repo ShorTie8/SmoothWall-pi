@@ -1,0 +1,6 @@
+#!/bin/sh
+
+/usr/sbin/logrotate /etc/logrotate.conf
+
+echo "Rotating Mod Logs"
+/usr/sbin/logrotate /etc/logrotate.base `find /var/smoothwall/mods -regex '.*/etc/logrotate.d' 2>/dev/null`

@@ -1,0 +1,87 @@
+--- Branch-3_14/autoconf/configure.in
++++ Branch-3_14/autoconf/configure.in
+@@ -1051,6 +1051,9 @@ then
+ elif test -f /etc/engarde-version
+ then
+    DISTNAME=engarde
++elif test -d /var/smoothwall
++then
++   DISTNAME=smoothwall
+ else
+    DISTNAME=unknown
+ fi
+@@ -1288,6 +1291,12 @@ qnx)
+       platforms/qnx/apcupsd \
+       platforms/qnx/apccontrol"
+    ;;
++smoothwall)
++   DISTVER=smoothwall
++   DFILES="\
++      platforms/smoothwall/apcupsd \
++      platforms/smoothwall/halt"
++  ;;
+ unknown)
+    DISTVER=unknown
+    DFILES="\
+
+
+--- Branch-3_14/configure
++++ Branch-3_14/configure
+@@ -13050,6 +13050,9 @@ then
+ elif test -f /etc/engarde-version
+ then
+    DISTNAME=engarde
++elif test -d /var/smoothwall
++then
++   DISTNAME=smoothwall
+ else
+    DISTNAME=unknown
+ fi
+@@ -13277,6 +13280,12 @@ qnx)
+       platforms/qnx/apcupsd \
+       platforms/qnx/apccontrol"
+    ;;
++smoothwall)
++   DISTVER=smoothwall
++   DFILES="\
++      platforms/smoothwall/apcupsd \
++      platforms/smoothwall/halt"
++  ;;
+ unknown)
+    DISTVER=unknown
+    DFILES="\
+
+
+--- Branch-3_14/platforms/smoothwall/Makefile
++++ Branch-3_14/platforms/smoothwall/Makefile
+@@ -0,0 +1,20 @@
++topdir:=../..
++
++SUBDIRS =
++include $(topdir)/autoconf/targets.mak
++
++all-install: install-smoothwall
++all-uninstall: uninstall-smoothwall
++
++install-smoothwall:
++	$(call DISTINST,Smoothwall)
++
++	@echo "The apcupsd boot script and halt script "
++	@echo "for clean emergency shutdown are not required "
++	@echo "when using apcupsd with Smoothwall."
++	@echo "Smoothwall will modify any scripts as necessary."
++
++uninstall-smoothwall:
++	$(call DISTUNINST,Smoothwall)
++	@echo "Smoothwall will remove any script modifications as necessary"
++	@echo "Please contribute your distribution install to apcupsd team."
+
+--- Branch-3_14/platforms/smoothwall/apcupsd.in
++++ Branch-3_14/platforms/smoothwall/apcupsd.in
+@@ -0,0 +1,1 @@
++# Not required
+
+--- Branch-3_14/platforms/smoothwall/halt.in
++++ Branch-3_14/platforms/smoothwall/halt.in
+@@ -0,0 +1,1 @@
++# Not required

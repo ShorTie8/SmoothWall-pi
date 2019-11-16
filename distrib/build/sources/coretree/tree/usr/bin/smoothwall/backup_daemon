@@ -1,0 +1,253 @@
+#! /bin/bash
+
+
+# AGCL/FS Backup
+#
+# Copyright 2011, Neal P. Murphy
+#
+# This program is licensed under the terms of the GNU Public License, version 2.
+#
+# backup_daemon
+#   The daemon watches for known backup devices to be plugged in and automatically
+#   runs the respective backup. It will perform a backup 'now' or at a specified
+#   later time (typically early morning). A vat/total backup is always performed
+#   'now'.
+# A backup medium *must* be configured before it can be used. The
+#   advanced installer will automatically add the install source drive as
+#   a var/total medium *if* it was *not* a CD/DVD.
+
+
+###################
+# Local functions #
+###################
+
+# Usage statement
+usage () {
+  echo "Usage: $0 [ -f | -i | -v ]"
+  echo "  Specify no options to perform a backup. You will need either a full,"
+  echo "    incremental or var/total medium that has already been added to the set."
+  echo "  Specify '-f' to add a new medium to the full set."
+  echo "  Specify '-i' to add a new medium to the incremental set."
+  echo "  Specify '-v' to add a new medium to the vartotal set. (F/W only)"
+  echo
+  echo "The F/W UI uses '-V' to add a new medium to the vartotal set."
+  exit 1
+}
+
+
+#############
+# Main code #
+#############
+
+# Prepare a bunch of shorthand vars
+ROOTDIR=/var/smoothwall
+
+# Set PATH for security
+PATH=/usr/bin/smoothwall:/bin:/usr/bin
+
+export relROOTDIR=${ROOTDIR/\//}
+export BACK_DIR=${ROOTDIR}/backup
+export relBACK_DIR=${relROOTDIR}/backup
+export DEV_FILE="${BACK_DIR}/devices"
+export BACK_FLAG="${BACK_DIR}/flag"
+export BACK_HIST="${BACK_DIR}/history"
+export BACK_SETTINGS="${BACK_DIR}/settings"
+export addNewID delID AUTOBACK
+
+# Be sure this exists and is set
+delID=0
+
+# Get global functions
+. /usr/lib/smoothwall/backup_functions
+umask 002
+
+# How this script was run determines where feedback is sent.
+  if [ $PPID -ne 1 ]; then
+    echo "Only init (process #1) can run the daemon!"
+#    exit 1;
+  fi
+  addNewID=0
+  AUTOBACK="AUTO"
+
+# Ensure the files and dirs exist with reasonable defaults
+if [ ! -d "${ROOTDIR}/backup" ]; then rm -f ${ROOTDIR}/backup; mkdir -p ${ROOTDIR}/backup; fi
+if [ ! -e "${BACK_SETTINGS}" ]; then writeSettings; fi
+if [ ! -e "${BACK_FLAG}" ]; then echo "Last backup: NEVER">${BACK_FLAG}; fi
+if [ ! -e "${BACK_HIST}" ]; then cp ${BACK_FLAG} ${BACK_HIST}; fi
+
+# Smoothwall's productdata files is pretty much guaranteed to exist. If not, this'll
+#   point it out quick enough.
+if [ "$ROOTDIR" != "/var/smoothwall" ]; then
+  if [ ! -d "${ROOTDIR}/main" ]; then rm -f ${ROOTDIR}/main; mkdir -p ${ROOTDIR}/main; fi
+  if [ ! -e ${ROOTDIR}/main/productdata ]; then
+    cat<<END > ${ROOTDIR}/main/productdata
+PRODUCT='AGCL-FS'
+RELEASE='0.0.0.0'
+CODENAME='cirrus'
+UI_VERSION='1.0'
+ARCH='i686'
+END
+  fi
+fi
+
+# Normalize flag and history (silently)
+(
+  chgrp nobody ${BACK_FLAG} || chgrp nogroup ${BACK_FLAG}
+  chgrp nobody ${BACK_HIST} || chgrp nogroup ${BACK_HIST}
+  chgrp nobody ${BACK_SETTINGS} || chgrp nogroup ${BACK_SETTINGS}
+  chmod 664 ${BACK_FLAG} ${BACK_HIST} ${BACK_SETTINGS}
+) >/dev/null 2>&1
+
+
+# Get the system pedigree
+. ${ROOTDIR}/main/productdata
+
+# Get the backup media IDs and other settings
+. ${BACK_SETTINGS}
+
+HOST=`uname -n`
+DATE=`date +"%Y-%m-%d"`
+TIME=`date +"%H:%M:%S"`
+
+INOTIFY_CMD="inotifywait -q"
+
+# Go to the working dir
+cd $BACK_DIR
+
+# Wait until the correct (or an acceptable) node appears in /dev/disk/by-id or the
+#   DISABLED or CANCEL files appear in $BACK_DIR
+
+# Ignore SIGUSR1 for now; new bash doesn't allow 'ignore', so do a no-op
+trap "true" SIGUSR1
+
+# Watch for CREATEs in /dev of $BACKUP_ID
+(
+  # Restore default USR1 handler for this subshell
+  trap SIGUSR1
+
+  # Are we enabled or disabled?
+  if [ -e $BACK_DIR/DISABLE_DAEMON ]; then
+    ENABLED=1
+  else
+    ENABLED=0
+  fi
+
+  # Loop reading inotify events
+  $INOTIFY_CMD -e CREATE,DELETE -m /dev/disk/by-id $BACK_DIR 2>&- | while read dir event filename; do
+
+    case $dir in
+      /dev/disk/by-id/)
+        # Handle CREATE events only if AUTO and enabled or if MANUAL
+        if [ $event == "CREATE" -a \
+             \( "$AUTOBACK" == "AUTO" -a $ENABLED -eq 0 \) ]; then
+          # Get the ID (less partition info)
+          ID="${filename/-part[0-9]*/}"
+
+          # Be sure we pick up newly added media (for daemon)
+          unset INCREMENTAL FULL VARTOTAL
+          . ${BACK_SETTINGS}
+
+          # Compare to configured IDs
+          retCode=1
+          for i in "${INCREMENTAL[@]}" "${FULL[@]}" "${VARTOTAL[@]}"; do
+            if [ "$ID" == "$i" ]; then
+              retCode=0
+              break;
+            fi
+          done
+
+          # What to do whether or not the plugged-in drive is configured
+          if [ "$AUTOBACK" == "AUTO" -a $retCode -eq 1 ]; then
+            # Go 'round if AUTO and NOT a configured ID
+            continue
+          fi
+
+          # If the ID was found and there's a device node and a partition #1 node, it's good to go.
+          if [ $retCode -eq 0 -a -e "$dir$ID" -a -e "$dir${ID}-part1" ]; then
+            # Save it
+            echo "${ID}-part1" > ${DEV_FILE}
+            # I slay me!
+            kill -SIGUSR1 0;
+          fi
+        fi
+        ;;
+
+      $BACK_DIR/)
+        # Change enabled state as needed
+        if [ $filename == "DISABLE_DAEMON" -a "$AUTOBACK" == "AUTO" ]; then
+          if [ $event == "CREATE" ]; then
+            ENABLED=1
+          elif [ $event == "DELETE" ]; then
+            ENABLED=0
+          fi
+        fi
+        ;;
+    esac
+  done
+) & #>/dev/null 2>&1 &
+wait
+
+# Restore default USR1 handler
+trap SIGUSR1
+
+# Read the node info
+read NODE < ${DEV_FILE}
+devID=${NODE/-part*/}
+partID="${devID}-part1"
+NODE="disk/by-id/$NODE"
+
+
+# Give audible feedback if automatic
+if [ $AUTOBACK == "AUTO" ]; then
+  callAudible /usr/bin/sounds/inserted # Audible
+fi
+
+# Determine the type of backup
+backupType
+
+if [ \( "$BTYPE" == "incremental" -a "$timeINCREMENTAL" != "at" \) -o \
+       \( "$BTYPE" == "full" -a "$timeFULL" != "at" \) -o \
+       \( "$BTYPE" == "var total" -a "$timeVARTOTAL" != "at" \) ]; then
+  # Running by daemon 'now'
+  . backup_run RunByBackupDaemonOrSys $AUTOBACK
+
+else
+  # Running by daemon delayed, so do the backup tomorrow @ delayUntil
+    #at "$delayUntil" 2>&1 | \
+  echo backup_run RunByBackupDaemonOrSys $AUTOBACK | \
+    at "$delayUntil" 2>&1 | egrep "^job" | ( read a b c; echo "Backup scheduled: $c" > ${BACK_FLAG} )
+
+  # And schedule the 'failsafe' check
+  #echo backup_notify  RunByBackupDaemonOrSys | at "$delayUntil + 5 hours"
+
+  # Now do the stuff to wait for completion
+
+  # Ignore SIGUSR1 for now; new bash doesn't allow 'ignore', so do a no-op
+  trap "true" SIGUSR1
+
+  # Watch for "Backup complete'" to appear in flag file
+  # Subshelled to do USR1 and backgrounded to silence unsilenceable messages.
+  (
+    # Set USR1 handler for this subshell: just exit
+    trap "exit" SIGUSR1
+
+    # And wait until the delayed backup is complete
+    inotifywait -q -e CLOSE_WRITE -m ${BACK_FLAG} 2>/dev/null | \
+      while read file event; do
+        if grep -q "Backup complete." ${BACK_FLAG}; then kill -SIGUSR1 0; fi
+      done >/dev/null 2>&1
+  ) >/dev/null 2>&1 &
+  # Wait for the kid to perish
+  wait
+  # Restore default handler
+  trap SIGUSR1
+fi
+
+# Tell the user to unplug the drive
+removeMedium "$devID"
+
+FPRE=`echo $FNAME | sed -e 's/total\/var//'`
+rm -f ${DEV_FILE} ${FPRE}{total,var}.{list,tarhead,tarheel}
+
+echo "Last backup: $AUTOBACK; date=$DATE $TIME; type=$BTYPE; medium=$mediumName" > /${BACK_FLAG}
+echo "Last backup: $AUTOBACK; date=$DATE $TIME; type=$BTYPE; medium=$mediumName" >> /${BACK_HIST}

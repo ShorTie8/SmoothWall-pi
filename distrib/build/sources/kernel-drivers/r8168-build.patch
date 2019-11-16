@@ -1,0 +1,21 @@
+--- r8168-8.045.08/src/Makefile.orig	2017-12-04 22:02:46.104466240 -0500
++++ r8168-8.045.08/src/Makefile	2017-12-04 22:07:14.089134302 -0500
+@@ -84,16 +84,10 @@
+ 		EXTRA_CFLAGS += -DENABLE_S0_MAGIC_PACKET
+ 	endif
+ else
+-	BASEDIR := /lib/modules/$(shell uname -r)
+-	KERNELDIR ?= $(BASEDIR)/build
++	BASEDIR := ../../../../lib/modules/$(KERNEL_VER)
++	KERNELDIR ?= ../../../linux/linux-$(KERNEL_VER)
+ 	PWD :=$(shell pwd)
+-	DRIVERDIR := $(shell find $(BASEDIR)/kernel/drivers/net/ethernet -name realtek -type d)
+-	ifeq ($(DRIVERDIR),)
+-		DRIVERDIR := $(shell find $(BASEDIR)/kernel/drivers/net -name realtek -type d)
+-	endif
+-	ifeq ($(DRIVERDIR),)
+ 		DRIVERDIR := $(BASEDIR)/kernel/drivers/net
+-	endif
+ 	RTKDIR := $(subst $(BASEDIR)/,,$(DRIVERDIR))
+ 
+ .PHONY: all

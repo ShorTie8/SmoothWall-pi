@@ -1,0 +1,11 @@
+--- pulsar-4.0.24-orig/pulsar.c	2007-06-28 17:59:21.000000000 -0600
++++ pulsar-4.0.24/pulsar.c	2008-01-28 10:57:59.000000000 -0700
+@@ -1015,7 +1015,7 @@
+ 
+ 	/* Register interrupt */
+ 	adsl_irq_disable(pmodem);
+-	err = request_irq(pci_dev->irq, isr, SA_SHIRQ, name, pmodem);
++	err = request_irq(pci_dev->irq, isr, IRQF_SHARED, name, pmodem);
+ 	if (err) {
+ 		printk(KERN_ERR "%s: IRQ request failure\n", name);
+ 		goto pulsar_init_exit_irq;

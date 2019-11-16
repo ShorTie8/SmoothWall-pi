@@ -1,0 +1,11 @@
+declare -A INCREMENTAL FULL VARTOTAL
+toSAVE=("/")
+toSKIP=()
+INCREMENTAL=()
+FULL=()
+VARTOTAL=()
+timeINCREMENTAL="now"
+timeFULL="at"
+timeVARTOTAL="now"
+delayUntil="1 am tomorrow"
+#delayUntil="now + 1 minute"

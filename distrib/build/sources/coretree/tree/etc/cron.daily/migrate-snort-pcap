@@ -1,0 +1,7 @@
+#! /bin/sh
+
+# Find and archive all snort.log.xxxxxxxxxx PCAP files in /var/log/snort older than 30 days.
+# The archive must not be compressed or zipped so that tar can append to it.
+
+/usr/bin/find /var/log/snort -regextype posix-egrep -regex ".*/snort.log.[0-9]{10}" -type f -mtime +29 | \
+    xargs tar rf /var/log/snort/pcaps.tar --remove-files

@@ -1,0 +1,15 @@
+#! /bin/sh
+
+. /etc/rc.d/inc.rc-functions
+
+if [ -f /var/run/STARTSTOP ]; then
+  echolog "e" "s" "" "Remove ingress policing barricade for"
+  for i in "$GREEN_DEV" "$RED_DEV" "$ORANGE_DEV" "$PURPLE_DEV"; do
+    if [ "$i" != "" ]; then
+      echolog "e" "s" "" "  $i"
+      /usr/sbin/tc qdisc del dev $i handle ffff: ingress >/dev/null 2>&1
+    fi
+  done
+
+  echolog "e" "" "" ""
+fi

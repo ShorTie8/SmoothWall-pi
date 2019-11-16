@@ -1,0 +1,11 @@
+--- libreswan-3.27/initsystems/sysvinit/ipsec.init.in.orig	2018-11-16 23:30:53.920259499 -0500
++++ libreswan-3.27/initsystems/sysvinit/ipsec.init.in	2018-11-16 23:31:07.400265651 -0500
+@@ -99,7 +99,7 @@
+ export PATH
+ 
+ mkdir -p ${rundir}
+-chmod 700 ${rundir}
++chmod 711 ${rundir}
+ 
+ verify_config() {
+     [ -f ${IPSEC_CONF} ] || exit 6

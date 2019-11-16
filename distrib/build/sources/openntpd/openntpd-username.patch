@@ -1,0 +1,11 @@
+--- openntpd-5.7p4/src/asd.h	2010-02-12 00:02:29.000000000 -0500
++++ openntpd-5.7p4/src/ntpd.h	2010-02-12 00:02:47.000000000 -0500
+@@ -31,7 +31,7 @@
+ #include "ntp.h"
+ 
+ #ifndef NTPD_USER
+-#define	NTPD_USER	"_ntp"
++#define	NTPD_USER	"ntpd"
+ #endif
+ #define	CONFFILE	SYSCONFDIR "/ntpd.conf"
+ 

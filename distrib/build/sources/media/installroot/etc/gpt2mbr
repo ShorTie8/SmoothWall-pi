@@ -1,0 +1,115 @@
+#! /bin/bash
+
+# Copyright Neal P. Murphy. All rights reserved.
+# Licensed under GPL with the rest of Smoothwall.
+
+# Usage
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 HD"
+  echo -n "where HD is the target hard drive, one of: "
+  echo -n `\ls -C1 /sys/block|egrep -v "fd|loop|sr" | sed -e 's/\(.*\)/ \1/'`
+  echo
+  echo "The HD must contain a GPT partition table."
+  echo
+  exit 1
+fi
+
+# Save the device node
+HD=$1
+
+# Get the partition table type
+ptType=`parted /dev/$HD p |grep -i "partition table" | sed -e 's/.*: //'`
+
+# It must be gpt to continue with the conversion
+if [ $ptType != "gpt" ]; then
+  echo "HD ${HD}'s partition table is $ptType; it must be GPT."
+  exit
+fi
+
+# Braindead partitioners do not behave consistently. They have to be
+#   mollycoddled and idiosyncracies must be worked around. Hence the
+#   extreme rigamarole below.
+
+parted /dev/$HD u s p | grep -e "^ *[1-4]" | (
+  echo "o"
+  read partnum begin end rest
+  echo "n"
+  echo "p"
+  echo "1"
+  echo "$begin"
+  echo "$end"
+  echo "a"
+  echo "1"
+  read partnum begin end rest
+  echo "n"
+  echo "p"
+  echo "2"
+  echo "$begin"
+  echo "$end"
+  echo "t"
+  echo "2"
+  echo "82"
+  read partnum begin end rest
+  echo "n"
+  echo "p"
+  echo "3"
+  echo "$begin"
+  echo "$end"
+  read partnum begin end rest
+  echo "n"
+  echo "p"
+  echo "4"
+  echo "$begin"
+  echo "$end"
+  echo "w"
+  echo "q"
+) > /tmp/mbrpartitions
+
+# Erase all evidence of GPT, include the last 2MiB of the drive.
+typeset -i lastSect endSect
+lastSect=`parted /dev/$HD u s p | egrep "Disk /" | sed -e 's/.*: //' -e 's/s$//'`
+echo $lastSect
+endSect=lastSect-4096
+echo $endSect-$lastSect
+
+dd if=/dev/zero of=/dev/$HD bs=512 count=4096 seek=$endSect
+dd if=/dev/zero of=/dev/$HD bs=512 count=34
+(
+  echo "mklabel msdos"
+  echo "y"
+) | parted -s /dev/$HD
+
+# And erase the beginning a second time
+dd if=/dev/zero of=/dev/$HD bs=512 count=34
+# Partition
+fdisk /dev/$HD </tmp/mbrpartitions
+
+# Now run grub to install the bootloader
+mount /dev/${HD}4 /harddisk
+mount --rbind /proc /harddisk/proc
+mount --rbind /sys /harddisk/sys
+mount --rbind /dev /harddisk/dev
+cat<<END >/harddisk/tmp/grub.cmds
+device (hd0) /dev/$HD
+root (hd0,0) 
+setup (hd0) 
+quit
+END
+
+/sbin/chroot /harddisk /usr/sbin/grub --batch </harddisk/tmp/grub.cmds
+umount /harddisk/dev
+umount /harddisk/sys
+umount /harddisk/proc
+umount /harddisk
+ 
+# Finish up
+echo; echo
+
+parted /dev/$HD u s p
+
+echo
+echo "If all has gone well, Smoothwall Express will start up after a reboot."
+echo
+echo -n "Press <ENTER> to reboot the system..."
+read a
+reboot -f

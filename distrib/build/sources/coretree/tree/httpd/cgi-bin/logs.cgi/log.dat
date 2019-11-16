@@ -1,0 +1,325 @@
+#!/usr/bin/perl
+#
+# SmoothWall CGIs
+#
+# This code is distributed under the terms of the GPL
+#
+# (c) The SmoothWall Team
+
+use lib "/usr/lib/smoothwall";
+use header qw( :standard );
+use POSIX qw(ceil);
+use strict;
+use warnings;
+
+my (%cgiparams, %selected);
+
+$cgiparams{'ACTION'} = '';
+
+my $infomessage = '';
+my $errormessage = '';
+my $sectionPattern = "";
+
+my @now = localtime(time);
+
+my @shortmonths = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+	'Sep', 'Oct', 'Nov', 'Dec' );
+my @longmonths = ( $tr{'january'}, $tr{'february'}, $tr{'march'},
+	$tr{'april'}, $tr{'may'}, $tr{'june'}, $tr{'july'}, $tr{'august'},
+	$tr{'september'}, $tr{'october'}, $tr{'november'},
+	$tr{'december'} );
+
+# The filter that selects which entries to cull from the messages log
+%filters = (
+	'apcupsd'        => '(apcupsd)\[.*\]',
+	'av'             => '(clamd|freshclam)\[.*\]',
+	'dhcp'           => '(dhcpd)', 
+	'im'             => '(imspector)',
+	'installpackage' => '(installpackage)\[.*\]',
+	'ipsec'          => '(ipsec_.*)',
+	'isdn'           => '(ipppd|ipppd\[.*\]|kernel: ippp\d|kernel: isdn.*|ibod\[.*\])',
+	'kernel'         => '(kernel)',
+	'miniupnpd'      => '(miniupnpd)\[.*\]',
+	'ntp'            => '(ntpdate|ntpd)\[.*\]',
+	'ppp'            => '(pppd|chat|pppoe)\[.*\]',
+	'sip'            => '(siproxd)\[.*\]',
+	'smoothd'        => '(smoothd)',
+	'smoothwall'     => '(smoothwall)',
+	'squid'          => '(squid)\[.*\]',
+	'ssh'            => '(sshd)\[.*\]', 
+);
+
+# The text that appears in the drop down menu
+%optionText = (
+	'apcupsd'        => "APCupsd",
+	'av'             => "$tr{'logsec av'}",
+	'dhcp'           => "$tr{'dhcp server'}",
+	'im'             => "$tr{'logsec im'}",
+	'installpackage' => "$tr{'update transcript'}",
+	'ipsec'          => "IPSec",
+	'isdn'           => "ISDN",
+	'kernel'         => "$tr{'kernel'}",
+	'miniupnpd'      => "UPNP",
+	'ntp'            => "NTP",
+	'ppp'            => "PPP",
+	'sip'            => "$tr{'logsec sip'}",
+	'smoothd'        => "SmoothD",
+	'smoothwall'     => "Smoothwall",
+	'squid'          => "$tr{'logsec web'}",
+	'ssh'            => "SSH",
+);
+
+# Pull in all the mods' log.filter-text files.
+while (</var/smoothwall/mods/*/httpd/cgi-bin/logs.cgi/log.filter-text>) {
+	&requireConditional($_);
+}
+
+# Prepare the string pattern
+foreach my $idx (sort (keys %filters)) {
+	$sectionPattern .= "|$idx";
+}
+$sectionPattern =~ s/^.//;
+
+$cgiparams{'DAY'} = $now[3]; 
+$cgiparams{'MONTH'} = $now[4];
+$cgiparams{'SECTION'} = 'smoothwall';
+&getcgihash(\%cgiparams);
+
+my $start = -1;
+if ($ENV{'QUERY_STRING'} && $cgiparams{'ACTION'} ne $tr{'update'}) {
+ 	my @temp = split(',',$ENV{'QUERY_STRING'});
+ 	$start = $temp[0];
+ 	$cgiparams{'MONTH'} = $temp[1];
+ 	$cgiparams{'DAY'} = $temp[2];  
+	$cgiparams{'SECTION'} = $temp[3];
+}
+
+if (!($cgiparams{'MONTH'} =~ /^(0|1|2|3|4|5|6|7|8|9|10|11)$/) ||
+    !($cgiparams{'DAY'} =~ /^(1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31)$/) ||
+    !($cgiparams{'SECTION'} =~ /^($sectionPattern)$/)) {
+	$cgiparams{'DAY'} = $now[3];
+	$cgiparams{'MONTH'} = $now[4];
+	$cgiparams{'SECTION'} = 'smoothwall';
+}
+
+my $monthstr = $shortmonths[$cgiparams{'MONTH'}];
+my $day = $cgiparams{'DAY'};
+
+my $daystr = '';
+
+if ($day <= 9) {
+	$daystr = " $day";
+}
+else {
+	$daystr = $day;
+}
+
+my $filter = $filters{$cgiparams{'SECTION'}};
+
+open (FILE, '/var/log/messages');
+
+my $lines = 0;  
+my @log;
+ 
+while (<FILE>) {
+	if (/^${monthstr} ${daystr} (..:..:..) [\w\-]+ ${filter}: (.*)/) {
+		$log[$lines] = $_;
+		$lines++;
+	}
+}	 
+close (FILE);
+
+if ($cgiparams{'ACTION'} eq $tr{'export'}) {
+	print "Content-type: text/plain\n\n";
+	print "Smoothwall diagnostics\r\n";
+	print "Section: $cgiparams{'SECTION'} ";
+	print "Date: $cgiparams{'DAY'} $longmonths[$cgiparams{'MONTH'}]\r\n\r\n"; 
+
+	foreach $_ (@log) {
+		/^${monthstr} ${daystr} (..:..:..) [\w\-]+ ${filter}: (.*)/;
+		print "$1 $2 $3\r\n";
+	}
+	exit;
+}
+
+&showhttpheaders();
+
+# Prepare the 'selected' option
+foreach my $idx (sort (keys %filters)) {
+	$selected{'SECTION'}{$idx} = '';
+}
+
+$selected{'SECTION'}{$cgiparams{'SECTION'}} = 'SELECTED';
+
+&openpage($tr{'log viewer'}, 1, '', 'logs');
+
+&openbigbox('100%', 'LEFT');
+
+&alertbox($errormessage, "", $infomessage);
+
+&openbox($tr{'settingsc'});
+
+print <<END
+<form action='/cgi-bin/logs.cgi/log.dat' method='POST'>
+<table style='width: 100%; border: none; margin-left:auto; margin-right:auto'>
+<tr>
+	<td class='base' style='width:10%'>$tr{'section'}</td>
+	<td style='width:20%;'><select name='SECTION'>
+END
+;
+
+# Emit the 'select' options
+foreach my $idx (sort (keys %filters)) {
+	print <<END;
+		<option $selected{'SECTION'}{$idx} value='$idx'>$optionText{$idx}</option>
+END
+;
+}
+	print <<END
+	</select>
+	</td>
+	<td style='width:10%;' class='base'>$tr{'month'}</td>
+	<td style='width:20%;'>
+	<select name='MONTH'>
+END
+;
+
+my $month;
+for ($month = 0; $month < 12; $month++) {
+	print "\t<option ";
+	if ($month == $cgiparams{'MONTH'}) {
+		print 'SELECTED ';
+	}
+	print "VALUE='$month'>$longmonths[$month]\n";
+}
+print <<END
+	</select>
+	</td>
+	<td style='width:10%;' class='base'>$tr{'day'}</td>
+	<td style='width:10%;'>
+	<select name='DAY'>
+END
+;
+
+for ($day = 1; $day <= 31; $day++) {
+	print "\t<option ";
+	if ($day == $cgiparams{'DAY'}) {
+		print 'SELECTED ';
+	}
+	print "VALUE='$day'>$day\n";
+}
+
+print <<END
+	</select>
+	</td>
+	<td style='width:10%; text-align:center;'><input type='submit' name='ACTION' value='$tr{'update'}'></td>
+	<td style='width:10%; text-align:center;'><input type='submit' name='ACTION' value='$tr{'export'}'></td>
+</tr>
+</table>
+</form>
+END
+;
+
+&closebox();
+
+&openbox($tr{'logc'});
+ 
+$start = $lines - $viewsize if ($start == -1);
+$start = $lines - $viewsize if ($start >= $lines - $viewsize);
+$start = 0 if ($start < 0);
+
+my $prev = $start - $viewsize;
+my $next = $start + $viewsize;
+
+$prev = 0 if ($prev < 0);
+$next = -1 if ($next >= $lines);
+$prev = -1 if ($start == 0);
+
+my @slice = splice(@log, $start, $viewsize);
+
+my $number_of_pages = ceil( $lines / $viewsize );
+my $page = 0;
+my $max_number_of_pages = 20;
+my $start_page = 0;
+my $end_page = $number_of_pages;
+
+my $tpage = $number_of_pages - ceil( $start / $viewsize );
+
+if ( $number_of_pages > $max_number_of_pages ) {
+	$start_page = $tpage - int( $max_number_of_pages / 2 );
+	$end_page   = $tpage + int( $max_number_of_pages / 2 );
+
+	if ( $end_page > $number_of_pages ) {
+		$start_page = $number_of_pages;
+		$end_page = $start_page;
+		$start_page -= $max_number_of_pages;
+	}
+
+	if ( $start_page < 0 ) {
+		$start_page = 0;
+		$end_page = $max_number_of_pages;
+	}
+}
+
+print <<END
+<table style='margin-left: auto; margin-right: auto;'>
+<tr>
+END
+;
+
+if ( $number_of_pages >= 2 ) {
+	if ($next != -1) {
+		$next = $lines - ((int( $lines / $viewsize ) * $viewsize)) if ($tpage == $number_of_pages);
+		print "<td style='vertical-align: top; text-align: center;'><a href='/cgi-bin/logs.cgi/log.dat?$next,$cgiparams{'MONTH'},$cgiparams{'DAY'},$cgiparams{'SECTION'}'>&lt; Sm</a></td>"; 
+	}
+	else {
+		print "<td style='vertical-align: top;text-align: center'>&lt; Sm</td>"; 
+	}
+
+	for ( my $i = ($lines-$viewsize) ; $i > (1-$viewsize) ; $i -= $viewsize ) {
+		my $page = $number_of_pages - ceil( $i / $viewsize );
+		$i = 0 if ( $i < 0);
+      
+		if ( $page >= $start_page and $page <= $end_page ) {
+			if ( $i == $start ){
+				print "<td style='vertical-align: top;text-align: center;'><a style='color: red;' href='/cgi-bin/logs.cgi/log.dat?$i,$cgiparams{'MONTH'},$cgiparams{'DAY'},$cgiparams{'SECTION'}'>o<br/><span style='color: #c0c0c0;'>$page</span></a></td>"
+			}
+			else {
+				print "<td style='vertical-align: top;text-align: center;'><a href='/cgi-bin/logs.cgi/log.dat?$i,$cgiparams{'MONTH'},$cgiparams{'DAY'},$cgiparams{'SECTION'}'>o<br/><span style='color: #c0c0c0;'>$page</span></a></td>"
+			}
+		}
+	}
+
+	if ($tpage != $number_of_pages) {
+		print "<td style='vertical-align: top;text-align: center;'><a href='/cgi-bin/logs.cgi/log.dat?$prev,$cgiparams{'MONTH'},$cgiparams{'DAY'},$cgiparams{'SECTION'}'>th &gt;</a></td>"; 
+	}
+	else {
+		print "<td style='vertical-align: top;text-align: center;'>th &gt;</td>"; 
+	}
+}
+
+print <<END
+	<td></td>
+</tr>
+</table>
+END
+;
+
+foreach $_ (@slice) {
+	$_ =~ s/\&/&amp;/g;
+	$_ =~ s/</&lt;/g;
+	$_ =~ s/>/&gt;/g;
+	/^${monthstr} ${daystr} (..:..:..) [\w\-]+ ${filter}: (.*)/;
+	print "<p style=\"margin:0 0 0 2em; font-family:'Courier New', monospace; text-indent:-2em;\">\n";
+	print "$1 $2 $3<br />\n";
+	print "</p>\n";
+
+}
+
+close (FILE);
+print "&nbsp;\n";
+
+&closebox();
+
+&closebigbox();
+&closepage();

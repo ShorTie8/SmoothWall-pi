@@ -1,0 +1,56 @@
+#! /tools/bin/bash +h
+
+# SmoothWall Build system.
+#
+# Parts (c) SmoothWall Ltd 2005
+# Parts (c) Neal P. Murphy 2009
+#
+# This code is distributed under the terms of the GPL v2.
+
+# Turn off path caching
+set +h
+
+# Creates files needed to start the building of the tree.
+
+cd /build
+
+. crumbs/build_environment
+PATH=$PATH:/tools/bin
+
+# Basic parts of the working tree
+rm -rf /bin /lib /root /sbin /tmp /usr /var /etc /dev /proc
+mkdir -pv /bin /lib /root /sbin /tmp /usr /usr/bin /usr/include /usr/lib /var
+mkdir -pv /etc /dev /proc /build/target/isos /build/buildroot/other
+
+# Permissions
+chmod -v 700 /root
+chmod -v 1777 /tmp
+
+# Temporary stuff - just needed to compile up the working tree
+mknod /dev/null c 1 3
+mknod /dev/tty c 5 1
+mknod /dev/urandom c 1 9
+ln -sv /tools/bin/sh /bin/sh 2>/dev/null
+ln -sv /tools/bin/{bash,cat,echo,grep,pwd,stty} /bin
+ln -sv /tools/bin/perl /usr/bin
+ln -sv /tools/lib/libgcc_s.so{,.1} /usr/lib
+ln -sv /tools/lib/libstdc++.so{,.6} /usr/lib
+
+# Get some vital files using the SWE coretree
+cp -avR /build/sources/coretree/tree/etc/passwd /etc/passwd
+cp -avR /build/sources/coretree/tree/etc/group /etc/group
+cp -avR /build/sources/coretree/tree/etc/ld.so.conf /etc/ld.so.conf
+rm -f /etc/localtime
+ln -sv /usr/share/zoneinfo/Europe/London /etc/localtime
+cp -v /build/crumbs/resolv.conf /etc/
+
+> /etc/mtab
+
+cat >/root/.profile <<END 
+HOME=/root
+TERM=$TERM
+PS1='\u:\w\# '
+PATH=/bin:/usr/bin:/sbin:/usr/sbin:/tools/bin
+
+set +h
+END

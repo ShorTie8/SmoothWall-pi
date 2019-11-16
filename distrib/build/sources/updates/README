@@ -1,0 +1,72 @@
+These are the general steps to take to build, prepare, test and release an
+update. It is left to the maintainer to determine where uploaded update files
+are found (there are only two places).
+
+The update build now uses the main build system to compile pkgs and prepare
+their 'release' tarballs. The update assembly generally determines which files
+will be included in the patch.
+
+The update build can now use a 'pkg'.list file for each pkg to control which
+of the pkg's files are included in the update. There is a 'pre-tar-setup'
+script that will tidy the distrib tree just before it is tarred up. Create
+these files as needed.
+
+
+Update Development Tools
+------------------------
+  - checklibs: this tool checks every shared lib needed by every program.
+    Note: it should also check shared libs needed by shared libs. It should
+    also report shared libs that are apparently not used by anything; these
+    shuold be deleted from the system.
+
+
+Update info file format
+-----------------------
+  MD5:      The md5sum of the complete update tarball.
+  Size:     The size in bytes of the patch tarball inside the update archive.
+  Info URL: Typically an URL to the forum describing the update.
+
+
+Update build steps
+------------------
+  - When releasing a service pack, add the update's release date to
+    .../coretree/tree/var/smoothwall/patches/installed. And don't
+    forget to update it if the update takes a long time to complete.
+  - Add pkgs to build for the update to the update's makefile.
+  - Add coretree files to coretree.list, one file per line, if any.
+  - NOTE: !!! If dhcpcd is included, be sure to include usr/etc/dhcpcd.conf. !!!
+  - Create 'pkg'.list file to constrain which of an updated pkg's files
+    are added to the update
+  - Go to the main .../build/... directory
+  - Execute "UPDATE=n make update" where 'n' is the number of the update.
+
+
+Update preparation steps
+------------------------
+  - Prepare update
+  - Upload inspection packet to internet somewhere (typically
+    downloads.smoothwall.org/update-testing/)
+  - Post link to it in the update planning thread
+  - Repeat as necessary
+
+
+Update release steps
+--------------------
+  - Edit info.* to include the current update's description, MD5sum, date,
+    patch size, and forum URL
+  - Run:
+      scp Express-3.1-Update1-*.tar.gz \
+        "username@web.sourceforge.net:/home/frs/project/smoothwall/SmoothWall\ Updates/3.1"
+    for EACH architecture (i586 and x86_64).
+  - Run:
+      for i in i586 x86_64; do
+        scp info-$i "fest3er@web.sourceforge.net:/home/frs/project/smoothwall/updateInfo/3.1-polar-$i/info"
+      done
+  - Edit /var/www/downloads.smoothwall.org/.htaccess (on downloads.sw.org) and add a permanent
+    redirect (301) for each arch's update.
+
+
+Post-release
+------------
+  - Add an announcement to the announcements forum
+  - Send a request to Towers to add the update notice to www.smoothwall.org.

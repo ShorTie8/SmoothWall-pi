@@ -1,0 +1,116 @@
+#!/bin/sh
+
+OLD_KERNEL=3.16.38
+KERNEL_VERSION=3.16.56
+TZ_TARBALL=tzdata2018c.tar.gz
+
+echo "Install Update 9."
+
+# Unpack the patch
+/usr/bin/tar xvf patch.tar.gz -C /
+
+# Leave these for a few generations, just in case.
+echo "  Fix logrotate config file modes"
+chmod 644 /etc/logrotate.{base,conf,d/*}
+echo "  Remove unused file 'acl'"
+/bin/rm -f /var/smoothwall/proxy/acl
+echo "  Fix /var/run"
+chmod 1777 /var/run
+
+# Ensure that /etc/ipsec.{conf,secrets} are the correct symlinks
+/bin/rm -f /etc/ipsec.conf /etc/ipsec.secrets
+/bin/ln -s /var/smoothwall/vpn/ipsec.conf /etc/ipsec.conf
+/bin/ln -s /var/smoothwall/vpn/ipsec.secrets /etc/ipsec.secrets
+
+
+# Update the new initramfs
+#
+echo "  Update the initramfs"
+mkdir /root/upd9-initramfs-unpack
+pushd /root/upd9-initramfs-unpack >/dev/null 2>&1
+
+echo "    Unpack"
+/usr/bin/zcat /boot/initrd-${KERNEL_VERSION}.gz | /bin/cpio -id
+
+echo "    Copy udev disk/NIC rules"
+pushd etc/udev/rules.d >/dev/null 2>&1
+rm -f *
+/bin/cp /etc/udev/rules.d/* .
+popd >/dev/null 2>&1
+
+echo "    Copy the root mount info"
+/bin/grep harddisk4 /etc/fstab | /usr/bin/sed -e 's=[ \t][ \t]*/[ \t][ \t]*= /harddisk =' > etc/fstab
+
+echo "    Repack"
+/usr/bin/find . | /bin/cpio -o -H newc | /usr/bin/gzip > /boot/initrd-${KERNEL_VERSION}.gz
+chmod 644 /boot/initrd-${KERNEL_VERSION}.gz
+
+popd >/dev/null 2>&1
+
+echo "    Tidy"
+rm -rf /root/upd9-initramfs-unpack
+#
+# Done with the new initramfs
+
+
+echo "  Update grub"
+/usr/bin/perl update-grub-kernel.pl $OLD_KERNEL $KERNEL_VERSION
+
+# This is for the host, *not* the initramfs because the initramfs has only one kernel
+echo "  Keep only the current kernel and one previous kernel"
+pushd /lib/modules >/dev/null 2>&1
+
+/bin/ls -dC1 [0-9.]* | \
+  /usr/bin/sed -e 's/\./ /g' -e 's=/$==' | \
+  /bin/sort -n -r -k 1 -k 2 -k 3 | \
+  /usr/bin/sed -e 's/ /./g' | \
+  /usr/bin/tail -n +3 | \
+  while read a; do
+    echo "    Archiving and deleting old kernel $a"
+    pushd / >/dev/null 2>&1
+    /usr/bin/find ./lib/modules/$a ./boot/initrd-$a.gz \
+                  ./boot/vmlinuz-$a ./boot/System.map-$a | \
+        /bin/cpio -o -H newc | \
+        /usr/bin/gzip > /root/linux-$a-archive.cpio.gz
+    /bin/rm -rf ./lib/modules/$a
+    /bin/rm -f ./boot/initrd-$a.gz
+    /bin/rm -f ./boot/vmlinuz-$a
+    /bin/rm -f ./boot/System.map-$a
+    popd >/dev/null 2>&1
+  done
+popd >/dev/null 2>&1
+
+# Update TZ data
+echo "  Update timezone data"
+
+mkdir -p /tmp/tzdata-update
+tar -xf $TZ_TARBALL -C /tmp/tzdata-update
+pushd /tmp/tzdata-update >/dev/null 2>&1
+
+ZONEINFO=/usr/share/zoneinfo
+mkdir -pv $ZONEINFO/{posix,right}
+export count=0
+echo -n "  " > /dev/tty
+for tz in etcetera southamerica northamerica europe africa antarctica \
+    asia australasia backward pacificnew systemv; do
+  echo -n "  $tz" >/dev/tty
+  if [ $count -gt 4 ]; then
+    echo -en "\n  "> /dev/tty
+    count=0
+  else
+    count=$((count + 1))
+  fi
+  (
+    /usr/sbin/zic -L /dev/null   -d $ZONEINFO       -y "sh yearistype.sh" ${tz}
+    /usr/sbin/zic -L /dev/null   -d $ZONEINFO/posix -y "sh yearistype.sh" ${tz}
+    /usr/sbin/zic -L leapseconds -d $ZONEINFO/right -y "sh yearistype.sh" ${tz}
+  ) 2>&1 | grep -v warning
+done
+if [ $count -ne 0 ]; then
+  echo -en "\n"
+fi
+cp -av zone.tab iso3166.tab $ZONEINFO 2>&1 | sed -e 's/^/    /'
+popd >/dev/null 2>&1
+rm -rf /tmp/tzdata-update
+
+echo "Update 9 install is complete."

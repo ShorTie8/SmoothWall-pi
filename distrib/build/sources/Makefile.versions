@@ -1,0 +1,38 @@
+# SmoothWall Build system.
+#
+# (c) SmoothWall Ltd 2005
+#
+# This code is distributed under the terms of the GPL v2.
+
+# The system's kernel.
+KERNEL_MAJOR = 3
+KERNEL_MMR = $(KERNEL_MAJOR).16
+KERNEL_VER = $(KERNEL_MMR).63
+
+# The kernel version headers needed to build glibc
+# Unrelated to the system's kernel
+KERNELHEADER_MAJOR = 3
+KERNELHEADERVER = 3.4.104
+
+# The kernel version headers needed to build klibc-2.6.18
+# Unrelated to the system's kernel
+KLIBKERNVER = $(KERNELHEADERVER)
+
+K_RAW_VERSION = $(KERNEL_VER)
+K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
+
+KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K_RAW_VERSION).tar.xz
+KERNELHEADER_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNELHEADER_MAJOR).x/linux-$(KERNELHEADERVER).tar.xz
+
+FREESWAN_TYPE = libreswan
+FREESWAN_VER = 3.27
+
+IPTABLES_VER = 1.6.0
+XTABLES_ADDONS_VER = 2.10
+
+GMP_VER = 5.1.2
+MPFR_VER = 3.1.2
+MPC_VER = 1.0.1
+
+TCL_MM = 8.5
+TCL_VER = $(TCL_MM).11

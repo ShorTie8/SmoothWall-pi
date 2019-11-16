@@ -1,0 +1,26 @@
+diff --git a/configure b/configure
+index 95168bb..c31f831 100755
+--- a/configure
++++ b/configure
+@@ -5090,7 +5090,7 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
+ VERSION="0.98.5"
+ 
+ LC_CURRENT=7
+-LC_REVISION=22
++LC_REVISION=24
+ LC_AGE=1
+ LIBCLAMAV_VERSION="$LC_CURRENT":"$LC_REVISION":"$LC_AGE"
+ 
+diff --git a/m4/reorganization/version.m4 b/m4/reorganization/version.m4
+index ea263b2..f4fe8b1 100644
+--- a/m4/reorganization/version.m4
++++ b/m4/reorganization/version.m4
+@@ -3,7 +3,7 @@ dnl VERSION="devel-`date +%Y%m%d`"
+ VERSION="0.98.5"
+ 
+ LC_CURRENT=7
+-LC_REVISION=22
++LC_REVISION=24
+ LC_AGE=1
+ LIBCLAMAV_VERSION="$LC_CURRENT":"$LC_REVISION":"$LC_AGE"
+ AC_SUBST([LIBCLAMAV_VERSION])

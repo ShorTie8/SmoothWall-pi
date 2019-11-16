@@ -1,0 +1,45 @@
+--- newt-0.52.12/Makefile.in	2010-08-06 11:45:34.000000000 +0000
++++ newt-0.52.12.new/Makefile.in	2011-01-26 10:51:07.000000000 +0000
+@@ -50,7 +50,7 @@
+ TARGET=depend $(PROGS)
+ endif
+ 
+-all:	$(TARGET) _snackmodule.so
++all:	$(TARGET)
+ 
+ test:	test.o $(LIBNEWT)
+ 	$(CC) -g -o test test.o $(LIBNEWT) $(LIBS)
+@@ -67,14 +67,6 @@
+ showkey:	showkey.o $(LIBNEWT)
+ 	$(CC) -g -o showkey showkey.o $(LIBNEWT) $(LIBS)
+ 
+-_snackmodule.so:   snackmodule.c $(LIBNEWTSH)
+-	for ver in $(PYTHONVERS) ; do \
+-	    	mkdir -p $$ver ;\
+-	        $(CC) $(CFLAGS) -I/usr/include/$$ver $(SHCFLAGS) -c -o $$ver/snackmodule.o snackmodule.c ;\
+-		$(CC) --shared $(SHCFLAGS) -o $$ver/_snackmodule.so $$ver/snackmodule.o -L .  -lnewt ;\
+-	done
+-	touch $@
+-
+ whiptail: $(NDIALOGOBJS) $(LIBNEWTSH)
+ 	$(CC) -g -o whiptail $(NDIALOGOBJS) -L . -lnewt $(LIBS) -lpopt
+ 
+@@ -121,17 +113,12 @@
+ 	make -C po datadir=$(instroot)/$(datadir) install
+ 	install -m 644 -D libnewt.pc $(instroot)/$(pkgconfigdir)/libnewt.pc
+ 
+-install-sh: sharedlib $(WHIPTCLSO) _snackmodule.so
++install-sh: sharedlib $(WHIPTCLSO)
+ 	[ -d $(instroot)/$(libdir) ] || install -m 755 -d $(instroot)/$(libdir)
+ 	install -m 755 $(LIBNEWTSH) $(instroot)/$(libdir)
+ 	ln -sf $(LIBNEWTSONAME) $(instroot)/$(libdir)/libnewt.so
+ 	ln -sf $(LIBNEWTSH) $(instroot)/$(libdir)/$(LIBNEWTSONAME)
+ 	[ -n "$(WHIPTCLSO)" ] && install -m 755 whiptcl.so $(instroot)/$(libdir) || :
+-	for ver in $(PYTHONVERS) ; do \
+-	   [ -d $(instroot)/$(libdir)/$$ver/site-packages ] || install -m 755 -d $(instroot)/$(libdir)/$$ver/site-packages ;\
+-	   install -m 755 $$ver/_snackmodule.so $(instroot)/$(libdir)/$$ver/site-packages ;\
+-	   install -m 644 snack.py $(instroot)/$(libdir)/$$ver/site-packages ;\
+-	done
+ 
+ Makefile: newt.spec
+ 	echo "You need to rerun ./configure before continuing"

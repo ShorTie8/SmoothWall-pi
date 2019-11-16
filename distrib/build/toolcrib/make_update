@@ -1,0 +1,95 @@
+#! /bin/bash +h
+#
+# SmoothWall Build system.
+#
+# Parts (c) SmoothWall Ltd 2005
+# Parts (c) Neal P. Murphy, 2009
+#
+# This code is distributed under the terms of the GPL v2.
+
+# Turn off path caching.
+set +h
+
+# First, look for /build. If it ain't found, this probably is not a chroot
+#   jail, it was probably run manually, so die.
+#
+if [ ! -d "/build" ]; then
+  exit 1
+fi
+
+PATH=$PATH:${PWD}/toolcrib
+
+# At this point, we must assume we are in a chroot jail.
+
+# If an argument specified, build only that item. Otherwise, build everything.
+#
+if [ "$#" -eq 1 ]; then
+  UPDATE="$1"
+else
+  echo "You did not specify which Update to prepare!"
+  exit 1;
+fi
+
+# Now trap on exit, to be sure proc is unmounted. Note that this does not change
+#   the exit status of the shell (only an explicit exit would do that).
+#   This is needed so the host OS doesn't complain when shutting down.
+#
+trap "echo; echo \"Unmounting /proc\"; umount /proc >/dev/null 2>&1" EXIT
+
+# The right place, the right phase
+#
+cd /build
+export BUILD_PHASE="Update"
+
+# Be sure /proc is mounted
+#
+if grep proc /etc/mtab; then umount /proc >/dev/null 2>&1; fi
+mount -t proc proc /proc
+
+# Get our functions
+#
+source toolcrib/environment
+source toolcrib/functions
+
+set_build_environment
+
+# Set up parallel make
+#
+export JOBS_UP="-j 1"
+export JOBS_MP
+cpu_count
+
+# Save stdout
+exec 3>&1
+
+if [ ! -d sources/updates/update${UPDATE} ]; then
+  echo "Update$update working dir not found! Prepare the update first!"
+  exit 1
+else
+  set -x
+  pushd sources/updates/update${UPDATE} >/dev/null 2>&1
+
+  (
+    if [ -p ../../../crumbs/monpipe ]; then echo "-u update ${UPDATE}" > ../../../crumbs/monpipe; fi
+
+    # Clean first
+    make clean
+
+    echo "Prepare Update${UPDATE}"
+    make all
+    retCode=$?
+    if [ $retCode -eq 0 ]; then
+      echo "Update${UPDATE} preparation success"
+      echo "Update${UPDATE} preparation success" >&3
+    else
+      echo "Update${UPDATE} preparation FAILED"
+      tail -10 Update.out >&3
+      echo "Update${UPDATE} preparation FAILED" >&3
+      exit $retCode    # 123
+    fi
+  )  <${BUILD_IN} >Update.out 2>&1
+
+  popd >/dev/null 2>&1
+fi
+
+if [ -p crumbs/monpipe ]; then echo "Done End" > crumbs/monpipe; fi

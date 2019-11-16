@@ -1,0 +1,22 @@
+                         Smoothwall Boot Selection Help
+
+  Install Smoothwall Express:   install using the basic installer; you must
+                                have *one* HD and *one* CD; serial port and
+                                flash are not supported;
+  Install Smoothwall Express (Advanced):
+                                install using the advanced installer; choose
+                                the source and target drives; install from
+                                flash; see 'Other Options' to boot using
+                                serial console;
+
+  Other Options
+    VESA Console Options
+      Explore Hardware/System:  boot to a shell w/all devices ready;
+      Convert ISO to Bootable Flash:
+                                prepare a bootable flash to install;
+      Single-user (no udev):    boot to a shell without udev;
+
+    Serial Console Options:     use a serial port as the console; the
+                                options are otherwise described above;
+
+  Help:                         this text;

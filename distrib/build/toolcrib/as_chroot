@@ -1,0 +1,12 @@
+#! /bin/bash +h
+
+  . crumbs/build_environment
+
+  if [ "$1" == "" ]; then
+    CMD="/tools/bin/bash --rcfile /build/crumbs/build_environment +h"
+  else
+    CMD="$1"
+  fi
+
+  if [ `id -u` -eq 0 ]; then BCMD="bash"; else BCMD="sudo su"; fi
+  ${BCMD} -c "chroot \"..\" /tools/bin/env -i ${CMD}"

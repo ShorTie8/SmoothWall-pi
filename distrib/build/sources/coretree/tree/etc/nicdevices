@@ -1,0 +1,74 @@
+Intel(R) Gigabit Ethernet Network Driver|igb
+Driver for TI ThunderLAN based ethernet PCI adapters|tlan
+AMD8111 based 10/100 Ethernet Controller. Driver Version 3.0.7|amd8111e
+KS8851 MLL Network driver|ks8851_mll
+Packet Engines Yellowfin G-NIC Gigabit Ethernet driver|yellowfin
+Marvell Yukon 2 Gigabit Ethernet driver|sky2
+Tehuti Networks(R) Network Driver|tehuti
+Digital 21*4* Tulip ethernet driver|tulip
+Winbond W89c840 Ethernet driver|winbond-840
+Davicom DM910X fast ethernet driver|dmfe
+Sun HappyMealEthernet(HME) 10/100baseT ethernet driver|sunhme
+Broadcom 44xx/47xx 10/100 PCI ethernet driver|b44
+AceNIC/3C985/GA620 Gigabit Ethernet driver|acenic
+Myson MTD-8xx 100/10M Ethernet PCI Adapter Driver|fealnx
+Adaptec Starfire Ethernet driver|starfire
+SMC 83c170 EPIC series Ethernet driver|epic100
+RealTek RTL-8139 Fast Ethernet driver|8139too
+Solarflare Communications network driver|sfc
+QLogic ISP3XXX Network Driver v2.03.00-k5|qla3xxx
+Atheros 1000M Ethernet Network Driver|atl1e
+ServerEngines BladeEngine2 10Gbps NICDriver 2.101.205|be2net
+Packet Engines 'Hamachi' GNIC-II Gigabit Ethernet driver|hamachi
+PCI NE2000 clone driver|ne2k-pci
+Reverse Engineered nForce ethernet driver|forcedeth
+Silan SC92031 PCI Fast Ethernet Adapter driver|sc92031
+IC Plus IP1000 Gigabit Ethernet Adapter Linux Driver|ipg
+Broadcom NetXtreme II BCM5706/5708/5709/5716 Driver|bnx2
+NIU ethernet driver|niu
+Timberdale KS8842 ethernet driver|ks8842
+SysKonnect Gigabit Ethernet driver|skge
+JMicron JMC2x0 PCI Express Ethernet driver|jme
+Sun GEM Gbit ethernet driver|sungem
+Dave DNET Ethernet driver|dnet
+Broadcom Tigon3 ethernet driver|tg3
+RealTek RTL-8139C+ series 10/100 PCI Ethernet driver|8139cp
+Chelsio T3 Network Driver|cxgb3
+Generic support for MDIO-compatible transceivers|mdio
+Intel(R) 82576 Virtual Function Network Driver|igbvf
+Intel(R) PRO/1000 Network Driver|e1000e
+Intel(R) PRO/1000 Network Driver|e1000
+Sun Cassini(+) ethernet driver|cassini
+Atheros L1 Gigabit Ethernet Driver|atl1
+Atheros Fast Ethernet Network Driver|atl2
+Myricom 10G driver (10GbE)|myri10ge
+OpenCores Ethernet MAC driver|ethoc
+VMware vmxnet virtual NIC driver|vmxnet
+VMware vmxnet3 virtual NIC driver|vmxnet3
+Intel(R) 10 Gigabit PCI Express Network Driver|ixgbe
+Mellanox ConnectX HCA low-level driver|mlx4_core
+Mellanox ConnectX HCA Ethernet driver|mlx4_en
+Chelsio 10Gb Ethernet Driver|cxgb
+National Semiconductor DP8381x series PCI Ethernet driver|natsemi
+VIA Networking Velocity Family Gigabit Ethernet Adapter Driver|via-velocity
+HP CASCADE Architecture Driver for 100VG-AnyLan Network Adapters|hp100
+RealTek RTL-8169 Gigabit Ethernet driver|r8169
+QLogic 10 Gigabit PCI-E Ethernet Driver|qlge
+Neterion's X3100 Series 10GbE PCIe I/OVirtualized Server Adapter|vxge
+NetXen Multi port (1/10) Gigabit Network Driver|netxen_nic
+Cisco 10G Ethernet Driver|enic
+Broadcom NetXtreme II CNIC Driver|cnic
+3Com Typhoon Family (3C990, 3CR990, and variants)|typhoon
+D-Link DL2000-based Gigabit Ethernet Adapter|dl2k
+VIA Rhine PCI Fast Ethernet driver|via-rhine
+SiS 900 PCI Fast Ethernet driver|sis900
+Intel(R) PRO/100 Network Driver|e100
+RDC R6040 NAPI PCI FastEthernet driver|r6040
+Intel(R) PRO/10GbE Network Driver|ixgb
+National Semiconductor DP83820 10/100/1000 driver|ns83820
+Broadcom NetXtreme II BCM57710/57711/57711E Driver|bnx2x
+SiS sis190/191 Gigabit Ethernet driver|sis190
+Sundance Alta Ethernet driver|sundance
+Driver for PCnet32 and PCnetPCI based ethercards|pcnet32
+3Com 3c59x/3c9xx ethernet driver|3c59x
+Atheros 1000M Ethernet Network Driver|atl1c

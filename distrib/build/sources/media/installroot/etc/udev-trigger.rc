@@ -1,0 +1,18 @@
+#! /bin/bash
+
+# Be sure the dependencies are right before tickling udev.
+depmod -a
+
+# Wait for udev
+echo -e "${BOUL}Wait for udev to start${NO}"
+while :; do
+  ps |grep udev > /dev/null 2>&1
+  if [ $? -eq 0 ]; then break; fi
+  usleep 100000
+done
+
+echo -e "${BOUL}Trigger udev${NO}"
+/sbin/udevadm trigger
+/sbin/udevadm settle
+
+rm -f /tmp/trigger-lock

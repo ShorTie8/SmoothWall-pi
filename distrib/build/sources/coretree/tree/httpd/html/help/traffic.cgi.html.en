@@ -1,0 +1,468 @@
+<h2 class="help"><B><U>Quality of Service (QoS) for Smoothwall Express</U></B></h2>
+
+<h3 class="help">
+   Introduction
+</h3>
+
+<p class="help">
+Smoothwall's Quality of Service feature allows the administrator to control
+speed and precedence of network traffic exiting to and entering from the
+internet on the Red interface and (to alesser degree) traffic internally
+between the Green, Purple and Orange interfaces.
+</p>
+
+<p class="help">
+When traffic control (or QoS) is not enabled, the system deploys the
+Stochastic Fair Queuing (SFQ) discipline. By itself, this keeps traffic
+flowing fairly smoothly. But, for example, should you find your VoIP calls
+becoming erratic or your internet gaming suffering, enabling QoS should solve
+the problem. However, Linux traffic control can only do so much. It does not
+predictably partition bandwidth and does not enforce limits on individual user
+bandwidth very well. But on the positive side, Linux traffic control does
+enforce sharing and does repress bandwidth hogs reasonably well.</p>
+
+<p style="padding:1em; margin:2em 5em; border:2pt dashed black">
+  <i>
+    <b><span style="color:#b00000">CAUTION:</span></b>
+    Incorrect manipulation of the settings on the QoS page can cause traffic on
+    Smoothwall's red interface to stop flowing, or may significantly slow or
+    prevent some or all applications on the network from communicating smoothly.
+    Before you begin, write down your current working settings. Additionally, it
+    is highly recommended that you back up Smoothwall data before making changes
+    to QoS settings. If QoS settings cause severe network latency or bring traffic
+    to a crawl, disable QoS and return the QoS settings to their original values
+    before re-enabling QoS.
+  </i>
+</p>
+
+<h3 class="help">
+  Basic (Default) QoS Settings
+</h3>
+
+<p class="help">
+For some users, especially for small single household networks, the default
+settings in Smoothwall may be adequate for everyday use. The Smoothwall QoS
+window includes a check box that will disable or enable the QoS capability.
+<ol type="a">
+  <li class="help">
+    Check-box unchecked: Smoothwall's default setting is 'QoS off ' (check-box
+    unchecked). With QoS off, each NIC and its corresponding interface uses
+    Stochastic Fair Queuing (SFQ) network traffic management.  SFQ is a
+    traffic management algorithm that assigns each type of traffic flow into a
+    specific Queue. Once assigned, each Queue is enabled one packet at a time
+    in a round robin fashion for complete fairness. SFQ might be perfectly
+    acceptable for household networks with high speed internet connections and
+    traffic usage consisting of simple e-mail, web-surfing and streaming video
+    or music. 
+  </li>
+  <li class="help">
+    Check-box Checked: In networks where extensive and varied types of
+    information flows are common, QoS settings may be used to optimize traffic
+    flow though the network. Use of Voice Over IP (VoIP),  high-speed gaming,
+    or networks with many users may see an improvement in network throughput
+    if QoS management is enabled and correctly implemented. If you determine
+    that changes are warranted, write down your original QoS settings that are
+    working now, and backup your Smoothwall system before making changes. 
+  </li>
+</ol>
+
+<h3 class="help">
+  Develop Custom QoS Settings For Your Network.
+</h3>
+
+<p class="help">
+  Linux QoS can be a difficult concept to master. If the default settings do not meet your needs, the following tutorial may benefit you. The outline of the discussion is as follows:
+</p>
+<ol type="a" style="margin-top:0">
+<li class="help">Background</li>
+<ol type="1">
+  <li class="help">Classes (Types of Traffic Flow)</li>
+  <li class="help">Priorities (Traffic Preferences)</li>
+</ol>
+<li class="help">Change the settings (manipulate three values for correct operation)</li>
+<ol type="1">
+  <li class="help">Understand the rules</li>
+  <li class="help">Understand exceptions</li>
+  <li class="help">Set RED's bit rate</li>
+  <li class="help">Set the internal bit rate</li>
+  <li class="help">Mind the priorities</li>
+</ol>
+</ol>
+
+<h4 class="help">
+  Background
+</h4>
+<p class="help">
+      <b>Linux Traffic Classes</b> answer the question, "What kinds of
+      traffic are to be transmitted?"
+</p>
+<p class="help">
+      For Linux, Smoothwall and other
+      software systems, identifying different types of traffic on today's
+      internet is extremely difficult. In reality, traffic identification is not
+      required. In previous years, internet traffic was identified by the port
+      number stated in the packet. However, the concept of 'port as service' is
+      fading. With so many services now operating over HTTP, it is difficult to
+      determine traffic type without peering inside their packets. Additionally,
+      with the explosion of encrypted traffic such as SSL and TLS encryption,
+      packet inspection is impossible. Not to worry! Even though traffic types
+      passing through the network can't be positively identified, Smoothwall has
+      the capability to coarsely balance traffic without knowing the traffic type of
+      individual packets.
+</p>
+      <ul class="help">
+        <li class="help">DNS</li>
+        <li class="help">Email</li>
+        <li class="help">FTP</li>
+        <li class="help">Gaming</li>
+        <li class="help">Instant Messaging</li>
+        <li class="help">Multimedia</li>
+        <li class="help">Netnews</li>
+        <li class="help">P2P</li>
+        <li class="help">SSH</li>
+        <li class="help">VNC</li>
+        <li class="help">VPN</li>
+        <li class="help">VoIP</li>
+        <li class="help">Web</li>
+      </ul>
+
+<p class="help">
+      <b>Linux Traffic Priorities</b> answer the question, "When is queued
+      traffic to be sent?"
+</p>
+<p class="help">
+        Smoothwall works with four
+        priorities of service for traffic control management. These priorities
+        determine when packets are dequeued when there is contention for
+        bandwidth.
+</p>
+      <ul class="help">
+        <li class="help">Priority 0: The isochronous priority (level 0) handles VoIP traffic.
+          Because higher priority flows might starve those at lower priorities,
+          you are strongly cautioned to assign priority zero only to the flows
+          that need limited bandwidth and cannot tolerate jitter or delay (like
+          VoIP).
+        </li>
+        <li class="help">Priority 1: The High priority (level 1) handles DNS traffic by
+          default. Because higher priority flows could starve those at lower
+          priorities, you are strongly cautioned to give only flows that need
+          limited bandwidth (like DNS) priority one.
+        </li>
+        <li class="help">Priority 2:  The Normal priority (level 2) handles the vast majority
+          of network traffic. It may use all bandwidth not consumed by priorities
+          0 and 1.
+        </li>
+        <li class="help">Priority 3:  The Low priority level (level 3) handles traffic that is
+          almost utterly insensitive to time constraints (such as instant
+          messaging (IM) and peer-to-peer (P2P) data sharing traffic). Low
+          priority traffic gets all bandwidth, if any, that was unused in
+          priorities 0, 1 and 2.
+        </li>
+      </ul>
+
+<h4 class="help">
+  Change the Settings In the Smoothwall QoS Window
+</h4>
+
+<p class="help">
+  <u>Understand the rules (set priorities)</u>&mdash;Each
+  rule represents a class of traffic. Additional classes include local
+  (internal) traffic, firewall admin traffic, squid (proxy) traffic, and small
+  packets (100 bytes or less). With four exceptions (discussed below), all
+  classes that have packets queued will equally share the available bandwidth.
+  With these same four exceptions, each class may use 100% of the available
+  bandwidth when no other traffic is queued. Based on the previous stated
+  condition&ndash;that each class may use 100% of bandwidth&ndash;you should only assign
+  high or isochronous priority to classes that you know with certainty will
+  never use more than a small portion of bandwidth. All classes other than
+  VoIP and DNS can be assigned low priority as desired.
+</p>
+
+<p class="help">
+  <u>Understand exceptions</u>&mdash;The following classes of traffic are constrained
+    from using 100% of available bandwidth.
+</p>
+<ul class="help">
+  <li class="help">
+    <b>VoIP&mdash;</b>VoIP traffic gets a 64kb/s share of bandwidth and may
+    use up to 128kb/s. This guarantees that VoIP traffic will never hog internet bandwidth.
+  </li>
+  <li class="help">
+    <b>DNS&mdash;</b>DNS traffic gets the same share of bandwidth that all
+    'normal' priority traffic gets, and may use up to 10% of this bandwidth. 
+    This limit is similar to VoIP restrictions above, this rule prevents DNS
+    (and other flows using port 53) from hogging internet bandwidth.
+  </li>
+  <li class="help">
+    <b>Small Packets&dash;</b>Packets of less than 100 bytes or so have their
+    own class; they receive the same equal share of the bandwidth up to a
+    maximum of 20% of the available bandwidth.
+  </li>
+  <li class="help">
+    <b>Local traffic&mdash;</b>Internal traffic on in and between each
+    Smoothwall interface is a special case. It is all lumped together; it is
+    assumed that the SFQ queueing discipline will enforce bandwidth sharing.
+    Local traffic receives all of the 'internal' bandwidth less RED's download
+    speed as its share and may use 100% in the absence of traffic from RED.
+  </li>
+</ul>
+
+<p class="help">
+  <u>Set the bit rates for RED</u>
+</p>
+<ul class="help">
+  <li class="help">
+    Data entry format&mdash;The bit rate numbers entered into the QoS
+    page's form must be a plain, unadorned integer; e.g. 3600000, 34300000,
+    123000, 55400. Remember that, in communication, multipliers are always
+    decimal; 'k' is 1000, 'M' is 1 000 000, and 'G' is 1 000 000 000. 
+  </li>
+  <li class="help">
+    Determine interface maximum upload and download bit rates&mdash;In
+    order for Smoothwall QoS to work, you must determine the maximum observed
+    long-term upload and download bit rates for your internet connection.
+    Ignore the short high-speed burst some ISP's give to their customers; it
+    causes more problems than it's worth.  As an alternative, you can use any
+    of the 'internet speed test' sites to perform these test transfers. 
+  </li>
+  <li class="help">
+    Download Rate&mdash;Start a huge download (a few hundred MiB is
+    good). Go to the bandwidth bars UI page and observe the incoming rate;
+    wait for the high speed boost, if any, to end. 
+  </li>
+  <li class="help">
+    Upload Rate&mdash;Next start a large upload and observe the
+    outgoing bit rate. Wait for the 'courtesy burst' to end and enter that
+    value in the QoS form
+  </li>
+</ul>
+
+<p class="help">
+  <u>Set the bit rates for internal interfaces (GREEN, ORANGE and
+  PURPLE)</u>&mdash;Enter the maximum observed maximum bit rate of your
+  network interfaces.  These interface speeds are rarely the NIC's advertised
+  speed. For example, most 100Mb/s NIC will max out at 90-95Mb/s on a Linux
+  system. GigE NICs that connect to a PCI slot should max out at 150-250Mb/s
+  (the limit of the PCI bus). GigE NICs that connect to PCI-E can top out at
+  600-960Mb/s. 10Mb/s NIC may have a hard time getting over 8-9Mb/s. Every
+  system is different; thus the bit rates must be observed and manually
+  entered. There are no predefined rates to select. If you cannot transfer
+  data fast enough to find the limit, use one of the above 'defaults'; you can
+  always adjust it later.
+</p>
+
+<p style="padding:1em; margin:2em 5em; border:2pt dashed black">
+  <i>
+    <b><span style="color:#b00000">Note:</span></b>
+    Be aware that inter-zone traffic control is suboptimal; traffic arriving
+    from a gigE NIC could easily flood a destination 10Mb/s or 100Mb/s link.
+    If you have a gigE NIC on one internal zone and a 100Mb/s NIC on another
+    and a lot of inter-zone traffic, you may find it better to use the slower
+    NIC's observed bit-rate.
+  </i>
+</p>
+
+<p class="help">
+  <u>Mind the priorities</u>&mdash;The default priorities (traffic flows)
+  for the supplied rules should be adequate for most users. Again, be very
+  careful when changing the priorities; you can easily starve many users of
+  bandwidth. Most traffic is in the normal priority because most flows are of
+  the 'unlimited' variety or cannot be distinguished from bursty or
+  rate-limited data flows. For example, HTTP and email are typically bursty,
+  but when they transfer large files, they do so without limit and can hog
+  bandwidth. Interactive SSH is safe at high priority until a large amount of
+  data are transferred across the link. SSH file transfer (scp, sftp), and git
+  over SSH and SSH tunnels are also unlimited, indistinguishable from
+  interactive SSH and can starve other flows.
+</p>
+
+<h3 class="help">
+   End Notes
+</h3>
+<ol class="help">
+  <li class="help">
+    Avoid the temptation to set the observed bit rates too high. Once outgoing
+    packets begin to pile up, it becomes very easy for any single flow to hog
+    the bandwidth, regardless of how QoS is configured.
+  </li>
+  <li class="help">
+    this rule. Other, 'unlimited' traffic might also have 'EF' option set. But
+    this should be OK because isochronous traffic cannot use more than 128kb/s
+    of upload or download.
+  </li>
+  <li class="help">
+    If you want to disable a rule, change the priority to '(disabled)' for
+    that rule. Such traffic will go into the default class (defined as
+    'Traffic that does not match the rules below....')
+  </li>
+  <li class="help">
+    Last word: If you have a gigE link feeding a gigE link, this queuing is
+    almost immaterial because packets are never queued. 'Almost' because the
+    queuing acts as a tie breaker should higher and lower priority packets
+    arrive almost at the same time. But when you have a faster link feeding a
+    slower link, the queuing makes all the difference.
+  </li>
+</ol>
+
+<h3 class="help">
+   Linux Traffic Control Theory
+</h3>
+<ol class="help">
+  <li class="help">
+    When QoS is NOT enabled, stochastic fair queuing (SFQ) is used on each NIC
+    (and VPN tap). SFQ prevents any single data flow from hogging all the
+    bandwidth. SFQ should be a good solution for most residential or Small
+    Office/Home Office installations. But when the admin determines that
+    additional control is needed, then QoS can be enabled on Smoothwall
+    Networking tab.
+  </li>
+  <li class="help">
+    QoS prioritizes the flows so that Linux transmits VoIP before DNS, and DNS
+    before most other traffic. IM and peer-to-peer traffic have the lowest
+    priority. QoS also enforces bandwidth sharing among the different types of
+    flows. For example, with QoS enabled, traffic flow is allocated in
+    accordance with the following table:
+  </li>
+</ol>
+
+    <table class="help" cellspacing="0" style="font:sans; border:solid black 1px">
+      <tr><th class="help" colspan=4 style="text-align:center">Smoothwall QoS</th></tr>
+      <tr>
+        <th class="help">Priority</th>
+        <th class="help">Type</th>
+        <th class="help">Example</th>
+        <th class="help">Bandwidth (B/W) Limit</th>
+      </tr>
+      <tr>
+        <td class="help">0 <i>(zero)</i></td>
+        <td class="help">Isochronous</td>
+        <td class="help">Voice over IP, digital audio</td>
+        <td class="help">Always first to be transmitted, can use up to 128kb/s B/W</td>
+      </tr>
+      <tr>
+        <td class="help">1</td>
+        <td class="help">High</td>
+        <td class="help">DNS</td>
+        <td class="help">10% of total bandwidth; transmitted after queued priority 0 packets</td>
+      </tr>
+      <tr>
+        <td class="help">2</td>
+        <td class="help">Normal</td>
+        <td class="help">All traffic not assigned to other priorities</td>
+        <td class="help">100% of total bandwidth less that used by priorities 0 and 1;
+            transmitted after queued priority 0 and 1 packets</td>
+      </tr>
+      <tr>
+        <td class="help">3</td>
+        <td class="help">Low</td>
+        <td class="help">IM and Peer2Peer<br />Traffic that is almost utterly insensitive to
+            time constraints (such as instant messaging (IM) and peer-to-peer
+            (P2P) data sharing traffic).</td>
+        <td class="help">100% of total bandwidth less that used by priorities 0, 1 and 2.
+            Transmitted after queued priority 0, 1 and 2 packets.</td>
+      </tr>
+    </table>
+
+<div style="margin:3em 1em 1em 1em; padding:4pt; background-color:#efefef; border:solid black 2px">
+<h3 class="help" style="margin:0">
+   A Simply Analogy For Smoothwall QoS
+</h3>
+<p class="help">
+  There is a hypothetical football stadium. (This could've been a classic
+  GASP_IV queueing theory simulation problem.)
+</p>
+
+<h4 class="help">
+  Stadium Description
+</h4>
+<ul class="help">
+  <li class="help">The stadium has a revolving entrance door that allows one
+    person through every two seconds (it's a fast door).</li>
+  <li class="help">There are 5 turnstyles that feed the door.</li>
+  <li class="help">10 people per cycle may enter.</li>
+  <li class="help">Thus a cycle lasts 20 seconds.</li>
+</ul>
+
+<h4 class="help">
+  Turnstyle Description
+</h4>
+<ul class="help">
+  <li class="help">The turnstyles are equivalent to the QoS rules (classes).</li>
+  <li class="help">The first turnstyle (TS) is for security guards on their
+    regular patrols. They're allowed through up to three at a time.
+    (Equivalent to up to three isochronous VoIP calls.)</li>
+  <li class="help">The second TS is for VIPs. They're allowed up to two at a
+    time. (Equivalent to high priority DNS traffic.)</li>
+  <li class="help">The third TS is for rabid fans. They arrive in groups of up
+    to 10. On average, they're allowed one at a time, but up to 10 may burst
+    in at any given time. The next rabid group must wait for the 'rabid fans'
+    share to recharge. (Equivalent to normal priority 'bursty' HTTP traffic.)</li>
+  <li class="help">The fourth TS allows at least one person at a time to pass.
+    (Equivalent to normal priority 'default' traffic.)</li>
+  <li class="help">The fifth TS queues 'cheap ticket' (CT) holders who may
+    enter only when no one else waits. (Equivalent to low priority P2P
+    traffic.)</li>
+</ul>
+
+<h4 class="help">
+  Operation Cycles
+</h4>
+<ol class="help" type="1">
+  <li class="help">A guard has just arrived, and a VIP awaits, as does a group
+    of 6 rabid fans. TSes 4 and 5 have fans waiting. The guard and the VIP are
+    allowed in. The six rabid fans pass through. TS 4 allows two fans to
+    enter.</li>
+  <li class="help">A VIP waits, and group of 10 rabid fans waits. The VIP is
+    allowed through. The rabid fans have to wait until 6 people have passed.
+    TS 4 allows 9 fans to enter.</li>
+  <li class="help">The group of 10 rabid fans passes through.</li>
+  <li class="help">A VIP waits, a single rabid fan waits, and there are fans
+    in TS 4 and 5. The VIP passes. The single rabid fan waits because the
+    previous group used 10 slots. TS 4 allows 9 fans to enter. The CT fans
+    still wait.</li>
+  <li class="help">There is the single rabid fan waiting and eleven cheap ticket
+    fans. The single rabid fan enters (because 10 other people have passed). 9
+    cheap ticket fans are allowed to enter.</li>
+  <li class="help">12 CT fans wait. 10 are allowed in.</li>
+  <li class="help">Two VIPs, two fans and two CT fans wait. Both VIPs are
+    allowed in, both fans are allowed in, and both CT fans are allowed in.</li>
+  <li class="help">A group of 5 rabid fans waits, and 5 CT fans wait. The
+    rabid fans pass through, and the CT fans enter.</li>
+  <li class="help">2 fans and 12 CT fans wait. The 2 fans pass through. 8 CT
+    fans pass through.</li>
+  <li class="help">20 fans and 10 CT fans wait. 10 fans are allowed through.</li>
+  <li class="help">Three guards just arrived, a group of 5 rabid fans waits
+    and 20 fans and 20 CT fans wait. The guards pass, the group of rabid fans
+    passes as do 2 fans.</li>
+  <li class="help">A VIP, 20 fans and 30 CT fans wait. The VIP and 9 fans pass.</li>
+  <li class="help">11 fans and 30 CT fans wait. 10 fans pass.</li>
+  <li class="help">1 fan and 40 CT fans wait. The one fan and 9 CT fans pass.</li>
+  <li class="help">35 CT fans wait. 10 pass.</li>
+  <li class="help">25 CT fans wait. 10 pass.</li>
+  <li class="help">A group of 10 rabid fans waits, as do 15 CT fans. The rabid fans pass.</li>
+  <li class="help">20 CT fans wait. 10 pass.</li>
+  <li class="help">A VIP and 12 CT fans wait. The VIP and 9 CT fans pass.</li>
+  <li class="help">3 fans and 6 CT fans wait. The 3 fans pass, then the 6 CT fans enter.</li>
+  <li class="help">Two guards arrive and continue their patrols.</li>
+  <li class="help">4 rabid fans, 4 fans, and 2 CT fans have arrived. The rabid
+    fans pass, the 4 fans pass, and the 2 CT fans pass.</li>
+  <li class="help">...</li>
+</ol>
+
+<h4 class="help">
+  Summary
+</h4>
+<p class="help">
+  You can see how the guards (VoIP) are always allowed through first, and you
+  can see how the VIPs (DNS) are allowed through next. You can see how rabid
+  fans (HTTP) are allowed through in bursts, but their overall entry rate is
+  held constant. You can see that normal fans (default traffic) can use
+  whatever slots are left. And you can see that cheap ticket fans (low
+  priority traffic) wait until there is some leftover bandwidth and that they,
+  too, can use all available bandwidth.
+</p>
+
+<p class="help">
+  Simplistically, this is how Linux Traffic Control (or QoS) works.
+</p>
+</div>

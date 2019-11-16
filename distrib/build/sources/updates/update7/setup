@@ -1,0 +1,27 @@
+#!/bin/sh
+
+OLD_KERNEL=3.4.109
+KERNEL_VERSION=3.4.112
+
+echo "Install Update 7."
+
+# Unpack the patch
+/usr/bin/tar xvf patch.tar.gz -C /
+
+# Leave these for a few generations, just in case.
+echo "  Fix logrotate config file modes"
+chmod 644 /etc/logrotate.{base,conf,d/*}
+echo "  Remove unused file 'acl'"
+/bin/rm -f /var/smoothwall/proxy/acl
+echo "  Fix /var/run"
+chmod 1777 /var/run
+
+echo "  Patch httpd.conf to fix excessive logging and magic file"
+/bin/bash patch-apache-conf.sh
+
+echo "  Configure stock proxy to use the faster aufs instead of diskd"
+# This should not affect the filtering mod's config.
+/usr/bin/smoothwall/writeproxy.pl
+# Don't bother to restart squid since a reboot is required anyway to use the new libs.
+
+echo "Update 7 install is complete."

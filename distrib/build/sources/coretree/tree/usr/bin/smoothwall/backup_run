@@ -1,0 +1,194 @@
+#! /bin/bash
+
+# AGCL/FS Backup
+#
+# Copyright 2011, Neal P. Murphy
+#
+# This program is licensed under the terms of the GNU Public License, version 2.
+
+# backup_run
+#   The actual backup operation. It is performed 'now' or at time TIME
+
+
+# Usage statement
+if [ "$1" != "RunByBackupDaemonOrSys" ]; then
+  echo "This program is designed to be run by backup_daemon and backup_sys."
+  echo "Do not run it by itself!"
+  exit 1
+fi
+AUTOBACK=$2
+
+#############
+# Main code #
+#############
+
+# Prepare a bunch of shorthand vars
+ROOTDIR=/var/smoothwall
+
+# First and foremost, set PATH for security
+PATH=/usr/smoothwall/bin:/bin:/usr/bin
+
+relROOTDIR=${ROOTDIR/\//}
+BACK_DIR=${ROOTDIR}/backup
+relBACK_DIR=${relROOTDIR}/backup
+DEV_FILE="${BACK_DIR}/devices"
+BACK_FLAG="${BACK_DIR}/flag"
+BACK_HIST="${BACK_DIR}/history"
+BACK_SETTINGS="${BACK_DIR}/settings"
+
+# If on AGCL FS, use the included tar that knows about ACLs and XATTRs.
+#TARCMD="tar-`uname -m`"
+#XATTRS=" --xattrs"
+
+# If on normal GNU/Linux, use the standard tar
+TARCMD="tar"
+XATTRS=
+
+# Get function defs
+. /usr/lib/smoothwall/backup_functions
+
+# Get the system pedigree
+. ${ROOTDIR}/main/productdata
+
+# Get the backup media IDs and other settings
+. ${BACK_SETTINGS}
+
+HOST=`uname -n`
+DATE=`date +"%Y-%m-%d"`
+TIME=`date +"%H:%M:%S"`
+
+# Always exclude these from the backup; they are never needed in a restore
+EXCLUDES="( -path ./proc -prune -o -path ./dev -prune -o -path ./sys -prune"
+# The mount point and temp backup files aren't needed either.
+EXCLUDES="$EXCLUDES -o -path .${ROOTDIR}/backup/tmp -prune -o -path ./backup -prune"
+EXCLUDES="$EXCLUDES -o -path .${ROOTDIR}/backup/DISABLE_DAEMON -prune -o -true )"
+
+INOTIFY_CMD="inotifywait -q"
+
+# Go to the working dir
+cd $BACK_DIR
+
+# Read the node info
+read NODE < ${DEV_FILE}
+devID=${NODE/-part1/}
+NODE="disk/by-id/$NODE"
+tmp=`readlink /dev/disk/by-id/$devID`
+simpleDev=`basename $tmp`
+
+
+# Make and mount
+MOUNT_PT=/backup
+mkdir -p $MOUNT_PT
+mountFAIL=0
+mount /dev/$NODE $MOUNT_PT >/dev/null 2>&1 || mountFAIL=1
+
+# Fail if couldn't mount; continue with backup otherwise
+if [ $mountFAIL -eq 1 ]; then
+  # Darn; we didn't suck seed
+  feedback $AUTOBACK "Couldn't mount the backup medium. Please verify that it is partitioned\nand contains a good filesystem."
+  callAudible /usr/bin/sounds/mount_failed.bps
+
+else
+
+  # It's mounted, so continue
+  callAudible /usr/bin/sounds/mount_succeeded.bps
+
+  rm -rf ${BACK_DIR}/tmp
+  mkdir ${BACK_DIR}/tmp
+
+  # Determine backup type
+  backupType
+
+  if [ -z "$BTYPE" ]; then
+    # If the device is somehow unknown, whimper.
+    callAudible /usr/bin/sounds/mount_failed.bps
+    feedback $AUTOBACK "Unknown medium '$devID'! Can't execute backup!"
+
+  else
+    # Good type, proceed with backup
+    for BACKUP_TYPE in $BTYPE; do
+      # Set the flag file names
+      FNAME="${HOST}_${DATE}_${PRODUCT}_${VERSION}_${REVISION}_${BACKUP_TYPE}"
+      HNAME="${relBACK_DIR}/tmp/${FNAME}"
+      touch /${HNAME}.tarhead
+      touch /${HNAME}.tarheel
+      # And set the files to back up
+      setFiles
+
+      # Midnight today (the moment it became 'today')
+      NOW=`date -d "0:0" "+%Y-%m-%d"`
+
+##############################################################33
+# Handle date for incremental saves      
+##############################################################33
+      # Need time constraint if incremental
+      if [ "$BACKUP_TYPE" == "incremental" ]; then
+        OIFS=$IFS; IFS=" ="
+        set `tail -1 $BACK_HIST`
+        IFS=$OIFS
+        LAST=$5
+        # In case never backed up
+        if [ "$LAST" == "" ]; then LAST=`date -d 'last week' "+%Y-%m-%d"`; fi
+        incrementalOPT="-o ( -newermt $LAST -o -newerct $LAST ) -print"
+      else
+        incrementalOPT="-print"
+      fi
+      
+      # Get the list of files
+      feedback $AUTOBACK "Finding files to back up"
+      sleep .5
+      (
+        cd /; 
+        find "${FILES_TO_SAVE[@]}" ${EXCLUDES} '!' -type s ${incrementalOPT}
+      ) > /${HNAME}.list #2>/dev/null
+
+      # Get the number of files
+      typeset -i i FILECOUNT
+      FILECOUNT=`cat /${HNAME}.list | wc -l`
+
+      i=0
+      if [ $AUTOBACK == "MANUAL" ]; then echo; fi
+
+      # Finally, why we're here.
+      (
+        cd /
+        ${TARCMD} cvfz ${MOUNT_PT}/${FNAME}.tar.gz \
+            --no-recursion --ignore-failed-read$(XATTRS) \
+            -T ${HNAME}.list \
+            #2>/dev/null
+      ) | while read a; do
+        i=i+1
+        feedback $AUTOBACK "$i/$FILECOUNT: $a" "same"
+      done
+      feedback $AUTOBACK "${BACKUP_TYPE} backup complete."
+      sleep 1
+    done
+    rm -rf ${BACK_DIR}/tmp
+
+    # Unmount
+    feedback $AUTOBACK "Unmounting backup device."
+    sleep .5
+    (sleep .5; umount $MOUNT_PT >/dev/null 2>&1)&
+    inotifywait -q -e unmount $MOUNT_PT >/dev/null 2>&1
+    while grep -q " $MOUNT_PT " /proc/mounts; do sleep .1; done
+
+    # Flush the buffers out to the drive.
+    feedback $AUTOBACK "Waiting for backup device to become idle."
+    sync
+    (
+      typeset -i i; i=0;
+      while true; do
+        set `cat /sys/block/$simpleDev/stat`
+        if [ "$9" -eq 0 ]; then i=i+1; fi
+        if [ $i -ge 10 ]; then break; fi
+        sleep .1
+      done
+    )
+
+
+    rmdir $MOUNT_PT
+  fi  # type is good
+fi  # medium mounted
+
+feedback $AUTOBACK "Backup complete."
+sleep 2

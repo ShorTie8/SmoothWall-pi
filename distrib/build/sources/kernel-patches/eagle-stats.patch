@@ -1,0 +1,67 @@
+--- eagle-usb-2.3.2/driver/eu_main.c	2005-09-25 12:46:59.000000000 +0100
++++ eagle-usb-2.3.2.new/driver/eu_main.c	2005-09-25 12:49:10.000000000 +0100
+@@ -1760,8 +1760,6 @@
+      * If this output needs to be larger than 4K (PAGE_SIZE), we need to do this
+      * differently
+      */
+-    p += sprintf(p, "eagle-usb status display\n");
+-    p += sprintf(p, "-------------------------------------------------------------\n");
+     p += sprintf(p, "Driver version %s     Chipset: Eagle%1.1d\n",
+                  EAGLEUSBVERSION, chipset_version);
+     
+@@ -1777,7 +1775,7 @@
+                       ins->usbdev->descriptor.idProduct,
+                       ins->usbdev->descriptor.bcdDevice);
+ #endif
+-        p += sprintf(p, "USB Bus : %03d\t USB Device : %03d\t Dbg mask: 0x%x\n",
++        p += sprintf(p, "USB Bus : %03d USB Device : %03d Dbg mask: 0x%x\n",
+                      ins->usbdev->bus->busnum, ins->usbdev->devnum, module_dbg_mask);
+     }
+     
+@@ -1793,19 +1791,19 @@
+                  ins->mac[0],ins->mac[1],ins->mac[2],ins->mac[3],ins->mac[4],
+                  ins->mac[5]);
+     
+-    p += sprintf(p, "Tx Rate  %10d  Rx Rate  %10d\n",
++    p += sprintf(p, "Tx Rate  %8d  Rx Rate  %8d\n",
+                  ins->AdiModemSm.UpRate / 1024, 
+                  ins->AdiModemSm.DownRate / 1024);
+-    p += sprintf(p, "FEC      %10d  Margin   %10d  Atten    %10d dB\n",
++    p += sprintf(p, "FEC      %8d  Margin   %8d  Atten    %8d dB\n",
+                  ins->AdiModemSm.stats_Uncorr_Blks,
+                  ins->AdiModemSm.stats_Cur_SNR & 0xFF,
+                  (ins->AdiModemSm.stats_Cur_Atten & 0xFF)/2);
+-    p += sprintf(p, "VID-CPE  %10d  VID-CO   %10d  HEC      %10d\n",
++    p += sprintf(p, "VID-CPE  %8d  VID-CO   %8d  HEC      %8d\n",
+                  ins->AdiModemSm.INFO14,
+                  ins->AdiModemSm.INFO08,
+                  ins->AdiModemSm.DIAG03);
+ 
+-    p += sprintf(p, "VPI      %10d  VCI      %10d  Delin         ", 
++    p += sprintf(p, "VPI      %8d  VCI      %8d  Delin          ", 
+                  ins->Vc.vpi, ins->Vc.vci);
+ 
+     /*Delineation is the only one where we print a string instead of a number*/
+@@ -1816,18 +1814,18 @@
+ 	    p += sprintf(p, " LOSS\n");
+ 	else
+ 	    p += sprintf(p, " GOOD\n");
+-    p += sprintf(p, "Cells Tx %10d  Cells Rx %10d\n",
++    p += sprintf(p, "Cells Tx %8d  Cells Rx %8d\n",
+                  ins->Statistics[STAT_CELLS_TX],
+                  ins->Statistics[STAT_CELLS_RX]);
+-    p += sprintf(p, "Pkts Tx  %10d  Pkts Rx  %10d\n",
++    p += sprintf(p, "Pkts Tx  %8d  Pkts Rx  %8d\n",
+                  ins->Statistics[STAT_PAKTS_TX],
+                  ins->Statistics[STAT_PAKTS_RX]);
+-    p += sprintf(p, "OAM      %10d  Bad VPI  %10d  Bad CRC  %10d\n",
++    p += sprintf(p, "OAM      %8d  Bad VPI  %8d  Bad CRC  %8d\n",
+                   ins->Statistics[STAT_CELLS_OAM_RCVD],
+                   ins->Statistics[STAT_CELLS_LOST_VPIVCI],
+                   ins->Statistics[STAT_CELLS_LOST_CRC]
+                   );
+-    p += sprintf(p, "Oversiz. %10d\n\n",
++    p += sprintf(p, "Oversiz. %8d\n\n",
+                 ins->Statistics[STAT_CELLS_LOST_OTHER] );
+     
+     switch (ins->AdiModemSm.CurrentAdiState)

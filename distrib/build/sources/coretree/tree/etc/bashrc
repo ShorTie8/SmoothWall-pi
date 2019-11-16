@@ -1,0 +1,53 @@
+# /etc/bashrc
+
+# System wide functions and aliases
+# Environment stuff goes in /etc/profile
+
+colors=$(tput colors 2> /dev/null || echo 0)
+if [ "$TERM" = 'xterm' ] && [ "$colors" -ge 8 ]; then
+	# Anything pretending to be xterm (including xterm) gets xterm's
+	# 256-color mode; terminfo doesn't know better.
+	# Terminal.App sometimes claims to be xterm-color and only supports 8
+	# colors, interpreting 256-color escapes as flashing.
+	# xterm-256color *is* known by tput to already be 256-color.
+	colors=256
+fi
+
+# To disable automatic colored prompts, uncomment the following line:
+#colors=0
+
+if [ "$colors" -ge 8 ]; then
+	if [ "$colors" -ge 256 ]; then
+		# Express 256 color scheme
+		# (based on site colors of #812610 and #f8b74c, slightly red-boosted)
+		PS1='\[\033[38;5;130m\][\[\033[01m\]\u@\[\033[01;38;5;214m\]\h\[\033[00;38;5;214m\] \W]\$\[\033[00m\] '
+	else
+		# Express ANSI color scheme
+		PS1='\[\033[33m\][\u@\[\033[01m\]\h\[\033[00;33m\] \W]\$\[\033[00m\] '
+	fi
+else
+	# Can't do color so make it plain.
+	PS1='[\u@\h] \W]\$ '
+fi
+
+VIM="/usr/share/vim"
+
+alias ls='ls --color=tty -F -b -T 0'
+
+# Adapted from Steve McNeill's ModInstall
+# Include mods' /bin directories in PATH; but only add each one once.
+# FM: trailing / matches only dirs; nullglob says return nothing when there's nothing.
+shopt -s nullglob
+for i in /var/smoothwall/mods/*/bin/; do
+    [[ ":$PATH:" == *":${i/bin\//bin}:"* ]] || PATH=$PATH:$i
+done
+
+# PYTHONPATH
+export PYTHONPATH=/usr/lib/python2.7
+for i in /var/smoothwall/mods/*/usr/lib/python2.7; do
+    [[ ":$PYTHONPATH:" == *":${i/usr\/lib\/python2.7\//usr\/lib\/python2.7}:" ]] || PYTHONPATH=$PYTHONPATH:$i
+done
+for i in /var/smoothwall/mods/*/lib/python2.7; do
+    [[ ":$PYTHONPATH:" == *":${i/lib\/python2.7\//lib\/python2.7}:" ]] || PYTHONPATH=$PYTHONPATH:$i
+done
+shopt -u nullglob
