@@ -11,7 +11,8 @@ VERSION = 3.3.3
 
 EXTENSION = .tar.bz2
 
-BASE_URL = http://dl.lm-sensors.org/lm-sensors/releases/
+BASE_URL = https://ftp.gwdg.de/pub/linux/misc/lm-sensors
+#BASE_URL = http://dl.lm-sensors.org/lm-sensors/releases/
 #https://github.com/groeck/lm-sensors/archive/V3-4-0.tar.gz
 
 PATCH_FILE1 = Makefile.patch

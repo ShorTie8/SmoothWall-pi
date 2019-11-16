@@ -1,0 +1,145 @@
+#!/bin/sh
+########################################################################
+# Begin SmoothWall bridge_client, rc_base=/etc/rc.d
+#
+# Description : bridge client initscript
+# Copyright Jeff Blanner, 3/2/2019.
+# Licensed under the GNU GPL license that governs the Smoothwall Express source code.
+#
+# We use iproute2 to setup the bridge so the mac can be set
+# brctl uses the lowest mac, so it can change
+# So a MAC is made during install
+#
+########################################################################
+
+# load our functions {echolog} & colors
+. /etc/rc.d/inc.rc-functions
+# read in our variables
+. /var/smoothwall/ethernet/settings
+
+case "${1}" in
+	start)
+	  if [ "${2}" = "green" ]; then
+		echo -e "${LTBL}      Setting up Green bridge, ${INFO} ${GREEN_BRG} ${NO}"
+		echolog "" "s" "" "    Setting up Green bridge"
+		/usr/sbin/ip link add "${GREEN_BRG}" address "${GREEN_BRG_MAC}" type bridge stp_state 1
+
+		echo -e "${LTBL}      Adding ${INFO} ${GREEN_BRG_DEV} ${LTBL} to ${GREEN_BRG} ${NO}"
+		echolog "" "s" "" "    Adding ${GREEN_BRG_DEV} to ${GREEN_BRG}"
+		# To add an interface (e.g. eth0) into the bridge, its state must be up:
+		
+		echo "flush ${GREEN_BRG_DEV} "
+		/usr/sbin/ip addr flush dev "${GREEN_BRG_DEV}"
+		
+		echo "add ${GREEN_BRG_DEV} "
+		/usr/sbin/ip link set dev "${GREEN_BRG_DEV}" master "${GREEN_BRG}"
+
+		echo "set ${GREEN_BRG_DEV} up"
+		/usr/sbin/ip link set "${GREEN_BRG_DEV}" up
+		brctl show ${GREEN_BRG}
+
+  echo -e "${BOUL}    Sleepy 4${NO}"
+  sleep 4
+
+	  elif [ "${2}" = "orange" ]; then
+		echo -e "${STEP}      Starting Orange bridge, ${INFO} ${ORANGE_BRG} ${NO}"
+		echolog "" "s" "" "    Starting Orange bridge"
+		ip link add "${ORANGE_BRG}" address "${ORANGE_BRG_MAC}" type bridge stp_state 1
+
+		echo -e "${LTBL}      Adding ${INFO} ${ORANGE_BRG_DEV} ${LTBL} to ${ORANGE_BRG} ${NO}"
+		echolog "" "s" "" "    Adding ${ORANGE_BRG_DEV} to ${ORANGE_BRG}"
+		
+		echo "flush ${ORANGE_BRG_DEV} "
+		/usr/sbin/ip addr flush dev "${ORANGE_BRG_DEV}"
+		
+		echo "add ${ORANGE_BRG_DEV} "
+		/usr/sbin/ip link set dev "${ORANGE_BRG_DEV}" master "${ORANGE_BRG}"
+
+		echo "set ${ORANGE_BRG_DEV} up"
+		/usr/sbin/ip link set "${ORANGE_BRG_DEV}" up
+		brctl show "${ORANGE_BRG}"
+
+	  elif [ "${2}" = "purple" ]; then
+		echo -e "${STEP}      Starting Purple bridge, ${INFO} ${PURPLE_BRG} ${NO}"
+		echolog "" "s" "" "    Starting Purple bridge"
+		ip -s link add "${PURPLE_BRG}" address "${PURPLE_BRG_MAC}" type bridge stp_state 1
+
+		echo -e "${LTBL}      Adding ${INFO} ${PURPLE_BRG_DEV} ${LTBL} to ${PURPLE_BRG} ${NO}"
+		echolog "" "s" "" "    Adding ${INFO} ${PURPLE_BRG_DEV} ${LTBL} to ${PURPLE_BRG}"
+		
+		echo "flush ${PURPLE_BRG_DEV} "
+		/usr/sbin/ip addr flush dev "${PURPLE_BRG_DEV}"
+		
+		echo "add ${PURPLE_BRG_DEV} "
+		/usr/sbin/ip link set dev "${PURPLE_BRG_DEV}" master "${PURPLE_BRG}"
+
+		echo "set ${PURPLE_BRG_DEV} up"
+		/usr/sbin/ip link set "${PURPLE_BRG_DEV}" up
+		brctl show "${PURPLE_BRG}"
+
+	  else
+		echo -e "${INFO}        No zone given {green,orange or purple}, exit 1 ${NO}"
+		echolog "" "s" "" "  No zone given {green,orange or purple}, exit 1 "
+		exit 1
+	  fi
+	  ;;
+
+
+	stop)
+	  if [ "${2}" = "green" ]; then
+		echo -e "${LTBL}      Stopping Green bridge, ${INFO} ${GREEN_BRG} ${NO}"
+		echolog "e" "s" "" "    Stopping Green bridge"
+		ip link set ${GREEN_BRG_DEV} nomaster
+		ip link set ${GREEN_BRG_DEV} down
+		ip link delete ${GREEN_BRG} type bridge
+	  elif [ "${2}" = "orange" ]; then
+		echo -e "${LTBL}      Stopping Orange bridge, ${INFO} ${ORANGE_BRG} ${NO}"
+		echolog "e" "s" "" "    Stopping Green bridge"
+		ip link set ${ORANGE_BRG_DEV} nomaster
+		ip link set ${ORANGE_BRG_DEV} down
+		ip link delete ${ORANGE_BRG} type bridge
+	  elif [ "${2}" = "purple" ]; then
+		echo -e "${LTBL}      Stopping Purple bridge, ${INFO} ${PURPLE_BRG} ${NO}"
+		echolog "e" "s" "" "    Stopping Green bridge"
+		ip link set ${PURPLE_BRG_DEV} nomaster
+		ip link set ${PURPLE_BRG_DEV} down
+		ip link delete ${PURPLE_BRG} type bridge
+	  else
+		echo -e "${INFO}        No zone given {green,orange or purple}, exit 1 ${NO}"
+		echolog "" "s" "" "  No zone given {green,orange or purple}, exit 1 "
+		exit 1
+	  fi
+	  ;;
+
+	restart)
+		${0} stop
+		sleep 2
+		${0} start
+		;;
+
+  status)
+	echo -e "${STEP}      Bridge status  ${NO}"
+	#echolog "e" "s" "" "    Bridge status  "
+	brctl show
+	echo
+	for i in ${GREEN_BRG} ${ORANGE_BRG} ${PURPLE_BRG} ${GREEN_BRG_DEV} ${ORANGE_BRG_DEV} ${PURPLE_BRG_DEV}; do
+	  if [ ! -v ${i} ]; then
+		echo ""
+		echo -e "${STEP}        ${i} ip addr show ${NO}"
+		#echolog "e" "s" "" "      ${i} ip addr show "
+		ip addr show ${i}
+		
+		echo -e "${STEP}        ${i} ifconfig ${NO}"
+		#echolog "e" "s" "" "      ${i} ifconfig "
+		ifconfig ${i}
+	  fi
+	done
+    ;;
+
+  *)
+		echo "Usage: ${0} {start|stop|restart|status}"
+		exit 1
+		;;
+esac
+
+# End bridge_client

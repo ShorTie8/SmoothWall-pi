@@ -7,8 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = which
-VERSION = 2.16
+VERSION = 2.21
 
-BASE_URL = http://www.xs4all.nl/~carlo17/which/
+BASE_URL = https://ftp.gnu.org/gnu/which
 
 include ../Makefile.rules

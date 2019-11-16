@@ -3,6 +3,8 @@
 # Copyright Neal Murphy.
 # Licensed under the GNU GPL license that governs the Smoothwall Express source code.
 
+# 2/2/2019, Colorized and add wlan.  Jeffrey R. Blanner
+
 # initramfs: if a new persistent-net rules file exists, copy it to /harddisk/dev
 #   This happens to be a convenient writable place to put it while / is RO.
 # After root change-over, rc.sysinit runs this script.
@@ -23,6 +25,8 @@
 
 # runtime initramfs copies the persistent rules file--if it exists--to /dev (the only
 # writable dir at that time)
+
+echo -e "${STEP}      Comparing MAC's${NO}"
 
 # Shorthand
 persNetRules=70-persistent-net.rules
@@ -52,8 +56,12 @@ for i in $NICS; do
 done | sort >/tmp/curMACs
 cd /
 
+echo -en "${STEP}        previous MAC addrs  ${BOUL}"; cat /tmp/oldMACs | tr '\n' '   '; echo -e "${NO}"
+echo -en "${STEP}        current  MAC addrs  ${BOUL}"; cat /tmp/curMACs | tr '\n' '   '; echo -e "${NO}"
+
 # Different?
 if ! diff /tmp/oldMACs /tmp/curMACs >/dev/null 2>&1; then
+  echo -e "${INFO}      Differences found${NO}"
   declare -A NICs
   declare -i j
 
@@ -77,34 +85,84 @@ if ! diff /tmp/oldMACs /tmp/curMACs >/dev/null 2>&1; then
   fi
 
   # Yank the drivers
-  DRIVERS=`echo /sys/class/net/*/device/driver/module/drivers/* | sed -e 's/.*://' | sort | uniq`
-  for i in $DRIVERS; do
-    rmmod $i
+  echo -e "${STEP}        Yank the drivers${NO}"
+  for f in /sys/class/net/*; do
+    dev=$(basename $f)
+    if [[ "$dev" != "lo" ]]; then
+      driver=$(readlink $f/device/driver/module)
+      if [ $driver ]; then
+          driver=$(basename $driver)
+      fi
+      echo -e "${DONE}        $driver${NO}"
+      addr=$(cat $f/address)
+      operstate=$(cat $f/operstate)
+      description=`modinfo $driver | egrep '^description' | sed -e 's/[^:]*:[ 	]*//'`
+      echo -e "${INFO}      $dev ${DONE} $addr  ${BOUL} $driver      $description ${NO}"
+      rmmod -v -w $driver
+    fi
   done
 
   # Change all 'ethN' to 'FRESHNIC'
   sed -i -e 's/, NAME=".*/, NAME="FRESHNIC"/' /tmp/$persNetRules
 
   # Set names for current NICs
+  typeset -i n w
   j=0
+  n=0
+  w=0
   while [ $j -lt $lastNIC ]; do
-    sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/eth'$j'/' /tmp/$persNetRules
+    if grep ${NICs["eth$j"]} /tmp/$persNetRules | grep wlan >/dev/null 2>&1; then
+      echo -e "${INFO}        wlan nic found    ${DONE} ${NICs["eth$j"]} ${NO}"
+      echo -e "${STEP}        1${NO}) use as nic, renames wlan*'s to eth*"
+      echo -e "${STEP}        2${NO}) use as Bridge, leave as wlan"
+      echo -en "${BOUL}      Please chose 1 or 2  ${NO}"
+      while [ 1 == 1 ]; do
+        read a #</dev/tty
+        if [ "$a" == "1" ]; then
+          echo -e "${STEP}    Renaming wlan* NIC's to ethX${NO}"
+          sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/eth'$n'/' /tmp/$persNetRules
+          n=n+1
+          break;
+        elif [ "$a" == "2" ]; then
+          echo -e "${STEP}    Using as Bridge, set as wlan${NO}"
+          sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/wlan'$w'/' /tmp/$persNetRules
+          w=w+1
+          break;
+        else
+          echo -en "${WARN}              Say What  ${INFO}??${NO}"
+          sleep 2
+        fi
+      done
+    else
+      sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/eth'$n'/' /tmp/$persNetRules
+      n=n+1
+    fi
     j=j+1
   done
+
   # Delete unset (removed) NICs)
   sed -e '/^$/N; N; /FRESHNIC/d;' /tmp/$persNetRules >$custNICRules
 
+  # Show custNICRules
+  echo -e "${INFO}      Showing custNICRules to be${NO}"
+  grep KERNEL /etc/udev/rules.d/70-Smoothwall-custom-NIC.rules
+
   # Sleep; maybe udev needs to rest
-  sleep 2
+  echo -e "${STEP}    Sleepy 4 udev${NO}"
+  sleep 4
 
   # Trigger udev to INS the drivers, thus changing the names
+  echo -e "${STEP}        reload udev${NO}"
   /sbin/udevadm control --reload
   /sbin/udevadm trigger
   /sbin/udevadm settle
 
   # Set flag file, clean up other files
+  echo -e "${STEP}        Set flag file, clean up other files${NO}"
   touch /var/smoothwall/ethernet/NICS-changed
-  rm -f /tmp/$persNetRules /dev/$persNetRules
+  rm -vf /tmp/$persNetRules /dev/$persNetRules
+else
+  echo -e "${INFO}      No Differences found${NO}"
 fi
 rm -f /tmp/oldMACs /tmp/curMACs
 
@@ -116,6 +174,7 @@ rm -f /tmp/oldMACs /tmp/curMACs
 if [ -e  /var/smoothwall/ethernet/NICS-changed ]; then
 
   # There are unhandled NIC changes.
+  echo -e "${OOPS}        Your NICs have changed; you must run setup to set their assignments.${NO}"
   echo -e "\007\n\n\nYour NICs have changed; you must run setup to set their assignments."
   
   export SUSHELL="/usr/sbin/susetup"
@@ -140,6 +199,7 @@ if [ -e  /var/smoothwall/ethernet/NICS-changed ]; then
 
   # If we make it here, setup ran and exited with success.
   # Update the initramfs
+  echo -e "${INFO}        Updating the initramfs, ${DONE}Pleaze be patience${NO}"
   mkdir -p /root/tmp
   OLDPWD=${PWD}
   cd /root/tmp
@@ -147,8 +207,11 @@ if [ -e  /var/smoothwall/ethernet/NICS-changed ]; then
   if [ ! -e ${INITRAMFS}-ORIG ]; then
     cp -a ${INITRAMFS} ${INITRAMFS}-ORIG
   fi
+  echo -e "${STEP}          Un-gunzip initramfs${NO}"
   gunzip < $INITRAMFS | cpio -id
-  cp -a ${custNICRules} ${custNICRules/\//}
+  echo -e "${STEP}          update ${custNICRules}${NO}"
+  cp -av ${custNICRules} ${custNICRules/\//}
+  echo -e "${STEP}          remake ${INITRAMFS}${NO}"
   find . | cpio -o -H newc | gzip > $INITRAMFS
   cd ${OLDPWD}
   rm -rf /root/tmp

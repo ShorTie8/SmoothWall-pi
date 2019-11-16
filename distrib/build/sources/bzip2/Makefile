@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = bzip2
 VERSION = 1.0.6
 
-BASE_URL = http://www.bzip.org/$(VERSION)/
+BASE_URL = https://sourceforge.net/projects/bzip2/files
 
 CONFIGURE = yes
 COMPILE = yes

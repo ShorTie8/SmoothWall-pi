@@ -7,10 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = kbd
+# anything newer needs pam
 VERSION = 1.15.3
 
 EXTENSION = .tar.xz
 
-BASE_URL = http://slackware.cs.utah.edu/pub/slackware/slackware_source/a/kbd/sources/
+BASE_URL = https://www.kernel.org/pub/linux/utils/kbd
+
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
 
 include ../Makefile.rules

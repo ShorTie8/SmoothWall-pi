@@ -1,0 +1,108 @@
+#!/bin/bash 
+
+# Define message colors
+BOUL="\033[1;4m"	    # light blue
+DONE="\033[1;32m"    # green
+STEP="\033[1;34m"    # blue
+WARN="\033[1;35m"    # hot pink
+NO="\033[0m"         # normal/light
+
+echo -e "${BOUL}      Running /etc/rc ...${NO}"
+
+echo -e "${DONE}        Install busybox${NO}"
+/bin/busybox --install
+
+# Right off the bat, set a udev lock file, since we can't do much until
+#   udev has handled the devices
+echo -e "${WARN}    Touching eudev /tmp/trigger-lock${NO}"
+touch /tmp/trigger-lock
+
+########## Functions ##################################################
+# Taken from Kay Seiver's example
+getarg() {
+  local o line
+  for o in $cmdline; do
+    if test "$o" = "$1"; then echo $1; break; fi
+    if test "${o%%=*}" = "${1%=}"; then echo ${o#*=}; break; fi
+  done
+}
+
+# Get initial devices
+first_dev() {
+  echo -e "${STEP}      Mounting proc & sysfs as /sys${NO}"
+  /bin/mount -v -t proc proc /proc
+  /bin/mount -v -t sysfs sysfs /sys
+
+  echo -e "${STEP}      Mounting /dev as devtmpfs${NO}"
+  /bin/mount -v -t devtmpfs devtmpfs /dev
+  /bin/mkdir -vp /dev/pts
+  /bin/mount -v -t devpts -o gid=5,mode=620 devpts /dev/pts
+
+  # Need USB here for kbd
+  # /lib/modules/4.9.0-6-amd64/kernel/drivers/usb/host/xhci-hcd.ko
+  if [ -f /lib/modules/*/kernel/drivers/usb/host/xhci-hcd.ko ]; then
+  echo -e "${STEP}      Starting USB kbd stuff if needed${NO}"
+  /sbin/modprobe xhci-hcd
+  /sbin/modprobe ehci-hcd
+  /sbin/modprobe ohci-hcd
+  /sbin/modprobe uhci-hcd
+  /sbin/modprobe usbhid
+  fi
+}
+
+#######################################################################
+# Prep initial sys FSen
+first_dev
+
+[ -d /root ] || mkdir -v -m 0700 /root
+[ -d /tmp ] || mkdir -v -m 0777 /tmp
+[ -d /var/lock ] || mkdir -vp -m 0755 /var/lock
+
+echo -e "${STEP}      Calling /sbin/depmod -a${NO}"
+/sbin/depmod -a
+
+# Fetch the kernel's command line
+echo -e "${STEP}      Fetching the kernel's command line${NO}"
+read cmdline </proc/cmdline;
+echo $cmdline
+cp /etc/inittab /etc/inittab.old
+
+# Doing serial? Activate bash and install on the serial port (ttyS0)
+echo -e "${STEP} Checking if we are running on serial, getarg console${NO}"
+echo $(getarg console) | awk '{if ($1 ~ /ttyS0,[0-9]+$/) { exit 0 } else { exit 1 }}'
+
+if [ $? -eq 0 ]; then
+  echo -e "${STEP}    running on serial, Remaking /etc/inittab-1${NO}"
+  cp /etc/inittab /a.a
+  sed -e 's/^SB:S1:off/SB:S1:respawn/' \
+      -e 's/^SF:3:off/SF:3:respawn/' \
+      -e 's/^SR:4:off/SR:4:respawn/' \
+      -e 's/^I:2:respawn/I:2:off/' \
+      -e 's/^F:3:respawn/F:3:off/' \
+      -e 's/^R:4:respawn/R:4:off/' </a.a >/etc/inittab
+  rm /a.a
+fi
+
+# Determine what to do
+RUNLEVEL="2"
+if [ "$(getarg single)" == "single" ]; then RUNLEVEL="S"; fi
+if [ "$(getarg explore)" == "explore" ]; then RUNLEVEL="1"; fi
+if [ "$(getarg install)" == "install" ]; then RUNLEVEL="2"; fi
+
+echo -e "${STEP}      Adjusting run level to ${DONE} ${RUNLEVEL} ${NO}"
+grep DR /etc/inittab
+cp /etc/inittab /b.b
+sed -e 's/^DR:.:/DR:'${RUNLEVEL}':/' </b.b >/etc/inittab
+rm /b.b
+kill -1 1
+cp /etc/inittab /etc/inittab.new
+grep DR /etc/inittab
+
+# Set run level
+echo -e "${STEP}    Calling init @ run level ${DONE}${RUNLEVEL}${NO}"
+init ${RUNLEVEL}
+echo -e "${WARN}    Starting system${NO}"
+case $RUNLEVEL in
+  2|3|4) echo "1 4 1 7" >/proc/sys/kernel/printk
+     ;;
+esac

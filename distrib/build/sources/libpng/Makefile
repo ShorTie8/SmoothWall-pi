@@ -9,6 +9,6 @@ include ../Makefile.conf
 PACKAGE = libpng
 VERSION = 1.5.18
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)15/$(VERSION)/
+BASE_URL = http://downloads.sourceforge.net/libpng
 
 include ../Makefile.rules

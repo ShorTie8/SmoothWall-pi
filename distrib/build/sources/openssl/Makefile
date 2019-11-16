@@ -27,6 +27,7 @@ INSTALL = yes
 CLEAN = yes
 
 configure: $(DIR)/
+	@echo; echo; echo "configure"; echo
 	sed -i -e '/^  \*86-\*-linux2/i \
   FUBAR\
 \toptions="$$options $(CFLAGS)";;' $(DIR)/config
@@ -37,9 +38,11 @@ configure: $(DIR)/
 	  patch < ../Makefile-MANDIR.patch);
 
 compile: configure
+	@echo; echo; echo "compile"; echo
 	+@$(MAKE) $(JOBS) -C $(PACKAGE)-$(VERSION)
 
 install: compile
+	@echo; echo; echo "install"; echo
 	@mkdir -p $(PKG_ROOT)
 	@make -C $(PACKAGE)-$(OPENSSL_VER) INSTALL_PREFIX=$(PKG_ROOT) install
 

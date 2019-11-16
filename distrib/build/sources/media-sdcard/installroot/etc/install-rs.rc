@@ -1,0 +1,383 @@
+#!/bin/bash 
+
+# Define message colors
+export BOUL="\033[1;4m"	    # light blue
+export OOPS="\033[1;31m"    # red
+export DONE="\033[1;32m"    # green
+export INFO="\033[1;33m"    # yellow
+export STEP="\033[1;34m"    # blue
+export WARN="\033[1;35m"    # hot pink
+export LTBL="\033[1;36m"	# light blue
+export NO="\033[0m"         # normal/light
+
+# Set screen formatting
+CLS="\033[0;0f\033[2J"
+BO="\033[1m"
+UL="\033[4m"
+BLINK="\033[1;5m"	# blink bold
+FAIL7="\033[1;7m"	# back light
+FAIL36="\033[1;36m"	# light blue
+FAIL31="\033[1;31m"	# red
+set `stty size`
+ROWS=$1
+COLS=$2
+
+# Taken from Kay Seiver's example
+getarg() {
+  local o line
+  for o in $cmdline; do
+    if test "$o" = "$1"; then echo $1; break; fi
+    if test "${o%%=*}" = "${1%=}"; then echo ${o#*=}; break; fi
+  done
+}
+
+# do-sid executes a program in a CTTY environment
+#
+function do-sid {
+  case $3 in
+    "")
+      setsid sh -c "exec $1 </dev/tty$2 >/dev/tty$2 2>&1"
+      ;;
+    "BG")
+      setsid sh -c "exec $1 </dev/tty$2 >/dev/tty$2 2>&1"&
+      return $!
+      ;;
+    "EXEC")
+      exec setsid sh -c "exec $1 </dev/tty$2 >/dev/tty$2 2>&1"
+      ;;
+  esac
+}
+
+# rsr() clears the scrolling region and restores the saved cursor position
+#
+function rsr {
+  echo -ne "\033[r\033[20;1f\033[J\033"
+  echo -ne "8"
+}
+# ssr() saves the cursor position and sets the scrolling region
+#
+function ssr {
+  echo -ne "\033"
+  echo -ne "7\033[21;${ROWS}r"
+  echo -ne "\033[20;1fExecuting: "
+  echo -n $1
+  echo -ne "\033[21;1f"
+}
+
+# do_or_die() executes the given command in a sub-scrolling region. If the
+#   command fails, the user is notified and the system can reboot
+#
+function do_or_die {
+  ssr "$1"
+  eval "$1"
+  exitcode=$?
+  rsr
+  
+  if [ $exitcode -ne 0 ]; then
+    echo "FAILED: \"$1\""
+    echo "  exit code: $exitcode"
+    echo
+    echo "Type <CTRL/C> to try again."
+    echo "Press <ENTER> to reboot the system and try again."
+    read a </dev/tty
+    reboot -f
+  fi
+}
+
+# undo_alot() unmounts, unswaps, kills udevd, and other stuff
+function undo_alot {
+  echo -e "${OOPS}  Function undo_alot${NO}"
+  umount -v /harddisk/var/log
+  umount -v /harddisk/boot
+  umount -v /harddisk
+  umount -v /cdrom
+  umount -v /restore
+
+  rm -vf /etc/udev/rules.d/70*
+
+  swapoff -a >/dev/null 2>&1
+
+  echo -n "printk is "
+  cat /proc/sys/kernel/printk
+  echo -e "${STEP}      Reset printk${NO}"
+  echo "0 0 0 0" > /proc/sys/kernel/printk
+}
+
+
+function kill_udev() {
+  # Stop udevd, we may miss a few events while we run init, but we'll catch up
+  udevadm control --exit
+}
+
+
+# The shell calls EXITTRAP() when init (this script) exits; it attempts to restore
+#   the operating state so that init (this script) can be restarted.
+#   
+function EXITTRAP {
+  trap - EXIT
+
+  echo -e "${OOPS}Ooops, Unexpected exit! Restarting...${NO}"
+  sleep 2
+
+  # Reverse a bunch of stuff
+  undo_alot
+
+  echo -e "Press ${BLINK}<ENTER>${NO} to try again..."
+  read a </dev/tty
+}
+
+
+#########  End functions  ###############
+
+echo -e "${LTBL}  Install-rs is Waitting for udev to settle, ${WARN} rm tmp/trigger-lock${NO}"
+while [ -e /tmp/trigger-lock ]; do
+  usleep 100000
+done
+
+echo -e "\n${DONE}    Trigger-lock removed, ${BOUL}Continuing Install-rs${NO}"
+
+
+echo -e "${INFO}  Loading system time.${NO}"
+if [ -e /sbin/fake-hwclock ]; then
+  echo -e "${STEP}    Starting fake hwclock${NO}"
+  /sbin/fake-hwclock load force
+else
+  echo -e "${STEP}    Starting hwclock${NO}"
+  /sbin/hwclock --hctosys --localtime
+fi
+#echo -en "${DONE}      "; /bin/date; echo -en "${NO}"
+
+echo -e "${STEP}      Update eudev hwdb${NO}"
+/sbin/udevadm hwdb --update
+/sbin/udevadm settle
+
+echo -e "${STEP}      Sleepy 4 udev install-rs.rc${NO}"
+sleep 4
+#ls /sys/class/net
+echo -en "${INFO}          Devices in /sys/class/net are${NO}"
+echo -en "${DONE}      "; ls /sys/class/net; echo -en "${NO}"
+
+typeset -i tries WORK_IDX
+tries=0
+WORKING[0]="|"
+WORKING[1]="/"
+WORKING[2]="-"
+WORKING[3]="\\\\"
+WORK_IDX=0
+TIME_START=`date +"%s"`
+
+# Time out, for rare times when udev doesn't create the file
+PersistentNetRule="/etc/udev/rules.d/70-persistent-net.rules"
+
+echo -e "${STEP}      Checking for persistent net rules${NO}"
+if [ ! -e ${PersistentNetRule} ]; then
+
+echo -e "${WARN}      Waiting for persistent net rules to appear${NO}"
+while [ ! -e ${PersistentNetRule} ]; do
+  echo -en "${WORKING[$WORK_IDX]}\r"
+  WORK_IDX=WORK_IDX+1
+  [ $WORK_IDX -eq 4 ] && WORK_IDX=0
+
+  usleep 100000
+  tries=tries+1
+  if [ $tries -gt 60 ]; then
+    echo -e "${WARN}    No ${PersistentNetRule}${NO}"
+    echo -e "${OOPS}    Touching ${PersistentNetRule}${NO}"
+    touch ${PersistentNetRule}
+  fi
+done
+unset tries WORK_IDX
+  echo "wait"
+  wait
+  cat ${PersistentNetRule}
+  echo -e "\n"
+else
+  echo -e "${STEP}        Persistent net rules is present, ${DONE}${PersistentNetRule}${NO}"
+fi
+
+echo -e "${INFO}          nic's in ${DONE}PersistentNetRule ${INFO}are${NO}"
+grep KERNEL ${PersistentNetRule}
+
+
+x86sys=$(uname -m)
+echo "x86sys is $x86sys"
+rpisys=$(cat /proc/cpuinfo | grep BCM | awk '{print $3}')
+echo "rpisys is $rpisys"
+
+if [ "$x86sys" == "i586" ] || [ "$x86sys" == "i686" ] || [ "$x86sys" == "x86_64" ]; then
+  echo -e "${WARN}          x86 ${INFO}install${NO}"
+elif [ "$rpisys" == "BCM2835" ] || [ "$x86sys" == "aarch64" ]; then
+  echo -e "${WARN}          Raspberry Pi ${INFO}Install${NO}"
+ #i2c Time
+  echo -e "${INFO}        Enable i2c-rtc && pick i2c-rtc hardware clock for Time  ${DONE} ?? ${NO}"
+  echo -en "${DONE}          y${NO} to enable  "
+  while [ 1 == 1 ]; do
+    read a #</dev/tty
+    if [ "$a" == "y" ]; then
+      echo -e "${STEP}          Enabling i2c-dev${NO}"
+      I2C_DEV=on
+      # arch/arm/boot/dts/overlays/i2c-rtc-overlay.dts
+      echo -e "${INFO}          Realtime clock to use ${DONE} ?? ${NO}"
+      echo -e "${STEP}            1${NO}) ds1307"
+      echo -e "${STEP}            2${NO}) ds1339"
+      echo -e "${STEP}            3${NO}) ds3231"
+      echo -e "${STEP}            4${NO}) mcp7940x"
+      echo -e "${STEP}            5${NO}) mcp7941x"
+      echo -e "${STEP}            6${NO}) pcf2127"
+      echo -e "${STEP}            7${NO}) pcf8523"
+      echo -e "${STEP}            8${NO}) pcf8563"
+      echo -e "${STEP}            9${NO}) m41t62"
+      echo -en "${BOUL}              Please choose 1 to 9  ${NO}"
+      while [ 1 == 1 ]; do
+        read a #</dev/tty
+        if [ "$a" == "1" ]; then
+            echo -e "${STEP}            Using ds1307 time${NO}"
+            I2C_rtc=ds1307
+            break;
+        elif [ "$a" == "2" ]; then
+            echo -e "${STEP}            Using ds1339 time${NO}"
+            I2C_rtc=ds1339
+            break;
+        elif [ "$a" == "3" ]; then
+            echo -e "${STEP}            Using ds3231 time${NO}"
+            I2C_rtc=ds3231
+            break;
+        elif [ "$a" == "4" ]; then
+            echo -e "${STEP}            Using mcp7940x time${NO}"
+            I2C_rtc=mcp7940x
+            break;
+        elif [ "$a" == "5" ]; then
+            echo -e "${STEP}            Using mcp7941x time${NO}"
+            I2C_rtc=mcp7941x
+            break;
+        elif [ "$a" == "6" ]; then
+            echo -e "${STEP}            Using pcf2127 time${NO}"
+            I2C_rtc=pcf2127
+            break;
+        elif [ "$a" == "7" ]; then
+            echo -e "${STEP}            Using pcf8523 time${NO}"
+            I2C_rtc=pcf8523
+            break;
+        elif [ "$a" == "8" ]; then
+            echo -e "${STEP}            Using pcf8563 time${NO}"
+            I2C_rtc=pcf8563
+            break;
+        elif [ "$a" == "9" ]; then
+            echo -e "${STEP}            Using m41t62 time${NO}"
+            I2C_rtc=m41t62
+            break;
+        else
+          echo -en "${WARN}                Say What  ${INFO}??  ${NO}"
+          sleep 2
+        fi
+      done
+      break;
+    else
+        echo -e "${STEP}          i2c not Time Enabled ${NO}"
+        break;
+    fi
+  done
+else
+  echo -e "${OOPS}          unsupported install${NO}"
+  exit 1
+fi
+
+
+# Sort and rename NICs
+echo -e "${STEP}      Sort and rename NICs${NO}"
+. /etc/eth-addr-sort
+
+echo -e "${DONE}sleep 2${NO}"
+sleep 2
+
+# Load FSen
+echo -e "${STEP}      Load File Systems, ${DONE}ext4 vfat${NO}"
+#for i in ext2 ext4 vfat isofs udf; do
+#  modprobe $i&
+  modprobe -v ext4
+  modprobe -v vfat
+
+echo -e "\n${STEP}      Wait, for all currently active child  processes to finish${NO}"
+wait >/dev/null 2>&1
+
+echo -e "${DONE}  Starting System${NO}"
+echo "1 4 1 7" >/proc/sys/kernel/printk
+
+# If init (this script) exits for any reason, it will be trapped
+echo -e "${STEP}      Setting Exit trap${NO}"
+trap EXITTRAP EXIT
+
+[ -t 0 ] || (echo "STDIN not a tty"; exit)
+
+echo -e "${BOUL}    Running config-install.rc${NO}"
+. /etc/config-install.rc
+echo -e "${DONE}    Finished Configuring installer, continuing install-rs.rc${NO}"
+
+# Prepare in case of restore: if the NICs have changed, setup must be run
+#   at least to re-assign the NICs. In the case of dev testing, much may
+#   need changing to avoid conflicting with another active system.
+mustRunSetup=0
+autoSetup=" firstInstall"
+
+echo -e "${BOUL}    Executing installer${NO}"
+. /etc/exec-install.rc
+echo -e "${DONE}    Finished Executing installer${NO}"
+
+if [ $mustRunSetup -eq 1 ]; then
+  # NICs changed, so force setup, but not auto mode
+  restore=1
+  autoSetup=" auto"
+  echo "    network devices have changed"
+  echo "      press <ENTER> to run setup"
+  read ans
+fi
+
+case $restore in
+  1)
+    echo -e "$TITLE"
+    echo
+    echo "Preparing Setup"
+    echo
+      echo "  cleaning up"
+        trap - EXIT
+        export TERM=linux
+        udevadm control --log-priority="none"
+
+      echo "  run setup"
+        mount -n -o move /dev /harddisk/dev
+        mount -n -o move /dev/pts /harddisk/dev/pts
+        mount -n -o move /sys /harddisk/sys
+        mount -n -o move /proc /harddisk/proc
+
+        cd /harddisk
+        echo $(getarg console) | \
+            awk '{if ($1 ~ /ttyS0,[0-9]+$/) { exit 0 } else { exit 1 }}'
+        if [ $? -eq 0 ]; then
+          # Use VT101 on serial port
+          chroot . /bin/bash -c "TERM=vt101 /usr/sbin/setup /dev/tty2${autoSetup}"
+        else
+          # VESA console behaves better
+          chroot . /usr/sbin/setup /dev/tty2${autoSetup}
+        fi
+
+      echo -ne $CLS
+      echo; echo;
+      echo "  setup complete"
+    ;;
+  2)
+    echo -ne $CLS
+    echo; echo;
+    echo "  install and restore complete"
+    ;;
+  3)
+    echo -ne $CLS
+    echo; echo;
+    echo "  total restore complete"
+    ;;
+esac
+
+echo -e "\n${DONE}    Finished Install${NO}"
+echo -e "${STEP}      clean up and reboot into SmoothWall"
+  undo_alot
+  sleep 2
+  /sbin/reboot -f

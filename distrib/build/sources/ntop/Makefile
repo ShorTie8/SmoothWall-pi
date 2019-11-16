@@ -9,13 +9,19 @@ include ../Makefile.conf
 PACKAGE = ntop
 VERSION = 5.0.1
 
-BASE_URL = http://iweb.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/Stable/
+BASE_URL = http://iweb.dl.sourceforge.net/project/ntop/$(PACKAGE)/Stable/
 
 CONFIG_OPTS += --prefix=/usr --with-ssl --with-ossl-root=/usr --with-ossl-lib=/usr/lib --with-ossl-include=/usr/include
 
 CONFIGURE = yes
 
 configure: $(DIR)/
+ifeq ($(mARCH), arm64)
+	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
+		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
+	done
+endif
+
 	@( \
 	  cd $(DIR); \
 	  sed -i -e 's/svn co/svn --non-interactive --trust-server-cert co/' autogen.sh; \

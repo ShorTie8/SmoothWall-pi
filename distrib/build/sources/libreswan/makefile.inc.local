@@ -1,7 +1,2 @@
-INITSYSTEM = sysvinit
-ARCH = i586
-USE_LIBCURL = false
-USE_XAUTHPAM = false
-INC_USRLOCAL = /usr
-KERNELSRC = /build/sources/linux/linux
-DEST_DIR = /build/buildroot/libreswan
+#KERNELSRC = /build/sources/linux/linux
+KERNELSRC = ../../linux/linux

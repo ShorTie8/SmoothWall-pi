@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = zlib
-VERSION = 1.2.8
+VERSION = 1.2.11
 
 BASE_URL = http://www.zlib.net/
 

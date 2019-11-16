@@ -44,6 +44,7 @@ fi
 #
 cd /build
 export BUILD_PHASE="Final"
+export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
 
 # Permanent: ensure {,u}mount are not setuid in /tools.
 /tools/bin/chmod u-s /tools/bin/{,u}mount
@@ -103,6 +104,7 @@ fi
                 "final toolchain adjustment" \
                 "bash -x toolcrib/final_tc_adjustment" \
                 "crumbs/$BUILD_PHASE.adjustment.out"
+      build zlib
       build binutils
       build gmp
       build mpfr
@@ -114,16 +116,17 @@ fi
                 "bash toolcrib/final_tc_check" \
                 "crumbs/$BUILD_PHASE.verification.out"
       build gcc libgcc
-      build coreutils
+      build pkg-config
+      build file
+      build readline
+      build m4
+      build bc
       build gdbm
       build mktemp
       build device-ids
       build iana-etc
-      build findutils
       build gawk
       build ncurses
-      build vim
-      build nano
       build m4
       build bison
       build less
@@ -133,9 +136,12 @@ fi
       build sed
       build flex
       build dejagnu
+      build autoconf
+      build automake
       build gettext
-      build pkg-config
+      build libtool
       build inetutils
+#  exit 22
       touch crumbs/Final.grp1.compiled
     fi
 
@@ -148,6 +154,9 @@ fi
       build libxslt
       build strace
       build attr
+      build acl
+      build coreutils
+      build findutils
       build libcap
       build pcre
       build libpcap
@@ -215,13 +224,11 @@ fi
       build iputils
       build perl
       build texinfo
-      build autoconf
-      build automake
-      build bash
-      build bc
-      build file
-      build libtool
       build readline
+      build bash
+      build lzip
+      build ed
+      build bc
       build xz
       build bzip2
       build diffutils
@@ -257,6 +264,7 @@ fi
       build openldap
       build wget
       build sudo
+      build libelf
       build linux
       #build linux-backports
       build linux-firmware
@@ -265,7 +273,7 @@ fi
       build ipset
       build xtables-addons
       build ipbatch
-      build klibc
+     build klibc
       build linux-atm
       touch crumbs/Final.grp4.compiled
     fi
@@ -327,8 +335,8 @@ fi
       build rp-pppoe
       build ibod
       build dhcpcd
-      build eciadsl-synch_bin
-      build eciadsl-usermode
+      #build eciadsl-synch_bin
+      #build eciadsl-usermode
       touch crumbs/Final.grp5.compiled
     fi
 
@@ -337,22 +345,40 @@ fi
     else
       echo
       echo -e "  Final group 6 packages (last utils)"
+      build vim
+      build nano
       build mtools
+    if [ "$mTUPLE" == "$mARCH" ]; then
       build cdrtools
+    fi
       build busybox
 
       build dhcp
       build snort
       build oinkmaster
+      build swig
+      build audit
       build libreswan
+      build wireless-regdb
+#exit 22
       build wireless_tools
+      build setuptools
+      build M2Crypto
+      
+      build libgpg-error
+      build libgcrypt
+      build crda
       build wpa_supplicant
+      
+      build hostapd
+      build bridge-utils
+      build iw
 
       build noip
       build ez-ipupdate
 
       build imspector
-
+      build check
       build clamav
       build p3scan
 
@@ -369,7 +395,29 @@ fi
       build miniupnpd
       build inotify
       build cpio
+   if [ "$mTUPLE" == "$mARCH" ]; then
       build grub
+   elif [ "$mTUPLE" == "pi0w" ] || [ "$mTUPLE" == "rpi2" ] \
+			|| [ "$mTUPLE" == "rpi3" ] || [ "$mTUPLE" == "rpi4" ] \
+			|| [ "$mTUPLE" == "pi4-64" ]; then
+      build rpi-firmware
+      build fake-hwclock
+      build libuv
+      build libarchive
+      build cmake
+      build rpi-userland
+      build i2c-tools
+      build wiringPi
+      build rng-tools
+      #echo "done"; exit 1
+   elif [ "$mTUPLE" == "xu4" ]; then
+      build swig
+      build dtc
+      build u-boot
+ #     build odroid-firmware
+ #     build bash-completion
+ #     build mkinitcpio
+   fi
       build reiserfsprogs
       build parted
       build pcmciautils
@@ -389,6 +437,7 @@ fi
       build squidclamav
       build usb-modeswitch
       build zip
+      build pv
 
       touch crumbs/Final.grp6.compiled
     fi

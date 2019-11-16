@@ -19,6 +19,7 @@ include ../Makefile.conf
 
 PACKAGE = grub
 VERSION = 0.97
+BASE_URL = http://downloads.smoothwall.org/buildmirror
 
 ifeq ($(BITS_32), yes)
 
@@ -36,16 +37,21 @@ PRE_CONFIGURE = LDFLAGS=-static CFLAGS="$(CFLAGS) -Os -Wall -fno-reorder-functio
 CONFIG_OPTS += --prefix=$(PKG_DIR)
 
 reconf: patch
+	@echo; echo; echo "autoreconf --install"; echo
+	cd $(DIR); autoreconf --install
+	@echo; echo; echo "autoreconf --force"; echo
 	cd $(DIR); autoreconf --force
 
 CONFIGURE = yes
 configure: reconf
+	@echo; echo; echo "configure"; echo
 	(if [ ! -e $(COMPILE_DIR) ]; then mkdir $(COMPILE_DIR); fi)
 	(cd $(COMPILE_DIR); $(PRE_CONFIGURE) ../$(DIR)/configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
 
 INSTALL = yes
 install: compile
-	@mkdir -p $(PKG_ROOT)
+	@echo; echo; echo "install"; echo
+	mkdir -vp $(PKG_ROOT)
 	make -C $(COMPILE_DIR) DESTDIR=${PKG_ROOT} install
 	mkdir -pv ${PKG_ROOT}/boot/grub
 	cp -av ${PKG_ROOT}/usr/share/grub/*/* $(PKG_ROOT)/boot/grub
@@ -71,6 +77,7 @@ ifeq ($(BITS_64), yes)
 BASE_URL = http://downloads.smoothwall.org/buildmirror
 
 TARBALL = smoothwall-$(PACKAGE)-$(ARCH32)
+#TARBALL = smoothwall-$(PACKAGE)-i586
 
 INSTALL = yes
 CLEAN = yes

@@ -7,10 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = readline
-VERSION = 6.2
-
-BASE_URL = ftp://ftp.gnu.org/gnu/readline/
-
-#CONFIG_OPTS = --disable-nls --disable-device-mapper
+VERSION = 8.0
+BASE_URL = https://ftp.gnu.org/gnu/readline
 
 include ../Makefile.rules

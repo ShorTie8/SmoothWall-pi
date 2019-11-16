@@ -122,6 +122,7 @@ function build_tc_stage_2() {
 
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
+  buildenv libstdc++
   buildenv binutils 2
   buildenv gcc 2
   check 2 gcc
@@ -152,6 +153,7 @@ function build_tc_stage_3() {
   buildenv zlib 1
   buildenv coreutils 1
   buildenv diffutils 1 
+  buildenv file
   buildenv e2fsprogs 1 
   buildenv findutils 1
   buildenv gawk 1
@@ -170,6 +172,7 @@ function build_tc_stage_3() {
   buildenv util-linux 1
   buildenv wget 1
   buildenv git 1
+  #buildenv bc
   startTIME=`date +%s`-beginTIME
   displayTIME=`perl -e "printf('%6d', $startTIME);"`
   echo "    $displayTIME $BUILD_PHASE build complete"

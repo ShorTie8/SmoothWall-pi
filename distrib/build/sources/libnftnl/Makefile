@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = libnftnl
-VERSION = 1.0.5
+VERSION = 1.1.2
 EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = ftp://ftp.netfilter.org/pub/$(PACKAGE)
+BASE_URL = https://www.netfilter.org/projects/libnftnl/files
 
 include ../Makefile.rules

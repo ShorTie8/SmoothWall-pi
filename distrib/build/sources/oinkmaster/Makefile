@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = oinkmaster
 VERSION = 2.0
 
-BASE_URL = http://heanet.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(VERSION)
+BASE_URL = http://prdownloads.sourceforge.net/oinkmaster
 
 INSTALL = yes
 

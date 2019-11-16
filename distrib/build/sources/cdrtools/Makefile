@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = cdrtools
 VERSION = 3.00
 
-BASE_URL = ftp://ftp.berlios.de/pub/cdrecord/
+BASE_URL = http://downloads.smoothwall.org/buildmirror
 
 CONFIGURE = yes
 COMPILE = yes

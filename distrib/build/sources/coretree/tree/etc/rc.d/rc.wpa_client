@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# load our functions {echolog} & colors
+. /etc/rc.d/inc.rc-functions
+# read in our variables
+. /var/smoothwall/ethernet/settings
+
+if [ "$wpa_client" = "on" ]; then
+	echo -e "${BOUL}    wpa_client is turned on${NO}"
+	echo -e "${BOUL}      wpa_client Device type is ${RED_DEV}${NO}"
+	echolog "" "s" "" "wpa_client is turned on"
+	echolog "" "s" "" "  wpa_client Device type is ${RED_DEV}"
+
+	/usr/sbin/wpa start
+
+	echo -e "${BOUL}    Sleepy 4${NO}"
+	sleep 4
+else
+	echo -e "${BOUL}    No wpa_client enabled${NO}"
+	echolog "" "s" "" "  No wpa_client enabled"
+fi

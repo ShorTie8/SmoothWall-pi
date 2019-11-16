@@ -22,6 +22,7 @@ ifeq ($(URL),)
 endif
 
 BASE_URL = https://www.snort.org/downloads/snort
+#BASE_URL = https://snort.org/downloads/snortplus
 
 DIR = $(PACKAGE)-$(VERSION)
 

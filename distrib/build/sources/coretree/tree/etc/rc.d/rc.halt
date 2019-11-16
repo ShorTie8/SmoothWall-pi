@@ -17,6 +17,10 @@ echolog "e" "s" "" "Shutting down..."
 echolog "e" "s" "" "Stop squid (if running)..."
 smoothcom squidstop
 
+echo -e "${STEP}    Stopping kernel random number generator... ${NO}"
+echolog "" "s" "" "Stopping kernel random number generator..."
+/usr/sbin/random stop
+
 echolog "e" "s" "" "Send all processes the TERM signal..." 
 /sbin/killall5 -15
 sleep 3

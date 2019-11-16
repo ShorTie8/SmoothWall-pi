@@ -11,14 +11,17 @@ if [ "$1" != "" ]; then
       sed -e "s/.*='*//" -e 's=/net/.*=='`
 
   # Get the driver name
-  DRIVER=`udevadm info --query=property --path="$ethPATH" | grep DRIVER | \
-      sed -e 's/.*=//' -e "s/'//g"`
+  DRIVER=$(readlink ${NIC}/device/driver/module)
 
   # Get the description
-  DESC=`modinfo $DRIVER | egrep '^description' | sed -e 's/[^:]*:[ 	]*//'`
-
-  echo -n "$DESC"
+  if [ "$DRIVER" != "" ]; then
+    DRIVER=$(basename $DRIVER)
+    DESC=`modinfo $DRIVER | egrep '^description' | sed -e 's/[^:]*:[ 	]*//'`
+    echo -n "$DESC"
+  else
+    echo -n "-NONE-"
+  fi
 else
   # Is unset, return hyphen
-  echo -n "-"
+  echo -n "-unset-"
 fi

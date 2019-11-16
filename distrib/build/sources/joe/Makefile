@@ -7,8 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = joe
-VERSION = 3.7
+VERSION = 4.4
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/$(PACKAGE)-editor/JOE%20sources/$(PACKAGE)-$(VERSION)/
+BASE_URL = https://sourceforge.net/projects/joe-editor/files/JOE%20sources/joe-$(VERSION)
 
 include ../Makefile.rules

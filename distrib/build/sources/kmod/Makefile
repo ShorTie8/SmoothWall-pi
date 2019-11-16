@@ -7,29 +7,23 @@
 include ../Makefile.conf
 
 PACKAGE = kmod
-VERSION = 22
+VERSION = 26
 
 BASE_URL = http://www.kernel.org/pub/linux/utils/kernel/kmod/
-EXTENSION = .tar.xz
 
-export NO_CHECK_CERT = 1
-
-CONFIG_OPTS = --prefix=/usr          \
-              --bindir=/bin          \
-              --sysconfdir=/etc      \
-              --with-rootlibdir=/lib \
-	      --disable-silent-rules \
-              --with-zlib
-              #--with-xz              \
+CONFIG_OPTS +=  --bindir=/bin \
+				--sysconfdir=/etc \
+				--with-rootlibdir=/lib \
+				--with-zlib
+				#--with-xz \ # No package 'liblzma' found
 
 INSTALL = yes
 install: compile
-	cd $(PKG_ROOT); mkdir -p sbin bin
+	cd $(PKG_ROOT); mkdir -vp sbin bin
 	cd $(COMPILE_DIR); $(MAKE) DESTDIR=$(PKG_ROOT) install
 	cd $(PKG_ROOT); for prog in depmod insmod lsmod modinfo modprobe rmmod; do \
 	  ln -sv /bin/kmod sbin/$$prog; \
 	done
 	cd $(PKG_ROOT); ln -sv kmod bin/lsmod
-	
 
 include ../Makefile.rules

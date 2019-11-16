@@ -30,6 +30,8 @@ function set_build_environment() {
 
   # Must show the correct ProgInterp
   case $mARCH in
+    arm) expectInterp="/tools/lib/ld-linux-armhf.so.3" ;;
+    arm64) expectInterp="/tools/lib/ld-linux-aarch64.so.1" ;;
     i*86)
       expectInterp="/tools/lib/ld-linux.so.2"
     ;;
@@ -86,7 +88,7 @@ function set_build_environment() {
       # Now report the environment
       #
       echo "    Environment:"
-      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH"
+      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
       echo "      PKG_ROOT=$PKG_ROOT; PKG_DIR=$PKG_DIR; "
       echo "      ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "
       echo "      PATH=$PATH; "
@@ -118,7 +120,7 @@ function set_build_environment() {
       # Now report the environment
       #
       echo "    Environment:"
-      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH"
+      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
       echo "      (PKG_ROOT not yet set); PKG_DIR=$PKG_DIR; "
       echo "      ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "
       echo "      PATH=$PATH; "
@@ -131,14 +133,14 @@ function set_build_environment() {
       # ROOT is equivalent to LFS' $LFS
       export ROOT="$DISTRIB_PATH"
       echo "    Environment:"
-      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH"
+      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
       echo "      ROOT=$ROOT; "
       ;;
 
     Update)
       # preparing an update
       echo "    Environment:"
-      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH"
+      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
       ;;
 
     *)

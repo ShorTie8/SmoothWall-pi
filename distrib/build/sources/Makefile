@@ -11,7 +11,7 @@ UI_VERSION = 3.1
 PRODUCT_EXTRA = -SP5
 
 BASENAME = $(PRODUCT_NAME)-$(PRODUCT_VERSION)
-REVISION = polar
+REVISION = arm
 
 
 # - NAME, VERSION and UI_VERSION: meaning should be fairly obvious

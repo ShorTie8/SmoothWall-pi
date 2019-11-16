@@ -87,7 +87,7 @@ all: clean bin lib klibc
 	) > /dev/null 2>&1
 	@(cd tmp; \
 	  for i in $(SWE_PKGS); do \
-	    tar xfz /build/target/smoothwall-$$i.tar.gz; \
+	    tar xzf /build/target/smoothwall-$$i.tar.gz; \
 	  done; \
 	  touch etc/ld.so.conf; \
 	  /sbin/ldconfig -r .; \
@@ -95,8 +95,9 @@ all: clean bin lib klibc
 	  install -d lib/{firmware,udev/devices/{pts,shm}}; \
 	  ln -sv /lib/firmware usr/lib/firmware; \
 	  rm -rf lib/firmware/*; \
-	  cp -av /build/buildroot/linux/lib/firmware lib; \
-	) > /dev/null 2>&1
+	)
+	#  cp -av /build/buildroot/linux/lib/firmware lib; \
+	#) > /dev/null 2>&1
 	  #mknod -m0666 lib/udev/devices/null c 1 3; \
 	  #ln -sf proc/kcore /lib/udev/devices/core; \
 	  #ln -sf proc/self/fd /lib/udev/devices/fd; \

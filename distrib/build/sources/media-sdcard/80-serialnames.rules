@@ -1,0 +1,5 @@
+# https://www.raspberrypi.org/forums/viewtopic.php?t=88899&p=626042
+# Create ttyAMA0 symlinks
+
+KERNEL=="ttyAMA0",SYMLINK+="ttyS0" GROUP="dialout"
+# KERNEL=="ttyACM0",SYMLINK+="ttyS1" GROUP="dialout"

@@ -7,9 +7,9 @@ PACKAGE = zip
 VERSION = 30
 
 TARBALL = $(PACKAGE)$(VERSION)
-EXTENSION = .tar.gz
+#EXTENSION = .tgz
 
-BASE_URL = http://sourceforge.net/projects/infozip/files/Zip%203.x%20%28latest%29/3.0/zip30.tar.gz/download
+BASE_URL = http://downloads.sourceforge.net/infozip
 
 DIR = zip30
 COMPILE_DIR = $(DIR)

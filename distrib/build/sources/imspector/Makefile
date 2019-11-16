@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = imspector
 VERSION = 20130214
 
-BASE_URL = http://www.imspector.org/downloads/snapshots/
+BASE_URL = http://downloads.smoothwall.org/buildmirror
 
 CONFIGURE = yes
 COMPILE = yes
@@ -23,6 +23,8 @@ export ADD_PLUGINS = dbfilterplugin.so censordfilterplugin.so catsloggingplugin.
 configure: patch
 	cd $(DIR); sed -i -e 's/LIBS = -ldl/& -lcrypto/' Makefile
 	sed -i -e 's/^\(CXXFLAGS.*\)/\1 $(CFLAGS)/' $(DIR)/Makefile
+	cd $(DIR); patch -p1 < ../warning-fix.diff
+	cd $(DIR); patch -p1 < ../icqprotocolplugin.cpp.diff
 
 compile: configure
 	@$(MAKE) $(JOBS) -C $(DIR) $(OPTS)

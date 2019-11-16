@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = rp-pppoe
-VERSION = 3.10
+VERSION = 3.13
 
 DIR = $(PACKAGE)-$(VERSION)/src
 
-BASE_URL = http://www.roaringpenguin.com/files/download/
+BASE_URL = https://dianne.skoll.ca/projects/rp-pppoe/download
 
 INSTALL = yes
 CLEAN = yes

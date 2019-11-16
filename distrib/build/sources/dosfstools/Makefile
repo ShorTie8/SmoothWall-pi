@@ -7,24 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = dosfstools
-VERSION = 3.0.26
+VERSION = 4.1
+EXTENSION = .tar.xz
+BASE_URL = https://github.com/dosfstools/dosfstools/releases/download/v$(VERSION)
 
-BASE_URL = http://daniel-baumann.ch/files/software/dosfstools
-
-TARBALL = $(PACKAGE)-$(VERSION)
-
-DIR = $(PACKAGE)-$(VERSION)
-
-CONFIGURE = yes
-INSTALL = yes
-
-configure: patch
-	sed -i -e 's/^\(CFLAGS.*\)/\1 $(CFLAGS)/' $(DIR)/Makefile
-
-install: compile
-ifeq ($(BUILD_PHASE), Final)
-	@mkdir -p $(PKG_ROOT)
-	@make -C $(COMPILE_DIR) PREFIX=$(PKG_ROOT) install
-endif
+CONFIG_OPTS += --enable-compat-symlinks
 
 include ../Makefile.rules

@@ -8,11 +8,12 @@ include ../Makefile.conf
 
 PACKAGE = util-linux
 VER_MM = 2.28
-VERSION = $(VER_MM)
+VERSION = $(VER_MM).2
 
-export NO_CHECK_CERT = 1
+#export NO_CHECK_CERT = 1
 
 BASE_URL = http://www.kernel.org/pub/linux/utils/util-linux/v$(VER_MM)/
+
 
 ifeq ($(BUILD_PHASE), Stage_3)
 

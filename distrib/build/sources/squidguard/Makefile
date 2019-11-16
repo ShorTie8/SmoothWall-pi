@@ -9,7 +9,8 @@ include ../Makefile.conf
 PACKAGE = squidGuard
 VERSION = 1.5-beta
 
-BASE_URL = http://www.squidguard.org/Downloads/Devel
+#BASE_URL = http://www.squidguard.org/Downloads/Devel
+BASE_URL = https://fossies.org/linux/www
 
 CONFIG_OPTS += --prefix=$(PKG_DIR) --exec_prefix=$(PKG_DIR) \
 	      --with-sg-config=/var/smoothwall/urlfilter/squidGuard.conf \

@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = GDGraph
-VERSION = 1.48
+VERSION = 1.54
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/R/RU/RUZ
 
@@ -15,7 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); echo 'y' | perl Makefile.PL
+	#@+cd $(DIR); echo 'y' | perl Makefile.PL
+	@+cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

@@ -7,24 +7,28 @@
 include ../Makefile.conf
 
 PACKAGE = nss
-VERSION = 3.33
-
-BASE_URL = https://ftp.mozilla.org/pub/security/$(PACKAGE)/releases/NSS_3_33_RTM/src
-
-DIR=$(PACKAGE)-$(VERSION)/nss
-
-PATCH_FILE1 = nss-3.33-standalone-1.patch
-
+VER_MAJ = 3
+VER_MIN = 41
+VERSION = $(VER_MAJ).$(VER_MIN)
 DIR = $(PACKAGE)-$(VERSION)/nss
+
+BASE_URL = https://ftp.mozilla.org/pub/security/$(PACKAGE)/releases/NSS_$(VER_MAJ)_$(VER_MIN)_RTM/src
+
+PATCH_FILE1 = nss-$(VERSION)-standalone-1.patch
+PATCH_URL1 = http://linuxfromscratch.org/patches/downloads/nss/$(PATCH_FILE1)
+#PATCH_URL1 = http://www.linuxfromscratch.org/patches/blfs/svn/nss-$(VERSION)-standalone-1.patch
+
 
 PATCH = yes
 patch: $(DIR)/
-	cd $(DIR); patch -Np2 -i ../../$(PATCH_FILE1)
+	@echo; echo; echo "patch"
+	cd $(DIR); patch -Np2 -i $(DOWNLOADS_DIR)/$(PATCH_FILE1)
 
 CONFIGURE = yes
 configure: patch
+	@echo; echo; echo "configure"
 	true
-	sed -i -e 's/\(OS_REL_CFLAGS.*-Di386\)/\1 -march=i586 -mtune=generic/' $(PACKAGE)-$(VERSION)/$(PACKAGE)/coreconf/Linux.mk
+	#sed -i -e 's/\(OS_REL_CFLAGS.*-Di386\)/\1 -march=i586 -mtune=generic/' $(PACKAGE)-$(VERSION)/$(PACKAGE)/coreconf/Linux.mk
 
 COMPILE = yes
 MAKE_DEFS = BUILD_OPT=1 \
@@ -37,10 +41,12 @@ ifeq ($(BITS_64), yes)
 endif
 
 compile: configure
+	@echo; echo; echo "compile"
 	cd $(DIR); make $(MAKE_DEFS)
 
 INSTALL = yes
 install: compile
+	@echo; echo; echo "install"
 	cd $(DIR)/../dist; \
 	  mkdir -p ${PKG_ROOT}/usr/lib ${PKG_ROOT}/usr/bin ${PKG_ROOT}/usr/lib/pkgconfig; \
 	  install -v -m755 Linux*/lib/*.so              ${PKG_ROOT}/usr/lib; \

@@ -8,20 +8,16 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = expect
-VER_MM = 5.43
-VERSION = $(VER_MM).0
+VER_MM = 5.45
+VERSION = $(VER_MM).4
 
-BASE_URL = http://anduin.linuxfromscratch.org/sources/LFS/lfs-packages/6.6/
+BASE_URL = http://prdownloads.sourceforge.net/expect
 
-TARBALL = $(PACKAGE)-$(VERSION)
+TARBALL = $(PACKAGE)$(VERSION)
 
-DIR = $(PACKAGE)-$(VER_MM)
+DIR = $(PACKAGE)$(VERSION)
 
 ifeq ($(BUILD_PHASE), Stage_3)
-
-# Patch files are from LFS 6.6
-PATCH_FILE1 = expect-5.43.0-spawn-1.patch
-PATCH_FILE2 = expect-5.43.0-tcl_8.5.5_fix-1.patch
 
 CONFIG_OPTS += --prefix=$(TOOLS_DIR) --with-tcl=/$(TOOLS_DIR)/lib \
 	--with-tclinclude=$(TOOLS_DIR)/include --with-x=no
@@ -29,10 +25,13 @@ CONFIG_OPTS += --prefix=$(TOOLS_DIR) --with-tcl=/$(TOOLS_DIR)/lib \
 CONFIGURE = yes
 
 configure: patch
-	cd $(COMPILE_DIR); \
-	  cp -v configure{,.orig}; \
-	  sed 's:/usr/local/bin:/bin:' configure.orig > configure; \
-	  $(PRE_CONFIGURE) ./configure $(CONFIG_OPTS)
+	cd $(DIR); cp -v configure{,.orig}; \
+	  sed 's:/usr/local/bin:/bin:' configure.orig > configure
+ifeq ($(mARCH), arm64)
+	cd $(DIR); libtoolize --install --copy --force --automake
+	cd $(DIR); autoreconf -i
+endif
+	cd $(DIR); ./configure $(CONFIG_OPTS)
 
 INSTALL = yes
 

@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = rsync
-VERSION = 3.0.9
+VERSION = 3.1.2
 
 BASE_URL = http://rsync.samba.org/ftp/rsync/src
 

@@ -1,0 +1,47 @@
+#! /bin/bash
+
+# Define message colors
+BOUL="\033[1;4m"	# light blue
+DONE="\033[1;32m"	# green
+INFO="\033[1;33m"	# yellow
+WARN="\033[1;35m"	# hot pink
+NO="\033[0m"		# normal/light
+
+# Be sure the dependencies are right before tickling udev.
+echo -e "${INFO}    Checking dependencies${NO}"
+depmod -a
+
+# Setup hotplug
+echo -e "${INFO}    Setting up hotplug${NO}"
+echo -e '\000\000\000\000' > /proc/sys/kernel/hotplug
+
+# Wait for udev
+echo -e "${INFO}    Waiting for eudev to start${NO}"
+while :; do
+  ps -ax | grep udev > /dev/null 2>&1
+  if [ $? -eq 0 ]; then break; fi
+  echo "usleep 100000"
+  usleep 100000
+done
+
+echo -e "${DONE}      Sleepy 4 udev${NO}"
+sleep 4
+
+echo -e "${INFO}    Triggering eudev${NO}"
+echo -e "${BOUL}      udevadm trigger${NO}"
+/sbin/udevadm trigger
+sleep 2
+
+echo -e "${BOUL}      udevadm trigger --type=subsystems${NO}"
+/sbin/udevadm trigger --type=subsystems --action=add
+sleep 2
+
+echo -e "${WARN}      udevadm settle${NO}"
+/sbin/udevadm settle
+
+echo -e "${INFO}    Sleepy 4 udev, ${DONE}settle${NO}"
+sleep 4
+echo -en "${DONE}"; ls /sys/class/net; echo -en "${NO}"
+
+echo -e "${WARN}  Removing trigger-lock${NO}"
+rm -vf /tmp/trigger-lock

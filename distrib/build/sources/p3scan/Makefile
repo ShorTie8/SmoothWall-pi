@@ -3,7 +3,7 @@ include ../Makefile.conf
 PACKAGE = p3scan
 VERSION = 2.3.2
 
-BASE_URL = http://softlayer.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)%20%28stable%29/$(PACKAGE)-$(VERSION)/
+BASE_URL = https://sourceforge.net/projects/p3scan/files/p3scan%20%28stable%29/p3scan-2.3.2
 
 CONFIGURE = yes
 COMPILE = yes

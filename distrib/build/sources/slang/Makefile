@@ -7,10 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = slang
-VER_MM = 2.2
-VERSION = $(VER_MM).4
+VER_MM = 2.3
+VERSION = $(VER_MM).2
 
-BASE_URL = ftp://space.mit.edu/pub/davis/slang/v$(VER_MM)/
+EXTENSION = .tar.bz2
+BASE_URL = https://www.jedsoft.org/releases/slang
 
 INSTALL = yes
 

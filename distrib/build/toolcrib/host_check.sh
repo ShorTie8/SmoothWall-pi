@@ -89,7 +89,7 @@ CGIT=010801
 VGIT=1.8.1
 
 CGLIBC=020205
-VGLIBC=2.2.5
+VGLIBC=2.30.0
 
 CGREP=0205
 VGREP=2.5
@@ -358,7 +358,7 @@ else
     #if [[ $TGLIBC < $CGLIBC || $TGLIBC > $CGLIBCM ]]; then
     if [[ $TGLIBC < $CGLIBC ]]; then
       echo "  FAIL: glibc v$WORK FAILED ($VGLIBC-$VGLIBCM)"
-      OK=OK+1
+      #OK=OK+1
     else
       #echo "    OK: glibc v$WORK seems OK (>=$VGLIBC, <=$VGLIBCM)"
       echo "    OK: glibc v$WORK seems OK (>=$VGLIBC)"
@@ -572,9 +572,12 @@ else
 fi
 
 # Check XML::Simple
-if [ ! -e /usr/share/perl5/XML/Simple.pm -a ! -e /usr/lib/perl5/site_perl/*/XML/Simple.pm ]; then
+if [ ! -e /usr/share/perl5/XML/Simple.pm \
+	-a ! -e /usr/lib64/perl5/*/*/XML/Simple.pm \
+	-a ! -e /usr/lib/perl5/site_perl/*/XML/Simple.pm ]; then
+  # /usr/lib64/perl5/vendor_perl/5.30.0/XML/Simple.pm
   echo "  FAIL: XML-Simple not found."
-  OK=OK+1
+  #OK=OK+1
 else
   echo "    OK: XML-Simple found."
 fi

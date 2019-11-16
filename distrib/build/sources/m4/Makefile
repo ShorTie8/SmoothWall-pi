@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = m4
-VERSION = 1.4.16
+VERSION = 1.4.18
 
-BASE_URL = ftp://ftp.gnu.org/gnu/m4
+BASE_URL = https://ftp.gnu.org/gnu/m4
 
 CONFIGURE = yes
 INSTALL = yes

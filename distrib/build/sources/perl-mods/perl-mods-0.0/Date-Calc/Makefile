@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = Date-Calc
-VERSION = 6.3
+VERSION = 6.4
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/S/ST/STBEY/
 
@@ -15,7 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); echo 'y' | perl Makefile.PL
+	#@+cd $(DIR); echo 'y' | perl Makefile.PL
+	@+cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

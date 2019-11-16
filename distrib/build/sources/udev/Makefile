@@ -10,7 +10,8 @@ PACKAGE = udev
 VERSION = 195
 TARBALL = $(PACKAGE)-$(VERSION)
 
-BASE_URL = https://bitbucket.org/braindamaged/udev/downloads
+#BASE_URL = https://bitbucket.org/braindamaged/udev/downloads
+BASE_URL = http://downloads.smoothwall.org/buildmirror
 
 PATCH_FILE1 = udev-watch.c.patch
 

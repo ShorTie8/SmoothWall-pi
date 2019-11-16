@@ -21,7 +21,7 @@ STATUS=0
 
 # Get GCC version
 #
-set `egrep "^VERSION" sources/gcc/Makefile`
+set `egrep "^GCC_VER" sources/Makefile.versions`
 VERSION=$3
 #################
 
@@ -50,7 +50,13 @@ cc dummy.c -v -Wl,--verbose &> dummy.log
 
 # Right program interpreter?
 #
-readelf -l a.out | grep ': /lib' >/dev/null 2>&1
+#if [ "$BITS_64" == "yes" ]; then
+if [ "$mARCH" == "x86_64" ]; then
+  readelf -l a.out | grep ': /lib64' >/dev/null 2>&1
+else
+  readelf -l a.out | grep ': /lib' >/dev/null 2>&1
+fi
+
 if [ $? -ne 0 ]; then
   echo "gcc uses wrong program interpreter!"
   STATUS=1
@@ -71,6 +77,13 @@ done
 #
 grep -B3 '^ /usr/include' dummy.log >/tmp/a.a
 case $mARCH in
+  arm|arm64) cat >/tmp/b.b <<END
+#include <...> search starts here:
+ /usr/lib/gcc/${FINAL_TGT}/${VERSION}/include
+ /usr/lib/gcc/${FINAL_TGT}/${VERSION}/include-fixed
+ /usr/include
+END
+    ;;
   $ARCH32) cat >/tmp/b.b <<END
 #include <...> search starts here:
  /usr/lib/gcc/${FINAL_TGT}/${VERSION}/include
@@ -101,7 +114,29 @@ rm /tmp/a.a /tmp/b.b
 #
 grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g' >/tmp/a.a
 case $mARCH in
+  arm) cat >/tmp/b.b <<END
+SEARCH_DIR("/usr/${FINAL_TGT}/lib")
+SEARCH_DIR("/usr/local/lib")
+SEARCH_DIR("/lib")
+SEARCH_DIR("/usr/lib");
+END
+    ;;
+  arm64) cat >/tmp/b.b <<END
+SEARCH_DIR("/usr/${FINAL_TGT}/lib64")
+SEARCH_DIR("/usr/local/lib64")
+SEARCH_DIR("/lib64")
+SEARCH_DIR("/usr/lib64")
+SEARCH_DIR("/usr/${FINAL_TGT}/lib")
+SEARCH_DIR("/usr/local/lib")
+SEARCH_DIR("/lib")
+SEARCH_DIR("/usr/lib");
+END
+    ;;
   $ARCH32) cat >/tmp/b.b <<END
+SEARCH_DIR("/usr/${FINAL_TGT}/lib32")
+SEARCH_DIR("/usr/local/lib32")
+SEARCH_DIR("/lib32")
+SEARCH_DIR("/usr/lib32")
 SEARCH_DIR("/usr/${FINAL_TGT}/lib")
 SEARCH_DIR("/usr/local/lib")
 SEARCH_DIR("/lib")
@@ -135,9 +170,11 @@ rm /tmp/a.a /tmp/b.b
 #
 grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
 case $mARCH in
+  arm|arm64) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
+    ;;
   $ARCH32) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
     ;;
-  $ARCH64) grep "attempt to open /lib64/libc.so.6" dummy.log >/dev/null 2>&1
+  $ARCH64) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
     ;;
   *) false ;;
 esac
@@ -150,9 +187,11 @@ fi
 # Using correct dynamic linker?
 #
 case $mARCH in
+  arm) grep "found ld-linux-armhf.so.3 at /lib/ld-linux-armhf.so.3" dummy.log >/dev/null 2>&1 ;;
+  arm64) grep "found ld-linux-aarch64.so.1 at /lib/ld-linux-aarch64.so.1" dummy.log >/dev/null 2>&1 ;;
   $ARCH32) grep "found ld-linux.so.2 at /lib/ld-linux.so.2" dummy.log >/dev/null 2>&1
     ;;
-  $ARCH64) grep "found ld-linux-x86-64.so.2 at /lib64/ld-linux-x86-64.so.2" dummy.log >/dev/null 2>&1
+  $ARCH64) grep "found ld-linux-x86-64.so.2 at /lib/ld-linux-x86-64.so.2" dummy.log >/dev/null 2>&1
     ;;
   *) false ;;
 esac

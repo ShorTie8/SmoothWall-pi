@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = dhcp
 VERSION = 4.1-ESV-R13
 
-BASE_URL = ftp://ftp.isc.org/isc/dhcp/$(VERSION)
+BASE_URL = http://isc.mirrors.pair.com/dhcp/$(VERSION)
 
 PRE_CONFIGURE = CFLAGS="-Wno-error $(CFLAGS)"
 

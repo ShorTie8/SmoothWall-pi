@@ -3,7 +3,7 @@
 include ../Makefile.conf
 
 PACKAGE = cpio
-VERSION = 2.11
+VERSION = 2.12
 
 BASE_URL = http://ftp.gnu.org/gnu/cpio/
 

@@ -17,6 +17,10 @@ HDTEMPDB = hddtemp.db
 
 PATCH_FILE1 = REG_EIP.patch
 
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
+
 INSTALL = yes
 
 install: compile

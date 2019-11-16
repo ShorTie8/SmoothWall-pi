@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = nspr
-VERSION = 4.17
+VERSION = 4.20
 
 BASE_URL = https://ftp.mozilla.org/pub/mozilla.org/$(PACKAGE)/releases/v$(VERSION)/src
 

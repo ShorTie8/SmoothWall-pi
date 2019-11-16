@@ -10,6 +10,6 @@ include ../Makefile.versions
 PACKAGE = mpc
 VERSION = $(MPC_VER)
 
-BASE_URL = http://www.multiprecision.org/mpc/download
+BASE_URL = https://ftp.gnu.org/gnu/mpc
 
 include ../Makefile.rules

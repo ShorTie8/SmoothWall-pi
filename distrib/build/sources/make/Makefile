@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = make
 VERSION = 4.2.1
 
-BASE_URL = ftp://ftp.gnu.org/gnu/make/
+BASE_URL = https://ftp.gnu.org/gnu/make
 
 CONFIG_OPTS += --without-guile
 

@@ -1,0 +1,94 @@
+#!/bin/sh
+# Begin /usr/sbin/random
+#
+# Description : hardware random number generator
+# Copyright Jeff Blanner, 11/12/2019.
+# Licensed under the GNU GPL license that governs the Smoothwall Express source code.
+#
+
+# load our functions {echolog} & colors
+. /etc/rc.d/inc.rc-functions
+
+#if [ -e /proc/sys/kernel/random/poolsize ]; then
+#	poolsize=$(</proc/sys/kernel/random/poolsize);
+#	poolsize=$(expr $poolsize / 8 );
+#else
+#	poolsize=512;
+#fi
+
+case "$1" in
+	start)
+		echo -e "${STEP}        Initializing hardware random number generator... ${NO}"
+		echolog "" "s" "" "Initializing hardware random number generator..."
+		echo -n "entropy_avail/poolsize is "
+		echo -en "${INFO}"
+		echo $(cat /proc/sys/kernel/random/entropy_avail)/$(cat /proc/sys/kernel/random/poolsize)
+		echo -e "${NO}"
+		RNGD_OPTS="-o /dev/random -r /dev/hwrng"
+		rngd -v $RNGD_OPTS
+
+		#ls -l /dev/{hwrng,random,urandom}
+		#rngd -v -o /dev/random -r /dev/hwrng
+
+#		echo -e "${STEP}        Initializing kernel random number generator... ${NO}"
+#		echolog "" "s" "" "Initializing kernel random number generator..."
+#		random_seed=/var/run/random-seed
+#		if [ -f /var/run/random-seed ]; then
+#			echo -e "${STEP}            random-seed is there ${NO}"
+#			cat /var/run/random-seed >/dev/urandom
+#			ls -l /var/run/random-seed
+#		else
+#			echo -e "${STEP}            creating random-seed ${NO}"
+#			touch /var/run/random-seed
+#			ls -l /var/run/random-seed
+#			chmod -v 600 /var/run/random-seed
+#			poolfile=/proc/sys/kernel/random/poolsize
+#			echo "poolfile is $poolfile"
+#			[ -r $poolfile ] && bits=$(cat $poolfile) || bits=4096
+#			bytes=$(expr $bits / 8)
+#			dd if=/dev/urandom of=/var/run/random-seed count=1 bs=$bytes
+#		fi
+#		#chmod -v 600 /var/run/random-seed
+		#poolfile=/proc/sys/kernel/random/poolsize
+		#cat $poolfile
+		#[ -r $poolfile ] && bits=$(cat $poolfile) || bits=4096
+		#bytes=$(expr $bits / 8)
+		#dd if=/dev/urandom of=/var/run/random-seed count=1 bs=$bytes
+#		ls -l /var/run/random-seed
+
+
+		#echo; echo -n "entropy_avail/poolsize is "
+		#echo $(cat /proc/sys/kernel/random/entropy_avail)/$(cat /proc/sys/kernel/random/poolsize)
+		#ls -l /dev/{hwrng,random,urandom}
+		#sleep 22
+		;;
+
+	save)
+		echo -e "${STEP}          Saving random seed... ${NO}"
+		echolog "" "s" "" "Saving random seed..."
+		ls -l /var/run/random-seed
+		#random_seed=/var/run/random-seed
+		#touch /var/run/random-seed
+		#chmod -v 600 /var/tmp/random-seed
+		poolfile=/proc/sys/kernel/random/poolsize
+		[ -r $poolfile ] && bits=$(cat $poolfile) || bits=4096
+		bytes=$(expr $bits / 8)
+		dd if=/dev/urandom of=/var/run/random-seed count=1 bs=$bytes
+		ls -l /var/run/random-seed
+		echo
+		;;
+
+	stop)
+		echo -e "${STEP}          Stopping random ... ${NO}"
+		echolog "" "s" "" "Stopping random ..."
+		killall -v rngd
+		echo
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 1
+		;;
+esac
+
+# End $rc_base/init.d/random

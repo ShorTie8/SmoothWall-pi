@@ -9,7 +9,8 @@ include ../Makefile.conf
 PACKAGE = cnxadsl
 VERSION = 2.6-1.5
 
-BASE_URL = http://www.zweije.nl.eu.org/~vzweije/accessrunner/release/
+#BASE_URL = http://www.zweije.nl.eu.org/~vzweije/accessrunner/release/
+BASE_URL = http://roadster.agcl.us/downloads
 
 TARBALL = CnxADSL-6.1.2.007-PIM-$(VERSION)
 DIR = $(TARBALL)

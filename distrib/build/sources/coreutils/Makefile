@@ -7,27 +7,34 @@
 include ../Makefile.conf
 
 PACKAGE = coreutils
-VERSION = 8.19
+VERSION = 8.28
 
-BASE_URL = ftp://ftp.gnu.org/gnu/coreutils/
+BASE_URL = https://ftp.gnu.org/gnu/coreutils
 EXTENSION = .tar.xz
 
 CONFIG_OPTS += --disable-silent-rules
 
-CONFIGURE = yes
+# Tool Chain Build Stage_3
+#
+ifeq ($(BUILD_PHASE), Stage_3)
+CONFIG_OPTS += --enable-install-program=hostname
+endif # Stage 3
 
-configure: patch
-	@cd $(COMPILE_DIR); \
-	  ./configure --prefix=$(PKG_DIR) --enable-install-program=hostname $(CONFIG_OPTS);
-
+# # Final Build
+#
 ifeq ($(BUILD_PHASE), Final)
 
-PATCH_FILE3 = coreutils-8.19-i18n-1.patch
+#CONFIG_OPTS += --enable-install-program=arch 
+
+PATCH_FILE1 = coreutils-$(VERSION)-i18n-1.patch
+PATCH_URL1 = http://www.linuxfromscratch.org/patches/downloads/coreutils/$(PATCH_FILE1)
+#PATCH_FILE2 = coreutils-8.26-uname-1.patch
+#PATCH_URL2 = http://www.linuxfromscratch.org/patches/downloads/coreutils/$(PATCH_FILE2)
 
 INSTALL = yes
-
 install: compile
-	@mkdir -p $(PKG_ROOT)
+	@echo; echo; echo "install"; echo
+	mkdir -vp $(PKG_ROOT)
 	@make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 	@(mkdir -p $(PKG_ROOT)/bin; \
 	for FILE in basename cat chgrp chmod chown cp cut date dd df echo env false link ln \

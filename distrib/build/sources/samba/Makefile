@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = samba
-VERSION = 3.6.15
+VERSION = 3.6.25
 
 BASE_URL = http://www.samba.org/samba/ftp/stable/
 
@@ -16,7 +16,13 @@ COMPILE_DIR = $(DIR)/source3
 CONFIGURE = yes
 
 configure: $(DIR)/
-	@( cd $(COMPILE_DIR); ./configure --prefix=/usr; ./config.status; )
+#	@( cd $(COMPILE_DIR); ./configure --prefix=/usr; ./config.status; )
+ifeq ($(mARCH), arm64)
+	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
+		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
+	done
+endif
+	cd $(COMPILE_DIR); ./configure $(CONFIG_OPTS)
 
 COMPILE = yes
 

@@ -20,6 +20,16 @@ exec <${BUILD_IN} >>${BUILD_OUT} 2>&1
 echo 'main(){}' > dummy.c && \
   # Must look for correct ld_linux....
   case $mARCH in
+    arm)
+      $SWE_TGT-gcc dummy.c && 
+      $SWE_TGT-readelf -l a.out | grep ': /tools/lib/ld-linux-armhf.so.3' > /dev/null
+      STATUS=$?
+      ;;
+    arm64)
+      $SWE_TGT-gcc dummy.c && 
+      $SWE_TGT-readelf -l a.out | grep ': /tools/lib/ld-linux-aarch64.so.1' > /dev/null
+      STATUS=$?
+      ;;
     i*86)
       $SWE_TGT-gcc dummy.c && 
       $SWE_TGT-readelf -l a.out | grep ': /tools/lib/ld-linux.so.2' > /dev/null

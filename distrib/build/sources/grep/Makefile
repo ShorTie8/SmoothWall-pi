@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = grep
-VERSION = 2.21
+VERSION = 3.0
 
 BASE_URL = http://ftp.gnu.org/gnu/grep/
 EXTENSION = .tar.xz

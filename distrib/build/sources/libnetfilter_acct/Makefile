@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = libnetfilter_acct
-VERSION = 1.0.2
+VERSION = 1.0.3
 EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = ftp://ftp.netfilter.org/pub/$(PACKAGE)
+BASE_URL = https://www.netfilter.org/projects/libnetfilter_acct/files
 
 include ../Makefile.rules

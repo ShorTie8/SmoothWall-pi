@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = file
-VERSION = 5.24
+VERSION = 5.31
 
-BASE_URL = ftp://ftp.astron.com/pub/file/
+BASE_URL = http://ftp.lfs-matrix.net/pub/clfs/conglomeration/file
 
 CONFIG_OPTS += --prefix=$(PKG_DIR)
 

@@ -1,0 +1,17 @@
+--- userland-master/buildme.orig	2018-08-15 11:19:52.761885017 +0000
++++ userland-master/buildme	2018-08-15 11:21:13.411259462 +0000
+@@ -8,12 +8,12 @@
+ 
+ BUILDSUBDIR=`echo $BUILDTYPE | tr '[A-Z]' '[a-z]'`;
+ 
+-if [ "armv6l" = `arch` ] || [ "armv7l" = `arch` ]; then
++if [ "armv6l" = `uname -m` ] || [ "armv7l" = `uname -m` ]; then
+ 	# Native compile on the Raspberry Pi
+ 	mkdir -p build/raspberry/$BUILDSUBDIR
+ 	pushd build/raspberry/$BUILDSUBDIR
+ 	cmake -DCMAKE_BUILD_TYPE=$BUILDTYPE ../../..
+-	if [ "armv6l" = `arch` ]; then
++	if [ "armv6l" = `uname -m` ]; then
+ 		make
+ 	else
+ 		make -j4

@@ -55,6 +55,7 @@ endif
 #   environment is correctly set and passed to all subprocedures.
 
 # Define the default ARCHs.
+# if not "ARCH32=yes make build" for CC
 ifndef ARCH32
 export ARCH32 = i586
 endif
@@ -64,28 +65,54 @@ endif
 
 # What ARCH do we seem to be?
 ifndef mARCH
-export mARCH = $(shell uname -m | sed -e 's/i.86/$(ARCH32)/')
+  ifeq ($(shell uname -m | grep arm | cut -d"v" -f1 | awk '{print$1}'), arm)
+    export mARCH = arm
+  else ifeq ($(shell uname -m), aarch64)
+    export mARCH = arm64
+  else
+    export mARCH = $(shell uname -m | sed -e 's/i.86/$(ARCH32)/')
+#    export mTUPLE = $(mARCH)
+  endif
 endif
 
-export mTUPLE = $(mARCH)
 
+
+# setarch This utility currently only affects the output of uname -m.
+# For example, on an AMD64 system, running 'setarch i386 program' will cause 'program' to see i686 (or other relevant arch) instead of x86_64 as machine type.
+# It also allows to set various personality options. The default program is /bin/sh.
 
 # See what we can build; that is, see if the chosen mARCH is possible.
 # If building on a multilib host, both will be zero. If building on pure i686
 # CANx86_64 will be non-zero. If building on pure 64-bit, CANi686
 # should be non-zero.
+
 export ARCHset =
 CANx86_64 = $(shell setarch x86_64 sh -c "exit" 2>/dev/null; echo $$?)
-CANi686 = $(shell setarch i686 sh -c "exit" 2>/dev/null; echo $$?)
+#CANi686 = $(shell setarch i686 sh -c "exit" 2>/dev/null; echo $$?)
+CANi686 = $(shell setarch i386 sh -c "exit" 2>/dev/null; echo $$?)
 
 # Only ARCH32 and ARCH64 targets are supported (see above), but only on hosts
 # that can build them.
 
-ifeq ($(mARCH),$(ARCH64))
+ifeq ($(ARCH32), yes)
+  export ARCH_OK = yes
+  export BITS_32 = yes
+  export mTUPLE = i586
+  export SWE_TGT = $(mTUPLE)-tools-linux-gnu
+  export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
+  #export CFLAGS = $(OPT_FLAGS) -m32
+  # -march=$(ARCH32) -mtune=generic
+  export CFLAGS = $(OPT_FLAGS) -O3 -fPIC -march=i586 -mcpu=pentium  
+  ifeq ($(CANi686), 0)
+    export ARCHset = linux32
+  endif
+
+else ifeq ($(mARCH),$(ARCH64))
   export ARCH_OK = yes
   export BITS_64 = yes
+  export mTUPLE = $(ARCH64)
   export SWE_TGT = $(mTUPLE)-tc-linux-gnu
-  export FINAL_TGT = $(mTUPLE)-linux-gnu
+  export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
   export CFLAGS = $(OPT_FLAGS) -m64 -fPIC
   ifeq ($(CANx86_64), 0)
     export ARCHset = linux64
@@ -93,18 +120,84 @@ ifeq ($(mARCH),$(ARCH64))
   # This is for building 32-bit grub with a cross-compiler
   # It isn't presently used, as we don't build a 32-bit env on 64-bit.
   export SWE32_TGT = $(ARCH32)-pc-linux-gnu
-endif
 
-ifeq ($(mARCH),$(ARCH32))
+else ifeq ($(mARCH),$(ARCH32))
   export ARCH_OK = yes
   export BITS_32 = yes
+  export mTUPLE = $(ARCH32)
   export SWE_TGT = $(mTUPLE)-tc-linux-gnu
-  export FINAL_TGT = $(mTUPLE)-pc-linux-gnu
+  export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
   export CFLAGS = $(OPT_FLAGS) -m32 -march=$(ARCH32) -mtune=generic
   ifeq ($(CANi686), 0)
     export ARCHset = linux32
   endif
+
 endif
+
+ifeq ($(mARCH),arm)
+  export ARCH_OK = yes
+  export ARCHset = linux64
+  export CFLAGS = -O3 -fPIC
+
+  export SWE_TGT = armv7l-tools-linux-gnueabihf
+  export FINAL_TGT = armv7l-swe-linux-gnueabihf
+
+#rpi
+  ifeq ($(shell cat /proc/cpuinfo | grep "Hardware" | cut -d " " -f2 | awk '{print$1}'),BCM2708)
+    export mTUPLE = "rpi"
+
+#rpi2
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a21041)
+    export mTUPLE = "rpi2"
+
+#rpi3
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a22082)
+    export mTUPLE = "rpi3"
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a020d3)
+    export mTUPLE = "rpi3"
+      
+#pi0w
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),9000c1)
+    export mTUPLE = "pi0w"
+
+#rpi4
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a03111)
+    export mTUPLE = "rpi4"
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),b03111)
+    export mTUPLE = "rpi4"
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),c03111)
+    export mTUPLE = "rpi4"
+    # export SWE_TGT = armv7-tools-linux-gnueabihf
+    # export FINAL_TGT = armv7-swe-linux-gnueabihf
+
+#Odroid xu3/4
+  else ifeq ($(shell cat /proc/cpuinfo | grep "Hardware" | cut -d " " -f2 | awk '{print$1}'),ODROID-XU3)
+    export mTUPLE = "xu4"
+
+  else
+    $(info So, So, Sorry, Unknown arm board)
+    $(error FAIL)
+  endif
+endif
+
+ifeq ($(mARCH),arm64)
+  ifeq ($(shell cat /proc/cpuinfo | grep "CPU part" | head -1 | cut -d " " -f3 | awk '{print$1}'),0xd08)
+    # For pi64
+    export mTUPLE = "pi4-64"
+    export ARCH_OK = yes
+    export ARCHset = linux64
+    export CFLAGS= -march=armv8-a+crc -mtune=cortex-a72 -O3 -pipe -fPIC
+    export ARCH64 = aarch64
+    # creates lib64 symlinks
+    export BITS_64 = yes
+    export SWE_TGT = aarch64-tools-linux-gnu
+    export FINAL_TGT = aarch64-swe-linux-gnu
+  else
+    $(info So, So, Sorry, Unknown arm64 board)
+    $(error FAIL)
+  endif
+endif
+
 
 ifeq ($(ARCHset),)
   $(info Cannot build for architecture $(mARCH) on this host!)

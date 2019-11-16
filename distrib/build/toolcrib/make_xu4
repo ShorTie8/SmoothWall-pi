@@ -1,0 +1,260 @@
+#! /bin/bash
+
+echo "make_xu4"
+
+case `basename $0` in
+  make_xu4)
+    # Won't work as a mere mortal
+    if [ $UID -ne 0 ]; then
+      echo "This script MUST be run as root. Please su or sudo and try again!"
+      echo
+      exit 1
+    fi
+    ;;
+esac
+
+export ORIG_DIR=${PWD}
+
+# cleanup ${LOG} ${BOOT} ${ROOT}
+# Function to unmount and clean up
+function cleanup {
+  cd $ORIG_DIR
+  if grep "/$1" /proc/mounts >/dev/null; then
+    umount -v ./$1
+  fi
+  if grep "/$2" /proc/mounts >/dev/null; then
+    umount -v ./$2
+  fi
+  if grep "/$3" /proc/mounts >/dev/null; then
+    umount -v ./$3
+    rmdir -v $3
+    typeset -i i; i=0
+    flnode=`basename $fldev`
+    while true; do
+      set `cat /sys/block/$flnode/stat`
+      if [ "$9" -eq 0 ]; then i=i+1; fi
+      if [ $i -ge 10 ]; then break; fi
+      sleep .1
+    done
+  fi
+}
+
+function countdown {
+  typeset -i i
+  i=$1
+  while [ $i -gt 0 ]; do
+    echo -en "\033[0K$i\r"
+    i=i-1
+    sleep 1
+  done
+  echo
+}
+
+source toolcrib/functions
+
+# Stuff you need to know
+echo
+echo "                   Smoothwall Express sdcard creator"
+echo
+echo "$0 is a script that creates a Smoothwall Express 3.1 sdcard"
+echo "to a flash/thumb drive such that it can be booted."
+echo ""
+echo "You will be prompted to plug in a USB thumb/flash drive."
+echo
+echo "Press <ENTER> to continue or "
+echo " 'gcc' to include gcc and dev files or"
+echo -n " 'n' to quit "
+read ans
+case $ans in
+  n) exit 0 ;;
+  gcc) GCC="yes" ;;
+esac
+
+echo "After the sdcard is made,"
+echo " would you like to make an image of it ??"
+echo -n " 'y' to make it "
+read ans
+if [ "$ans" == "y" ]; then Image="yes"; fi
+
+# Pause for reflection
+sleep 2
+
+# Shorthand for mount points
+ROOT="sdcard"
+BOOT="sdcard/boot"
+LOG="sdcard/var/log"
+
+echo "Plug in flash drive"
+
+# Wait until a new [0-9] node appears in /dev
+#   This should be OK because there should be few device changes during operation
+DEV_FILE="/tmp/inotify_devs"
+INOTIFY_CMD="inotifywait -q"
+WATCH="CREATE"
+
+# Watch for CREATEs in /dev of xxx[0-9]*
+$INOTIFY_CMD -m --exclude "t[my]" /dev | while read a b c; do
+  if [ "$b" != "$WATCH" ]; then continue; fi
+  C="${c/[0-9]*/}"
+  if [ "$c" != "$C" -a -e "$a$C" -a -e "$a${C}1" ]; then
+    echo "${C}" > ${DEV_FILE}
+    exit  # This exits the 'while read' subprocess
+  fi
+done
+read fldev <$DEV_FILE
+rm -f $DEV_FILE
+
+# Pause for reflection
+sleep 2
+
+echo; echo "Flash drive is /dev/${fldev}"; echo
+
+echo; echo "Zero the beginning of the SD card:"
+dd if=/dev/zero of=/dev/${fldev} bs=1M count=8
+
+
+echo; echo "Partitioning flash drive /dev/${fldev}"
+fdisk /dev/${fldev} <<EOF
+o
+n
+p
+1
+
++256M
+t
+c
+
+n
+p
+2
+
++512M
+t
+2
+82
+
+n
+p
+3
+
++4G
+
+n
+p
+
+
+w
+EOF
+
+echo "sleeping 6"
+sleep 6
+echo "syncing"
+sync
+echo "sleeping 6"
+sleep 6
+
+#partprobe /dev/${fldev}
+
+echo "Formatting flash drive /dev/${fldev}"
+echo -e "\nFormatting boot partition /dev/${fldev}1\n"
+mkdosfs -v -n BOOT /dev/${fldev}1
+#mkfs.fat -v -t vfat -i boot /dev/${fldev}1
+#mkfs.fat -v -n BOOT /dev/${fldev}1
+
+echo -e "\nMaking swap /dev/${fldev}2\n"
+mkswap /dev/${fldev}2
+
+echo -e "\nFormatting log partition /dev/${fldev}3\n"
+echo "y" | mkfs.ext4 -O ^huge_file  -L /var/log /dev/${fldev}3
+
+
+echo -e "\nFormatting root partition /dev/${fldev}4\n"
+echo "y" | mkfs.ext4 -O ^huge_file  -L SmoothWall /dev/${fldev}4 && sync
+echo
+
+echo "fdisk -l /dev/${fldev}"
+fdisk -l /dev/${fldev}
+echo
+
+echo -e "\nFusing /dev/${fldev}\n"
+(cd sources/media-sdcard/distrib/boot; ./sd_fusing.sh /dev/${fldev})
+
+# Be sure the flash are unmounted and the mount point deleted
+#   if the script abends.
+trap "cleanup ${LOG} ${BOOT} ${ROOT}; exit" EXIT SIGINT SIGQUIT
+
+# Make the mount points
+echo
+echo "Preparing..."
+echo "Make and mount the mount points"
+
+echo "root"
+mkdir -vp ${ROOT} || \
+    { echo "Couldn't make ${ROOT} mount point!"; exit 1; }
+mount -v -t ext4 -o sync /dev/${fldev}4 ${ROOT} || \
+    { echo "Couldn't mount /dev/${fldev}4 ${ROOT}"; exit 1; }
+
+echo "boot"
+mkdir -vp ${BOOT} || \
+    { echo "Couldn't make ${BOOT} mount point!"; exit 1; }
+mount -v -t vfat -o sync /dev/${fldev}1 ${BOOT} || \
+    { echo "Couldn't mount /dev/${fldev}1 ${BOOT}"; exit 1; }
+
+echo "log"
+mkdir -vp ${LOG} || \
+    { echo "Couldn't make ${LOG} mount point!"; exit 1; }
+mount -v -t ext4 -o sync /dev/${fldev}3 ${LOG} || \
+    { echo "Couldn't mount /dev/${fldev}3 ${LOG}"; exit 1; }
+
+
+
+echo; echo "Copying root"
+cp -ax sources/media-sdcard/distrib/* ${ROOT}
+
+echo; echo "Copying doc's"
+cp -ax sources/media-sdcard/distrib-doc/* ${ROOT}
+
+echo; echo "Creating /sys/block/mmcblk0/mmcblk0boot0/force_ro"
+mkdir -vp sdcard/sys/block/mmcblk0/mmcblk0boot0
+echo 0 > sdcard/sys/block/mmcblk0/mmcblk0boot0/force_ro
+
+if [ "$GCC" = "yes" ]; then
+  echo; echo "Copying dev"
+  cp -ax sources/media-sdcard/distrib-dev/* ${ROOT}
+fi
+
+echo "syncing"
+sync
+
+echo; echo; echo "sdcard states";
+df -h ${ROOT}
+df -h ${BOOT}
+df -h ${LOG}
+
+
+# Unmount them
+cleanup ${LOG} ${BOOT} ${ROOT}
+
+if [ "$Image" == "yes" ]; then
+  if [ "$GCC" == "yes" ]; then
+    echo "Making dev image of sdcard"
+    dd bs=4M if=/dev/${fldev} | gzip > swe-3.2-arm.rpi-dev.img.gz
+    sync
+  else
+    echo "Making image of sdcard"
+    dd bs=4M if=/dev/${fldev} | gzip > swe-3.2-arm.rpi.img.gz
+    sync
+  fi
+fi
+
+
+# Clear the exit booby trap
+trap "" EXIT
+
+
+echo
+echo "Smoothwall Express sdcard creator complete."
+
+
+exit
+

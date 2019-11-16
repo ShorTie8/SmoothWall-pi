@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = yaml
-VERSION = 0.1.3
+VERSION = 0.1.7
 
 DIR = $(PACKAGE)-$(VERSION)
 

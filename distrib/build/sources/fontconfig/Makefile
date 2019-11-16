@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = fontconfig
-VERSION = 2.8.0
+VERSION = 2.12.6
 
 BASE_URL = http://www.freedesktop.org/software/fontconfig/release/
 

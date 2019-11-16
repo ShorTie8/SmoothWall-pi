@@ -5,14 +5,14 @@
 # This code is distributed under the terms of the GPL v2.
 
 # The system's kernel.
-KERNEL_MAJOR = 3
-KERNEL_MMR = $(KERNEL_MAJOR).16
-KERNEL_VER = $(KERNEL_MMR).63
+KERNEL_MAJOR = 4
+KERNEL_MMR = $(KERNEL_MAJOR).19
+KERNEL_VER = $(KERNEL_MMR).83
 
 # The kernel version headers needed to build glibc
 # Unrelated to the system's kernel
-KERNELHEADER_MAJOR = 3
-KERNELHEADERVER = 3.4.104
+KERNELHEADER_MAJOR = 4
+KERNELHEADERVER = $(KERNEL_VER)
 
 # The kernel version headers needed to build klibc-2.6.18
 # Unrelated to the system's kernel
@@ -24,15 +24,48 @@ K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
 KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K_RAW_VERSION).tar.xz
 KERNELHEADER_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNELHEADER_MAJOR).x/linux-$(KERNELHEADERVER).tar.xz
 
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
+    KERNEL_VER = $(KERNEL_MMR).80+
+    KERNEL_COM = 412bd8c8b2f7ba01c6423b9d31cc1be317d1ba4d
+    #KERNEL_VER = $(KERNEL_MMR).83+
+    #KERNEL_COM = 3c235dcfe80a7c7ba360219e4a3ecb256f294376
+    KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-rpi-$(KERNEL_VER).tar.gz
+    K_RAW_VERSION = $(KERNEL_VER)
+    K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
+
+else ifeq ($(mTUPLE), xu4)
+    KERNEL_MAJOR = 4
+    KERNEL_MMR = $(KERNEL_MAJOR).9
+    KERNEL_VER = $(KERNEL_MMR).57+
+    KERNEL_COM = 4e456eabc3be85aa8c3fe55cae757cd3a6544611
+    KERNEL_URL = https://github.com/hardkernel/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
+    K_RAW_VERSION = $(KERNEL_VER)
+    K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
+else ifneq ($(mARCH),$(mTUPLE))
+	KERNEL_URL = Unknown_system_kernel
+endif
+
 FREESWAN_TYPE = libreswan
-FREESWAN_VER = 3.27
+FREESWAN_VER = 3.29
 
 IPTABLES_VER = 1.6.0
-XTABLES_ADDONS_VER = 2.10
+# 1.6.1 & 2 don't give /iptables/xshared.o
+#IPTABLES_VER = 1.6.2
 
-GMP_VER = 5.1.2
-MPFR_VER = 3.1.2
-MPC_VER = 1.0.1
+#XTABLES_ADDONS_VER = 2.10
+#XTABLES_ADDONS_VER = 2.14
+# warning Kernels below 4.15 not supported.
+XTABLES_ADDONS_VER = 3.3
 
-TCL_MM = 8.5
-TCL_VER = $(TCL_MM).11
+BIN_VER = 2.28
+GCC_VER = 6.5.0
+GCC_EXT = .tar.xz
+
+GMP_VER = 6.1.2
+MPFR_VER = 4.0.1
+MPC_VER = 1.1.0
+ISL_VER = 0.18
+
+
+TCL_MM = 8.6
+TCL_VER = $(TCL_MM).9

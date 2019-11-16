@@ -9,8 +9,12 @@ include ../Makefile.conf
 PACKAGE = linux-atm
 VERSION = 2.5.2
 
-BASE_URL = http://softlayer.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(VERSION)/
+BASE_URL = https://sourceforge.net/projects/linux-atm/files/linux-atm/$(VERSION)
 
 PATCH_FILE1 = led-main.c.patch
+
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
 
 include ../Makefile.rules

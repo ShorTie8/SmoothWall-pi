@@ -7,8 +7,21 @@
 include ../Makefile.conf
 
 PACKAGE = inotify-tools
-VERSION = 3.14
+VERSION = 3.20.1
 
-BASE_URL = http://cloud.github.com/downloads/rvoicilas/inotify-tools
+TARBALL = $(VERSION)
+
+#DIR = $(PACKAGE)-$(VERSION)
+
+
+#BASE_URL = https://github.com/rvoicilas/inotify-tools/archive/3.20.1.tar.gz/inotify-tools-3.20.1.tar.gz
+BASE_URL = https://github.com/rvoicilas/inotify-tools/archive
+
+PATCH = yes
+patch: $(DIR)/
+	@echo; echo; echo "patch"
+	# 
+	cd $(DIR); autoreconf -vif
+
 
 include ../Makefile.rules

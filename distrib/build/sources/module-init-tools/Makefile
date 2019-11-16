@@ -18,4 +18,8 @@ PRE_CONFIGURE = DOCBOOKTOMAN=/bin/true
 
 CONFIG_OPTS += --datarootdir=/usr/share
 
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
+
 include ../Makefile.rules

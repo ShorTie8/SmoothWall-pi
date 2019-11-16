@@ -1,0 +1,21 @@
+diff -ruN imspector.orig/icqprotocolplugin.cpp imspector/icqprotocolplugin.cpp
+--- imspector.orig/icqprotocolplugin.cpp	2017-08-07 04:15:41.285203093 -0400
++++ imspector/icqprotocolplugin.cpp	2017-08-07 05:13:37.000000000 -0400
+@@ -226,7 +226,7 @@
+ 
+ 	std::string roasted;	
+ 
+-	char xordata[] =
++	unsigned char xordata[] =
+ 	{ 
+ 		0xF3, 0x26, 0x81, 0xC4, 0x39, 0x86, 0xDB, 0x92,
+ 		0x71, 0xA3, 0xB9, 0xE6, 0x53, 0x7A, 0x95, 0x7C,
+@@ -507,7 +507,7 @@
+ 									return 1;
+ 							}	
+ 
+-							char guid094613494C7F11D18222444553540000[] =
++							unsigned char guid094613494C7F11D18222444553540000[] =
+ 							{
+ 								0x09, 0x46, 0x13, 0x49, 0x4C, 0x7F, 0x11, 0xD1, 
+ 								0x82, 0x22, 0x44, 0x45, 0x53, 0x54, 0x00, 0x00

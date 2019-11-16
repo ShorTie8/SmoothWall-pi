@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = groff
-VERSION = 1.21
+VERSION = 1.22.4
 
-BASE_URL = ftp://ftp.gnu.org/gnu/groff
+BASE_URL = https://ftp.gnu.org/gnu/groff
 
 PRE_CONFIGURE = PAGE=letter
 

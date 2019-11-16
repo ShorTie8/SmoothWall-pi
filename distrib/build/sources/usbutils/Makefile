@@ -10,7 +10,7 @@ PACKAGE = usbutils
 VERSION = 007
 EXTENSION = .tar.xz
 
-BASE_URL = http://ftp.kernel.org/pub/linux/utils/usb/usbutils
+BASE_URL = https://www.kernel.org/pub/linux/utils/usb/usbutils
 
 CONFIG_OPTS += --disable-zlib
 

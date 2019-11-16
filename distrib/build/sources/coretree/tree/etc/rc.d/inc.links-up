@@ -15,6 +15,9 @@
 #   default gateway) if RED is static. This file is sourced into the running
 #   script; nicsToUp is automatically available.
 
+echo -e "${BOUL}    File: inc.links-up ${NO}"
+echo -e "${INFO}      nicsToUp are ${DONE} $nicsToUp ${NO}"
+
 for i in $nicsToUp; do
   case $i in
 
@@ -29,6 +32,13 @@ for i in $nicsToUp; do
       ;;
   esac
 done
+
+#if [ "$WIFI" = "on" ]; then
+#	echo -e "${BOUL}    WIFI is turned on${NO}"
+#	echo -e "${BOUL}      WIFI Device type is ${PURPLE_DEV}${NO}"
+#	echolog "e" "s" "" "WIFI is turned on, Device type is ${PURPLE_DEV}"
+#	. /etc/rc.d/rc.wifi
+#fi
 
 if [ "$RED_TYPE" = "STATIC" ]; then
   # If RED_TYPE is STATIC, update the RED settings (pick up the default gateway)

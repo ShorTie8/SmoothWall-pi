@@ -10,7 +10,7 @@ PACKAGE = dialog
 VERSION = 1.2-20121230
 EXTENSION = .tgz
 
-BASE_URL = ftp://invisible-island.net/$(PACKAGE)
+BASE_URL = http://invisible-mirror.net/archives/dialog/
 
 PRECONFIGURE = LDFLAGS=-ltinfo
 CONFIG_OPTS += --with-ncurses=tinfo

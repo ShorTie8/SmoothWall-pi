@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = bash
-VERSION = 4.1
+VERSION = 4.3.30
+BASE_URL = https://ftp.gnu.org/gnu/bash
 
-BASE_URL = ftp://ftp.gnu.org/gnu/bash/
-
-PATCH_FILE1 = gnu-patches.patch
+PATCH_FILE1 = bash-4.3.30-upstream_fixes-3.patch
+PATCH_URL1 = http://www.linuxfromscratch.org/patches/downloads/$(PACKAGE)/$(PATCH_FILE1)
 
 ifeq ($(BUILD_PHASE), Stage_3)
 BUILD = --build=$(SWE_TGT)
@@ -25,7 +25,10 @@ install: compile
 endif
 
 ifeq ($(BUILD_PHASE), Final)
-CONFIG_OPTS += --bindir=/bin $(BUILD)
+CONFIG_OPTS += --bindir=/bin $(BUILD) \
+		--docdir=/usr/share/doc/bash-4.3.30 \
+		--with-installed-readline
+#		--without-bash-malloc \
 
 INSTALL = yes
 

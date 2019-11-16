@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# load our functions {echolog} & colors
+. /etc/rc.d/inc.rc-functions
+# read in our variables
+. /var/smoothwall/ethernet/settings
+
+if [ "$hostapd_client" = "on" ]; then
+  echo -e "${BOUL}    hostapd_client is turned on${NO}"
+  echolog "" "s" "" "hostapd_client is turned on"
+
+  if [ ! -v $GREEN_BRG ]; then
+    echo -e "${STEP}          Starting Green hostapd ${NO}"
+    echolog "" "s" "" "  Starting Green hostapd "
+    /usr/sbin/wifi start green
+  else
+    echo -e "${STEP}          No Green hostapd found ${NO}"
+    echolog "" "s" "" "  No Green hostapd found "
+  fi
+
+  if [ ! -v $ORANGE_BRG ]; then
+    echo -e "${STEP}          Starting Orange hostapd ${NO}"
+    echolog "" "s" "" "  Starting Orange hostapd "
+    /usr/sbin/wifi start orange
+  else
+    echo -e "${STEP}          No Orange hostapd found ${NO}"
+    echolog "" "s" "" "  No Orange hostapd found "
+  fi
+
+  if [ ! -v $PURPLE_BRG ]; then
+    echo -e "${STEP}          Starting Purple hostapd ${NO}"
+    echolog "" "s" "" "  Starting Purple hostapd "
+    /usr/sbin/wifi start purple
+  else
+    echo -e "${STEP}          No Purple hostapd found ${NO}"
+    echolog "" "s" "" "  No Purple hostapd found "
+  fi
+
+  echo -e "${BOUL}    Sleepy 4${NO}"
+  sleep 4
+else
+  echo -e "${BOUL}    No hostapd_client enabled ${NO}"
+  echolog "" "s" "" "  No hostapd_client enabled"
+fi

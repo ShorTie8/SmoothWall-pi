@@ -5,6 +5,9 @@ VERSION = 0.101.1
 
 BASE_URL = https://www.clamav.net/downloads/production
 
+# The --disable-clamav switch disables the check for existence of the clamav user and group 
+#    but clamscan would still require an unprivileged account to work in a superuser mode.
+
 PRE_CONFIGURE = LIBS=-ltinfo
 CONFIG_OPTS += --sysconfdir=/usr/lib/smoothwall --with-dbdir=/var/clamav --disable-clamav --disable-ltdl-install --without-included-ltdl
 

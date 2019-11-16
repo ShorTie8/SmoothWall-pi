@@ -37,12 +37,14 @@ INSTALL_LANGUAGES = English
 CONFIGURE = yes
 
 configure: patch
-	@/bin/sh -c "ulimit -n 8192; cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=/$(PKG_DIR)"
+	@echo; echo; echo "configure"; echo
+	/bin/sh -c "ulimit -n 8192; cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=/$(PKG_DIR)"
 
 
 INSTALL = yes
 
 install: compile
+	@echo; echo; echo "install"; echo
 	mkdir -p $(PKG_ROOT)
 	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 	mkdir -p $(PKG_ROOT)/var/smoothwall/proxy
@@ -59,7 +61,9 @@ SQUID_BITS = ./usr/bin/ ./usr/libexec/ ./usr/sbin/squid \
              ./usr/etc/mime.conf ./usr/share/ ./var/smoothwall/proxy/squid.conf
 
 $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz: install
-	@tar -zcvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C $(PKG_ROOT) $(SQUID_BITS)
-	@tar -xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /
+	@echo; echo; echo "build tarball"
+	tar -zcf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C $(PKG_ROOT) $(SQUID_BITS)
+	@echo "install tarball"
+	tar -xf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /
 
 include ../Makefile.rules

@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = pciutils
 VERSION = 3.1.7
 
-BASE_URL = ftp://ftp.kernel.org/pub/software/utils/pciutils/
+BASE_URL = https://www.kernel.org/pub/software/utils/pciutils/
 
 CONFIGURE = yes
 COMPILE = yes

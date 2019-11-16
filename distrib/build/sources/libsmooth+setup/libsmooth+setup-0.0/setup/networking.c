@@ -384,6 +384,10 @@ int changedrivers(void)
 	char cardinfo[STRING_SIZE];
 	char mac[STRING_SIZE];
 	int driverc = 0;
+	/* define our bridges */
+	char greenbridge[STRING_SIZE];
+	char orangebridge[STRING_SIZE];
+	char purplebridge[STRING_SIZE];
 	
 	if (!(readkeyvalues(kv, CONFIG_ROOT "ethernet/settings")))
 	{
@@ -403,6 +407,11 @@ int changedrivers(void)
 	replacekeyvalue(kv, "ORANGE_DEV", "");
 	replacekeyvalue(kv, "PURPLE_DEV", "");
 	replacekeyvalue(kv, "RED_DEV", "");
+	
+	/* read in our bridge names */
+	findkey(kv, "GREEN_BRG", greenbridge);
+	findkey(kv, "ORANGE_BRG", orangebridge);
+	findkey(kv, "PURPLE_BRG", purplebridge);
 	
 	if (configtype == 0)
 		needcards = 1;
@@ -464,7 +473,12 @@ int changedrivers(void)
 				/* Now we see which iface needs its settings changed. */
 				if (strcmp(sections[choice], green) == 0)
 				{
-					replacekeyvalue(kv, "GREEN_DEV", nexteth);
+					if (!(strlen(greenbridge))) {
+						replacekeyvalue(kv, "GREEN_DEV", nexteth);
+					} else {
+						replacekeyvalue(kv, "GREEN_DEV", greenbridge);
+						replacekeyvalue(kv, "GREEN_BRG_DEV", nexteth);
+					}
 					replacekeyvalue(kv, "GREEN_DRIVER", currentdriver);
 					replacekeyvalue(kv, "GREEN_DRIVER_OPTIONS", currentdriveroptions);
 					replacekeyvalue(kv, "GREEN_DISPLAYDRIVER", displaydriver);
@@ -476,7 +490,12 @@ int changedrivers(void)
 				}
 				if (strcmp(sections[choice], orange) == 0)
 				{
-					replacekeyvalue(kv, "ORANGE_DEV", nexteth);
+					if (!(strlen(orangebridge))) {
+						replacekeyvalue(kv, "ORANGE_DEV", nexteth);
+					} else {
+						replacekeyvalue(kv, "ORANGE_DEV", orangebridge);
+						replacekeyvalue(kv, "ORANGE_BRG_DEV", nexteth);
+					}
 					replacekeyvalue(kv, "ORANGE_DRIVER", currentdriver);
 					replacekeyvalue(kv, "ORANGE_DRIVER_OPTIONS", currentdriveroptions);
 					replacekeyvalue(kv, "ORANGE_DISPLAYDRIVER", displaydriver);
@@ -488,7 +507,12 @@ int changedrivers(void)
 				}
 				if (strcmp(sections[choice], purple) == 0)
 				{
-					replacekeyvalue(kv, "PURPLE_DEV", nexteth);
+					if (!(strlen(purplebridge))) {
+						replacekeyvalue(kv, "PURPLE_DEV", nexteth);
+					} else {
+						replacekeyvalue(kv, "PURPLE_DEV", purplebridge);
+						replacekeyvalue(kv, "PURPLE_BRG_DEV", nexteth);
+					}
 					replacekeyvalue(kv, "PURPLE_DRIVER", currentdriver);
 					replacekeyvalue(kv, "PURPLE_DRIVER_OPTIONS", currentdriveroptions);
 					replacekeyvalue(kv, "PURPLE_DISPLAYDRIVER", displaydriver);
@@ -718,7 +742,7 @@ int dnsgatewaymenu(void)
 	}
 
 	entries[DNS1].text = ctr[TR_PRIMARY_DNS];
-	strcpy(temp, ""); findkey(kv, "DNS1", temp);
+	strcpy(temp, "8.8.8.8"); findkey(kv, "DNS1", temp);
 	values[DNS1] = strdup(temp);
 	entries[DNS1].value = (char **) &values[DNS1];
 	entries[DNS1].flags = 0;
@@ -730,7 +754,8 @@ int dnsgatewaymenu(void)
 	entries[DNS2].flags = 0;
 	
 	entries[DEFAULT_GATEWAY].text = ctr[TR_DEFAULT_GATEWAY];
-	strcpy(temp, ""); findkey(kv, "DEFAULT_GATEWAY", temp);
+	/* strcpy(temp, ""); findkey(kv, "DEFAULT_GATEWAY", temp); */
+	findkey(kv, "GREEN_ADDRESS", temp); findkey(kv, "DEFAULT_GATEWAY", temp);
 	values[DEFAULT_GATEWAY] = strdup(temp);
 	entries[DEFAULT_GATEWAY].value = (char **)  &values[DEFAULT_GATEWAY];
 	entries[DEFAULT_GATEWAY].flags = 0;

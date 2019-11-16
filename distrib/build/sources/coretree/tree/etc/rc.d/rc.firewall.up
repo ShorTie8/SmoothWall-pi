@@ -20,16 +20,16 @@ for FILE in /proc/sys/net/ipv4/conf/*/log_martians; do
 done
 
 # Set timeouts.  2.5 hours for TCP.
-echo 9000 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_established
+echo 9000 > /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_established
 
 # Set timeout for udp, since the servers fail in 90+ seconds, lots of hits
-echo 100 > /proc/sys/net/ipv4/netfilter/ip_conntrack_udp_timeout
+echo 100 > /proc/sys/net/netfilter/nf_conntrack_udp_timeout
 
 # Set timeouts for tcp, to avoid the nagging FINACK, FIN, RSTACKs
-echo 630 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_fin_wait
-echo 360 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_last_ack
-echo 630 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_close_wait
-echo 360 > /proc/sys/net/ipv4/netfilter/ip_conntrack_tcp_timeout_close
+echo 630 > /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_fin_wait
+echo 360 > /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_last_ack
+echo 630 > /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_close_wait
+echo 360 > /proc/sys/net/netfilter/nf_conntrack_tcp_timeout_close
 
 # IPV6: Set default policy to DROP everything
 /usr/sbin/ip6tables -F

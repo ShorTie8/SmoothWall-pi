@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = pixman
-VERSION = 0.22.2
+VERSION = 0.38.4
 
 BASE_URL = http://cairographics.org/releases/
 

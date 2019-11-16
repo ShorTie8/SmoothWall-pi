@@ -12,4 +12,9 @@ VERSION = 0.17
 BASE_URL = http://www.ex-parrot.com/~pdw/iftop/download/
 
 PRE_CONFIGURE = LIBS=-ltinfo
+
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
+
 include ../Makefile.rules

@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libcap-ng
-VERSION = 0.6.5
+VERSION = 0.7.9
 
 DIR = $(PACKAGE)-$(VERSION)
 

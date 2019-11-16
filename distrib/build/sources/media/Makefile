@@ -28,7 +28,7 @@ export UDEVunused = udev
 # Some of these are retirees.
 TOOLCHAIN_PKGS = expect
 OTHER_PKGS = updates jam $(UDEVunused) udev-config cnxadsl \
-	     libart_lgpl procps procinfo dev86 openswan
+	     libart_lgpl procps procinfo dev86 openswan eciadsl-synch_bin eciadsl-usermode
 
 TARGET_DIR = /build/target
 
@@ -53,7 +53,7 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    strace rrdtool cron tcpdump dnsmasq ntp openntpd hdparm hddtemp \
 	    iproute2 gd expat ethtool listtables inotify-tools \
 	    beep2 pcre trafficstats iftop setuids ppp isdn4k-utils rp-pppoe \
-	    ibod dhcpcd eciadsl-synch_bin eciadsl-usermode dhcp snort \
+	    ibod dhcpcd dhcp snort \
 	    oinkmaster libreswan wireless_tools wpa_supplicant imspector diffutils clamav \
 	    p3scan siproxd which miniupnpd ez-ipupdate noip cdrtools \
 	    suricata smartmontools at dosfstools grub linux-atm \
@@ -143,6 +143,8 @@ endif
 	    echo; \
 	  done; \
 	);
+# include some firmware
+	cp -av /build/buildroot/linux-firmware/lib/firmware/{rtl_nic,RTL8192E,rtlwifi} distrib/lib/firmware
 # Move usr/include/python2.7 *back*!
 	@echo "        move includes to distrib-dev" >>$(MEDIA_BUILD_OUT)
 	@echo "Moving includes to distrib-dev:"

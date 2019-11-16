@@ -1,0 +1,151 @@
+#!/bin/sh
+########################################################################
+# Begin SmoothWall hostapd_client, rc_base=/etc/rc.d
+#
+# Description : hostapd client initscript
+# Copyright Jeff Blanner, 4/14/2019.
+# Licensed under the GNU GPL license that governs the Smoothwall Express source code.
+#
+########################################################################
+
+# load our functions {echolog} & colors
+. /etc/rc.d/inc.rc-functions
+# read in our variables
+. /var/smoothwall/ethernet/settings
+
+case "${1}" in
+	start)
+# Green
+	  if [ "${2}" = "green" ]; then
+		echo -e "${LTBL}      Starting Green hostapd, ${INFO} ${GREEN_BRG} ${NO}"
+		echo -e "${STEP}        Checking hostapd.green.conf Country_Code ${NO}"
+		COUNTRY_CODE=$(grep 'country_code' /etc/hostapd/hostapd.green.conf | cut -d"=" -f2 | awk '{print$1}')
+		if [ "${COUNTRY_CODE}" != "${Country_Code}" ]; then
+		  echo -e "${STEP}        Country_Code is ${OOPS}NOT${STEP} ok, adjusting ${NO}"
+		  sed -i -e "s/country_code=.*/country_code=${Country_Code}/" /etc/hostapd/hostapd.green.conf
+		  cat /etc/hostapd/hostapd.green.conf
+		  COUNTRY_CODE=""
+		  COUNTRY_CODE=$(grep 'country_code' /etc/hostapd/hostapd.green.conf | cut -d"=" -f2 | awk '{print$1}')
+		else
+		  echo -e "${STEP}        Country_Code is ok ${NO}"
+		fi
+
+		echo -e "${STEP}        Intialize iw ${NO}"
+		/usr/sbin/iw reg get
+		echo -e "${STEP}        Setting Country_Code to ${OOPS}$COUNTRY_CODE  ${NO}"
+		/usr/sbin/iw reg set "$COUNTRY_CODE"
+		/usr/sbin/iw reg get
+
+        echo -e "${STEP}        Make run directory ${NO}"
+        mkdir -vp /var/run/hostapd
+
+        echo -e "${STEP}        Start hostapd ${NO}"
+        /usr/sbin/hostapd -B -P /var/run/hostapd.${GREEN_WIFI}.pid -i ${GREEN_WIFI} /etc/hostapd/hostapd.green.conf
+        
+        #sleep 22
+
+# Orange
+	  elif [ "${2}" = "orange" ]; then
+		echo -e "${STEP}      Starting Orange hostapd, ${INFO} ${ORANGE_BRG} ${NO}"
+		echolog "" "s" "" "    Starting Orange hostapd"
+
+		echo -e "${STEP}        Checking hostapd.orange.conf Country_Code ${NO}"
+		COUNTRY_CODE=$(grep 'country_code' /etc/hostapd/hostapd.orange.conf | cut -d"=" -f2 | awk '{print$1}')
+		if [ "${COUNTRY_CODE}" != "${Country_Code}" ]; then
+		  echo -e "${STEP}        Country_Code is ${OOPS}NOT${STEP} ok, adjusting ${NO}"
+		  sed -i -e "s/country_code=.*/country_code=${Country_Code}/" /etc/hostapd/hostapd.orange.conf
+		  cat /etc/hostapd/hostapd.orange.conf
+		  COUNTRY_CODE=""
+		  COUNTRY_CODE=$(grep 'country_code' /etc/hostapd/hostapd.orange.conf | cut -d"=" -f2 | awk '{print$1}')
+		else
+		  echo -e "${STEP}        Country_Code is ok ${NO}"
+		fi
+
+		echo -e "${STEP}        Intialize iw ${NO}"
+		/usr/sbin/iw reg get
+		echo -e "${STEP}        Setting Country_Code to ${OOPS}$COUNTRY_CODE  ${NO}"
+		/usr/sbin/iw reg set "$COUNTRY_CODE"
+		/usr/sbin/iw reg get
+
+        echo -e "${STEP}        Make run directory ${NO}"
+        mkdir -vp /var/run/hostapd
+
+        echo -e "${STEP}        Start hostapd ${NO}"
+        /usr/sbin/hostapd -B -P /var/run/hostapd.${ORANGE_WIFI}.pid -i ${ORANGE_WIFI} /etc/hostapd/hostapd.orange.conf
+        
+        #sleep 22
+
+
+# Purple
+	  elif [ "${2}" = "purple" ]; then
+		echo -e "${STEP}      Starting Purple hostapd, ${INFO} ${PURPLE_BRG} ${NO}"
+		echolog "e" "s" "" "    Starting Purple hostapd"
+
+
+		echo -e "${STEP}        Checking hostapd.purple.conf Country_Code ${NO}"
+		COUNTRY_CODE=$(grep 'country_code' /etc/hostapd/hostapd.purple.conf | cut -d"=" -f2 | awk '{print$1}')
+		if [ "${COUNTRY_CODE}" != "${Country_Code}" ]; then
+		  echo -e "${STEP}        Country_Code is ${OOPS}NOT${STEP} ok, adjusting ${NO}"
+		  sed -i -e "s/country_code=.*/country_code=${Country_Code}/" /etc/hostapd/hostapd.purple.conf
+		  cat /etc/hostapd/hostapd.purple.conf
+		  COUNTRY_CODE=""
+		  COUNTRY_CODE=$(grep 'country_code' /etc/hostapd/hostapd.purple.conf | cut -d"=" -f2 | awk '{print$1}')
+		else
+		  echo -e "${STEP}        Country_Code is ok ${NO}"
+		fi
+
+		echo -e "${STEP}        Intialize iw ${NO}"
+		/usr/sbin/iw reg get
+		echo -e "${STEP}        Setting Country_Code to ${OOPS}$COUNTRY_CODE  ${NO}"
+		/usr/sbin/iw reg set "$COUNTRY_CODE"
+		/usr/sbin/iw reg get
+
+        echo -e "${STEP}        Make run directory ${NO}"
+        mkdir -vp /var/run/hostapd
+
+        echo -e "${STEP}        Start hostapd ${NO}"
+        /usr/sbin/hostapd -B -P /var/run/hostapd.${PURPLE_WIFI}.pid -i ${PURPLE_WIFI} /etc/hostapd/hostapd.purple.conf
+        #iw phy phy0 interface add wlan10 type managed" ? 
+        
+  echo -e "${BOUL}    Sleepy 4${NO}"
+  sleep 4
+
+	  else
+		echo -e "${INFO}        No zone given {green,orange or purple}, exit 1 ${NO}"
+		#echolog "e" "s" "" "  No zone given {green,orange or purple}, exit 1 "
+		exit 1
+	  fi
+	  ;;
+
+	stop)
+		if [ -n "wlan0" ]; then
+	      echo -e "${STEP}      killall hostapd, stop, wlan0${NO}"
+	      echolog "" "s" "" "    killall hostapd, stop, wlan0"
+		  killall -v hostapd
+
+		  brctl delif ${GREEN_BRG} ${GREEN_WIFI}
+		  brctl delif ${ORANGE_BRG} ${ORANGE_WIFI}
+		  brctl delif ${PURPLE_BRG} ${PURPLE_WIFI}
+		fi
+		;;
+
+	restart)
+		${0} stop
+		sleep 2
+		${0} start
+		;;
+
+	status)
+	    echo -en "${STEP}      pidof hostapd  ${NO}"
+	    echolog "" "s" "" "    pidof hostapd  "
+		pidof hostapd
+		iwconfig wlan0
+		;;
+
+	*)
+		echo "Usage: ${0} {start|stop|restart|status}"
+		exit 1
+		;;
+esac
+
+# End hostapd_client

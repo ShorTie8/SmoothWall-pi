@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = expat
-VERSION = 2.1.0
+VERSION = 2.2.7
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(VERSION)/
+BASE_URL = https://sourceforge.net/projects/expat/files/expat/$(VERSION)
 
 INSTALL = yes
 

@@ -7,9 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = perl
-VERSION = 5.14.4
+#VERSION = 5.14.4
+VERSION = 5.22.4
 
-BASE_URL = ftp://ftp.cpan.org/pub/CPAN/src/5.0/
+BASE_URL = https://www.cpan.org/src/5.0
 
 # Toolchain, Stage 3 build
 #

@@ -7,27 +7,14 @@
 include ../Makefile.conf
 
 PACKAGE = bc
-VERSION = 1.06.95
+VERSION = 2.1.3
+#BASE_URL = http://ftp.gnu.org/gnu/bc
+BASE_URL = https://github.com/gavinhoward/bc/archive/$(VERSION)
 
-BASE_URL = http://alpha.gnu.org/gnu/$(PACKAGE)
+CONFIGURE = yes
+configure: patch
+	@echo; echo; echo "configure"; echo
+	cd $(DIR); PREFIX=/usr CC=gcc CFLAGS="-std=c99" ./configure.sh -G -O3
 
-EXTENSION = .tar.bz2
-
-PATCH_FILE1 = bc-1.06.95-memory_leak-1.patch
-
-ifeq ($(BUILD_PHASE), Stage_3)
-
-CONFIG_OPTS += --prefix=$(TOOLS_DIR) \
-	      --with-readline \
-	       --mandir=$(TOOLS_DIR)/usr/share/man \
-	       --infodir=$(TOOLS_DIR)/usr/share/info
-
-else
-
-CONFIG_OPTS += --with-readline \
-	      --mandir=/usr/share/man \
-	      --infodir=/usr/share/info
-
-endif
 
 include ../Makefile.rules

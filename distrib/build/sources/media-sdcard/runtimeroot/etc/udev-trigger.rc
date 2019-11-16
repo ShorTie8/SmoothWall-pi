@@ -1,0 +1,52 @@
+#! /bin/bash
+
+# Define message colors
+OOPS="\033[1;31m"   # red
+DONE="\033[1;32m"	# green
+INFO="\033[1;33m"	# yellow
+WARN="\033[1;35m"	# hot pink
+STEP="\033[1;34m"	# blue
+NO="\033[0m"		# normal/light
+
+echo -e "${DONE}    Starting udev-trigger.rc${NO}"
+
+
+# Right off the bat, set a udev lock file, since we can't do much until
+#   udev has handled the devices
+echo -e "${WARN}  touch /tmp/trigger-lock${NO}"
+touch /tmp/trigger-lock
+
+
+
+# Be sure the dependencies are right before tickling udev.
+echo -e "${INFO}    Checking dependencies${NO}"
+depmod -a
+
+# Setup hotplug
+echo -e "${INFO}    Setting up hotplug${NO}"
+echo -e '\000\000\000\000' > /proc/sys/kernel/hotplug
+
+# Wait for udev
+echo -e "${INFO}    Waitting for eudev to start${NO}"
+while :; do
+  ps -ax | grep udev > /dev/null 2>&1
+  if [ $? -eq 0 ]; then break; fi
+  usleep 100000
+done
+
+echo -e "${INFO}    Trigger eudev${NO}"
+/sbin/udevadm trigger
+sleep 2
+
+echo -e "${STEP}      udevadm trigger --type=subsystems${NO}"
+/sbin/udevadm trigger --type=subsystems --action=change
+sleep 2
+
+echo -e "${STEP}      udevadm settle${NO}"
+/sbin/udevadm settle
+sleep 2
+
+echo -e "${INFO}    Remove /tmp/trigger-lock${NO}"
+rm -vf /tmp/trigger-lock
+
+echo -e "${WARN}  End udev-trigger.rc${NO}"

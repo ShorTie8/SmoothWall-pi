@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = libffi
-VER_MM = 3.0
-VERSION = $(VER_MM).10
+VER_MM = 3.2
+VERSION = $(VER_MM).1
 
-BASE_URL =  ftp://sourceware.org/pub/libffi/
+BASE_URL =  https://sourceware.org/pub/libffi/
 
 include ../Makefile.rules

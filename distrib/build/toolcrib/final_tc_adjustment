@@ -41,17 +41,23 @@ if [ $STATUS -eq 0 ]; then
 
   # Must use the correct ProgInterp
   case $mARCH in
+    arm) expectInterp="/lib/ld-linux-armhf.so.3" ;;
+    arm64) expectInterp="/lib/ld-linux-aarch64.so.1" ;;
     i*86) expectInterp="/lib/ld-linux.so.2" ;;
     x86_64) expectInterp="/lib64/ld-linux-x86-64.so.2" ;;
   esac
 
   # Tweak gcc specs
   #
-  gcc -dumpspecs | sed \
-    -e 's@'${TOOLS_DIR}${expectInterp}'@'$expectInterp'@g' \
-    -e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
-    -e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' > \
-  `dirname $(gcc --print-libgcc-file-name)`/specs
+#  gcc -dumpspecs | sed \
+#    -e 's@'${TOOLS_DIR}${expectInterp}'@'$expectInterp'@g' \
+#    -e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+#    -e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' > \
+#  `dirname $(gcc --print-libgcc-file-name)`/specs
+  gcc -dumpspecs | sed -e 's@/tools@@g' \
+	-e '/\*startfile_prefix_spec:/{n;s@.*@/usr/lib/ @}' \
+	-e '/\*cpp:/{n;s@$@ -isystem /usr/include@}' > \
+	`dirname $(gcc --print-libgcc-file-name)`/specs
 
   #################
 
@@ -111,10 +117,12 @@ END
   # Loader using correct search paths?
   #
   grep 'SEARCH.*/usr/lib' dummy.log |sed 's|; |\n|g' >/tmp/a.a
+  # per LFS, lines with 'linux-gnu' should be ignored
+  sed -i '/linux-gnu/d' /tmp/a.a
 
   cat >>/tmp/b.b <<END
 SEARCH_DIR("/usr/lib")
-SEARCH_DIR("/lib");
+SEARCH_DIR("/lib")
 END
   diff /tmp/a.a /tmp/b.b >/dev/null 2>&1
   if [ $? -ne 0 ]; then
@@ -128,7 +136,7 @@ END
 
   # Using correct libc?
   #
-  if [ "$BITS_64" == "yes" ]; then mINST=64; fi
+#  if [ "$BITS_64" == "yes" ]; then mINST=64; fi
   grep "attempt to open /lib${mINST}/libc.so.6" dummy.log >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "Loader is using incorrect libc:"
@@ -138,7 +146,8 @@ END
 
   # Using correct dynamic linker?
   #
-  grep "found `basename ${expectInterp}` at ${expectInterp}" dummy.log >/dev/null 2>&1
+  #grep "found `basename ${expectInterp}` at ${expectInterp}" dummy.log >/dev/null 2>&1
+  grep "/lib.*/libc.so.6 " dummy.log
   if [ $? -ne 0 ]; then
     echo "Wrong or no dynamic linker found!"
     grep "found" dummy.log | sed -e 's/^/    /'

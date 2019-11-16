@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = libcap
 VERSION = 2.22
 
-BASE_URL = http://http.us.debian.org/debian/pool/main/libc/libcap2/
+BASE_URL = https://mirrors.mediatemple.net/debian-archive/debian/pool/main/libc/libcap2
 
 DIR = $(PACKAGE)-$(VERSION)
 TARBALL = $(PACKAGE)2_$(VERSION).orig

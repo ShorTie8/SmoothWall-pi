@@ -14,53 +14,290 @@ download:
 	@$(DL_CMD) $(KERNEL_URL)
 
 unpack: download
-	@tar -xvf $(DOWNLOADS_DIR)/linux-$(K_RAW_VERSION).tar.xz
-
-
-prepare: unpack
 	rm -f linux
+
+	@echo; echo; echo "unpack"; echo
+ifeq ($(mTUPLE),$(filter $(mTUPLE),i586 i686 x86_64))
+	tar -xf $(DOWNLOADS_DIR)/linux-$(K_RAW_VERSION).tar.xz
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
+	#tar xf $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).tar.gz
+	tar xf $(DOWNLOADS_DIR)/linux-rpi-$(KERNEL_VER).tar.gz
+	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+else ifeq ($(mTUPLE), xu4)
+	tar xf $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).tar.gz
+	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+else
+	$(info Unsupported Makefile-kernel untar)
+	$(error FAIL)
+endif
 	ln -s linux-$(K_RAW_VERSION) linux
 
+prepare: unpack
+	@echo; echo; echo "make mrproper"; echo
 	make -C linux mrproper
 
-	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
+	@echo; echo; echo "Creating .config"
+ifeq ($(mTUPLE), x86_64)
+	#sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH)-$(KERNEL_MMR) > linux/.config
+	@echo; echo; echo "x86_64 config adjust"; echo
+	cd linux; make x86_64_defconfig
+	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/'  -i linux/.config
+	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
 
-	make -C linux CC=$(COMPILER) clean prepare
+	# for xtables-addons, we need CONFIG_NETFILTER_NETLINK_ACCT, but first.
+	sed -e 's/# CONFIG_NETFILTER_ADVANCED is not set/CONFIG_NETFILTER_ADVANCED=y/' -i linux/.config
+	# this sets new config options created by above to defualts
+	cd linux; make olddefconfig
+
+	@echo; echo; echo "CONFIG_NF_CONNTRACK_MARK"; echo
+	sed -e 's/# CONFIG_NF_CONNTRACK_MARK is not set/CONFIG_NF_CONNTRACK_MARK=y/' -i linux/.config
+	cd linux; make olddefconfig
+
+else ifeq ($(mTUPLE), pi0w)
+	@echo; echo; echo "pi0w config adjust"; echo
+#	export KERNEL=kernel
+	echo + > linux/.scmversion
+#	cp -v ../linux.config-pi0w-$(KERNEL_MMR) linux/.config
+# or
+	cd linux; KERNEL=kernel make bcmrpi_defconfig
+	sed -e 's/CONFIG_EXT4_FS=y/CONFIG_EXT4_FS=m/' -i linux/.config
+	sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
+	#sed -e 's/brcmfmac=m/brcmfmac=y/' -i linux/.config
+	#sed -e 's/brcmutil=m/brcmutil=y/' -i linux/.config
+	
+else ifeq ($(mTUPLE), rpi3)
+	@echo; echo "  rpi3 config adjust"; echo
+	echo + > linux/.scmversion
+#	cp -v ../linux.config-rpi3-$(KERNEL_MMR) linux/.config
+# or
+#	cd linux; KERNEL=kernel7 make bcm2709_defconfig
+	cd linux; make bcm2709_defconfig
+	sed -e 's/CONFIG_LOCALVERSION="-v7"/CONFIG_LOCALVERSION=""/' -i linux/.config
+	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
+
+	sed -e 's/CONFIG_USB_LAN78XX=y/CONFIG_USB_LAN78XX=m/' -i linux/.config
+	sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
+
+	# disable multi media support
+	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
+
+	# turn off wifi power save
+	sed -e 's/CONFIG_CFG80211_DEFAULT_PS=y/# CONFIG_CFG80211_DEFAULT_PS is not set/' -i linux/.config
+
+	#sed -e 's/CONFIG_BCM2835_VCHIQ=y/CONFIG_BCM2835_VCHIQ=m/' -i linux/.config
+
+	#sed -e 's/# CONFIG_RTL8XXXU_UNTESTED is not set/CONFIG_RTL8XXXU_UNTESTED=y/' -i linux/.config
+
+	# rpi3 wifi
+	#sed -e 's/brcmfmac=m/brcmfmac=y/' -i linux/.config
+	#sed -e 's/brcmutil=m/brcmutil=y/' -i linux/.config
+
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi4 pi4-64))
+	echo + > linux/.scmversion
+	cd linux; make bcm2711_defconfig
+ifeq ($(mTUPLE), rpi4)
+	@echo; echo "  rpi4 config"; echo
+	sed -e 's/CONFIG_LOCALVERSION="-v7l"/CONFIG_LOCALVERSION=""/' -i linux/.config
+else 
+	@echo; echo "  pi4-64 config"; echo
+	sed -e 's/CONFIG_LOCALVERSION="-v8"/CONFIG_LOCALVERSION=""/' -i linux/.config
+endif
+
+
+	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
+
+	# disable multi media support
+	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
+
+	# turn off wifi power save
+	#sed -e 's/CONFIG_CFG80211_DEFAULT_PS=y/# CONFIG_CFG80211_DEFAULT_PS is not set/' -i linux/.config
+
+	# return nic's to modules
+	sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
+	# pi3
+	sed -e 's/CONFIG_USB_LAN78XX=y/CONFIG_USB_LAN78XX=m/' -i linux/.config
+	# pi4
+	sed -e 's/CONFIG_BROADCOM_PHY=y/CONFIG_BROADCOM_PHY=m/' -i linux/.config
+	sed -e 's/CONFIG_BCMGENET=y/CONFIG_BCMGENET=m/' -i linux/.config
+	sed -e 's/CONFIG_USB_RTL8152=y/CONFIG_USB_RTL8152=m/' -i linux/.config
+
+
+	# Adjust Ciphers
+	sed -e 's/# CONFIG_CRYPTO_AES_TI is not set/CONFIG_CRYPTO_AES_TI=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_ANUBIS is not set/CONFIG_CRYPTO_ANUBIS=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_BLOWFISH is not set/CONFIG_CRYPTO_BLOWFISH=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_CAMELLIA is not set/CONFIG_CRYPTO_CAMELLIA=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_CAST6 is not set/CONFIG_CRYPTO_CAST6=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_FCRYPT is not set/CONFIG_CRYPTO_FCRYPT=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_KHAZAD is not set/CONFIG_CRYPTO_KHAZAD=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SALSA20 is not set/CONFIG_CRYPTO_SALSA20=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_CHACHA20 is not set/CONFIG_CRYPTO_CHACHA20=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SEED is not set/CONFIG_CRYPTO_SEED=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SERPENT is not set/CONFIG_CRYPTO_SERPENT=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SM4 is not set/CONFIG_CRYPTO_SM4=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_TEA is not set/CONFIG_CRYPTO_TEA=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_TWOFISH is not set/CONFIG_CRYPTO_TWOFISH=m/' -i linux/.config
+
+	#sed -e 's/CONFIG_GENERIC_PHY=y/CONFIG_GENERIC_PHY=m/' -i linux/.config
+	#sed -e 's/CONFIG_NET_VENDOR_BROADCOM=y/CONFIG_NET_VENDOR_BROADCOM=m/' -i linux/.config
+
+else ifeq ($(mTUPLE), xu4)
+	# https://wiki.odroid.com/odroid-xu4/software/building_kernel
+	# http://140.120.7.21/LinuxRef/DIYBigData/BuildingKernelForOdroid-Xu4.html
+
+	@echo; echo; echo "odroid config adjust"; echo
+	echo + > linux/.scmversion
+#	cd linux; make odroidxu3_defconfig
+	cp -v ../linux.config-xu4-$(KERNEL_MMR) linux/.config
+else
+	$(info Un-supported kernel config!)
+	$(error FAIL)
+endif
+
+	@echo; echo; echo "make oldconfig"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig
+	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(mTUPLE)-$(KERNEL_MMR).new
 
 
 compile-kernel: prepare
-	sed -e 's/^CONFIG_LOCALVERSION=.*$$/CONFIG_LOCALVERSION="$(KERNEL_TYPE)"/' ../linux.config$(KERNEL_TYPE)-$(mARCH) > linux/.config
-
-	make -C linux CC=$(COMPILER) clean
-	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig
+	@echo; echo; echo "compile-kernel"; echo
+ifeq ($(mARCH),$(mTUPLE))
+	@echo "Make bzImage"; echo
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) bzImage
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 xu4))
+	@echo "Make zImage"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) zImage
+else ifeq ($(mTUPLE), pi4-64)
+	@echo; echo; echo "Make"; echo
+	#ARCH=arm64 CROSS_COMPILE=aarch64-swe-linux-gnu- make $(JOBS) V=1 -C linux CC=$(COMPILER)
+	ARCH=arm64 make $(JOBS) V=1 -C linux CC=$(COMPILER)
+#else ifeq ($(mTUPLE), xu4)
+#	@echo; echo; echo "Make"; echo
+#	make $(JOBS) V=1 -C linux CC=$(COMPILER)
+else
+	$(info Unsupported kernel compile)
+	$(error FAIL)
+endif
+
+	@echo; echo; echo "Make modules"; echo
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
 
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64 xu4))
+	@echo; echo; echo "Make dtbs"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
+endif
+
+ifeq ($(mTUPLE), xu4)
+	@echo; echo; echo "firmware"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) firmware
+endif
 
 package-kernel: compile-kernel
+	@echo; echo; echo "Package Kernel: compile-kernel"; echo
+ifeq ($(mTUPLE),$(mARCH))
 	mkdir -p $(PKG_ROOT)
 	(cd $(PKG_ROOT); \
 	make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install; \
 	mkdir -p boot; \
 	cp $(KERNEL_DIR)/arch/x86/boot/bzImage boot/vmlinuz-$(K_SWE_VERSION); \
 	cp $(KERNEL_DIR)/System.map boot/System.map-$(K_SWE_VERSION); \
-	rm -f lib/modules/$(K_SWE_VERSION)/build; \
-	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(mARCH).new)
+	rm -f lib/modules/$(K_SWE_VERSION)/build)
+
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi3 rpi4))
+	mkdir -vp $(PKG_ROOT)/boot/overlays
+	@echo; echo "Make modules_install"; echo
+	(cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
+#	echo; echo; echo "scripts/mkknlimg"; echo
+#	(cd $(KERNEL_DIR); scripts/mkknlimg arch/arm/boot/zImage $(KERNEL).img)
+#	cp -v $(KERNEL_DIR)/$(KERNEL).img $(PKG_ROOT)/boot/$(KERNEL).img
+	@echo; echo "Some copies"; echo
+	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
+ifeq ($(mTUPLE), pi0w)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2708-rpi-0-w.dtb $(PKG_ROOT)/boot
+else ifeq ($(mTUPLE), rpi3)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2709-rpi-2-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-cm3.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi4 pi4-64))
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+	#cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2838-rpi-4-b.dtb $(PKG_ROOT)/boot
+endif
+
+else ifeq ($(mTUPLE), pi4-64)
+	mkdir -vp $(PKG_ROOT)/boot/overlays
+	echo; echo "Make modules_install"; echo
+	(cd $(PKG_ROOT); ARCH=arm64 make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
+
+	@echo; echo "Some copies"; echo
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/Image $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+
+else ifeq ($(mTUPLE), xu4)
+	mkdir -vp $(PKG_ROOT)/boot
+	@echo; echo; echo "Make modules_install"; echo
+	cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
+	@echo; echo; echo "Make firmware_install"; echo
+	cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) firmware_install
+	@echo; echo; echo "Copy"; echo
+	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/config-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/zImage
+	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/exynos5422-odroidxu3.dtb $(PKG_ROOT)/boot/exynos5422-odroidxu3.dtb
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/exynos5422-odroidxu4.dtb $(PKG_ROOT)/boot/exynos5422-odroidxu4.dtb
+#	rm -f lib/modules/$(K_SWE_VERSION)/build; \
+	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+else
+	$(info Unsupported package-kernel)
+	$(error FAIL)
+endif
+ 
 
 
 build-tarball: package-kernel $(PACKAGES)
+	@echo; echo; echo "Build Tarball"
 	@(cd $(PKG_ROOT); \
-	tar -zcvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz .; \
-	tar -xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /);
+	tar -zcvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz .);
+	@echo; echo; echo "Install Tarball"
+	tar -xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /
 
 
 clean:
+ifndef BUILD_PHASE
 	@echo -n " $(PACKAGE)"
 	@rm -f linux
 	@rm -rf linux-$(KERNEL_VER)
 	@rm -rf $(FREESWAN_TYPE)-$(FREESWAN_VER)
 	@rm -rf $(PKG_ROOT)
 
+else
+	@echo "$(PACKAGE)"
+	@echo; echo "clean"
+	rm -f linux
+	rm -rf linux-$(KERNEL_VER)
+	rm -rf $(FREESWAN_TYPE)-$(FREESWAN_VER)
+	rm -rf $(PKG_ROOT)
+	@rm -vf ../linux-firmware/Final.built
+	@rm -vf ../ipset/Final.built
+	@rm -vf ../xtables-addons/Final.built
+	@rm -vf ../$(FREESWAN_TYPE)/Final.built
+	@rm -vf ../rpi-firmware/Final.built
+	@rm -vf ../../crumbs/Final.grp5.compiled
+	@rm -vf ../../crumbs/Final.grp6.compiled
+endif
 
 cleanall: clean build-tarball
 

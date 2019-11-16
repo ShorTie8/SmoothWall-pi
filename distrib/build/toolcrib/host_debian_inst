@@ -3,6 +3,7 @@
 MSG1="Installing extra packages needed to build on Debian:\n"
 
 for package in build-essential bison flex gawk inotify-tools screen zip libxml-simple-perl; do
+  # python-sphinx
   MUST_INST=0
   # May be unknown, try this
   dpkg -s $package >/dev/null 2>&1
@@ -22,14 +23,33 @@ for package in build-essential bison flex gawk inotify-tools screen zip libxml-s
   fi
 done
 
-MSG2="Symlinking /bin/sh to /bin/bash; just say, \"No.\"\n"
+if [ `uname -m` == "armv6l" ] || [ `uname -m` == "armv7l" ]; then
+  if [ ! -f /etc/dphys-swapfile ]; then
+    echo "Setting up swap file"
+    apt-get -y install dphys-swapfile
+  elif [ `cat /etc/dphys-swapfile | grep CONF_SWAPSIZE=100` ]; then
+    echo "Must be a pi"
+    echo "Resizing the swap file"
+    sed -i 's/CONF_SWAPSIZE=100/#CONF_SWAPSIZE=/' /etc/dphys-swapfile
+    echo "Restarting dphys-swapfile"
+    /etc/init.d/dphys-swapfile stop
+    /etc/init.d/dphys-swapfile start
+  fi
+fi
+
+if [ `uname -m` == "armv6l" ] || [ `uname -m` == "armv7l" ]; then
+  apt install python-sphinx
+fi
+
+MSG2="Symlinking /bin/sh to /bin/bash\n"
 set `readlink /bin/sh`
 set `basename $1`
 LNK=$1
 if [ "$LNK" == "dash" ]; then
   echo -ne $MSG2; MSG2=""
   sleep 2
-  dpkg-reconfigure dash
+  echo "dash dash/sh boolean false" | debconf-set-selections
+  DEBIAN_FRONTEND=noninteractive dpkg-reconfigure dash
 fi
 
 if [ "$MSG1" != "" -a "$MSG2" != "" ]; then

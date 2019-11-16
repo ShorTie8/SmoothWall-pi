@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = isdn4k-utils
-VERSION = CVS-2007-11-27
+VERSION = 3.27_20151118
+EXTENSION = .tar.xz
 
-BASE_URL = ftp://ftp.isdn4linux.de/pub/isdn4linux/CVS-Snapshots/
-
-EXTENSION = .tar.bz2
+#BASE_URL = ftp://ftp.isdn4linux.de/pub/isdn4linux/CVS-Snapshots/
+BASE_URL = http://pkgs.fedoraproject.org/repo/pkgs/isdn4k-utils/isdn4k-utils-3.27_20151118.tar.xz/8b4733559b1c4de3d7716af4dbbbb354
 
 CONFIGURE = yes
 

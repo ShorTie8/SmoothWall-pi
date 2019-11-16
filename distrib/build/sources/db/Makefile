@@ -18,6 +18,18 @@ PATCH_FILE1 = ../Makefile.in.patch
 
 DIR = $(PACKAGE)-$(VERSION)/build_unix
 
+PREPARE = yes
+$(DIR)/: download
+	@echo; echo "prepare"
+	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
+ifeq ($(mARCH), arm64)
+	#cd $(PACKAGE)-$(VERSION)/dist; autoreconf -vi
+	for i in $$(find $(PACKAGE)-$(VERSION) -name config.guess -o -name config.sub); do \
+		cp -vf $${i} $${i}.orig; \
+		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
+	done
+endif
+
 PATCH = yes
 CONFIGURE = yes
 CLEAN = yes

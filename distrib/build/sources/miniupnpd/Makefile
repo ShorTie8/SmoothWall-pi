@@ -8,7 +8,7 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = miniupnpd
-VERSION = 2.0
+VERSION = 2.1
 
 BASE_URL = http://miniupnp.free.fr/files/
 

@@ -8,39 +8,96 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = gcc
-VERSION = 4.7.3
+VERSION = $(GCC_VER)
 
-BASE_URL = ftp://ftp.gnu.org/gnu/gcc/gcc-$(VERSION)
-EXTENSION = .tar.bz2
+BASE_URL = https://ftp.gnu.org/gnu/gcc/gcc-$(VERSION)
+EXTENSION = $(GCC_EXT)
 
-BASE_MPC = http://www.multiprecision.org/mpc/download
+BASE_MPC = https://ftp.gnu.org/gnu/mpc
 TAR_MPC = mpc-$(MPC_VER).tar.gz
 
-BASE_GMP = ftp://ftp.gnu.org/gnu/gmp
-TAR_GMP = gmp-$(GMP_VER).tar.bz2
+BASE_GMP = https://ftp.gnu.org/gnu/gmp
+TAR_GMP = gmp-$(GMP_VER).tar.xz
 
-BASE_MPFR = http://www.mpfr.org/mpfr-$(MPFR_VER)
+BASE_MPFR = https://ftp.gnu.org/gnu/mpfr
 TAR_MPFR = mpfr-$(MPFR_VER).tar.bz2
+
+BASE_ISL = https://gcc.gnu.org/pub/gcc/infrastructure
+TAR_ISL = isl-$(ISL_VER).tar.bz2
 
 COMPILE_DIR = $(DIR)-compile
 
 DOWNLOAD = yes
-
 download:
-	@$(DL_CMD) $(BASE_GMP)/$(TAR_GMP)
-	@$(DL_CMD) $(BASE_MPFR)/$(TAR_MPFR)
-	@$(DL_CMD) $(BASE_MPC)/$(TAR_MPC)
-	@$(DL_CMD) $(BASE_URL)/$(TARBALL)$(EXTENSION) $(MD5)
+	@echo; echo; echo "download"; echo
+	$(DL_CMD) $(BASE_GMP)/$(TAR_GMP)
+	$(DL_CMD) $(BASE_MPFR)/$(TAR_MPFR)
+	$(DL_CMD) $(BASE_MPC)/$(TAR_MPC)
+	#$(DL_CMD) $(BASE_ISL)/$(TAR_ISL)
+	$(DL_CMD) $(BASE_URL)/$(TARBALL)$(EXTENSION) $(MD5)
 
-
+ifeq ($(mTUPLE), i586)
+  GCC_flags = --with-cpu=pentium
+else ifeq ($(mTUPLE), x86_64)
+  GCC_flags =
+else ifeq ($(mTUPLE), pi0w)
+  GCC_flags = --with-cpu=arm1176jzf-s --with-float=hard
+else ifeq ($(mTUPLE), rpi2 Opi-r1h2)
+  GCC_flags = --with-cpu=cortex-a7 --with-fpu=neon-vfpv4 --with-float=hard
+else ifeq ($(mTUPLE), rpi3)
+  GCC_flags = --with-cpu=cortex-a53 --with-fpu=neon-fp-armv8 --with-float=hard 
+else ifeq ($(mTUPLE), rpi4)
+  # +crypto https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845
+  GCC_flags = --with-cpu=cortex-a72 --with-fpu=vfp --with-float=hard --enable-linker-build-id
+else ifeq ($(mTUPLE), xu4)
+  GCC_flags = --with-cpu=cortex-a15 --with-cpu=cortex-a7 --with-fpu=vfpv3-d16 --with-float=hard 
+else ifeq ($(mTUPLE), pi4-64)
+  GCC_flags =  --with-arch=armv8-a+crc --with-cpu=cortex-a72 --enable-linker-build-id
+else
+  GCC_flags = Un-known GCC_flags
+endif
+ 
 # Tool Chain Build Stage 1
 #
 ifeq ($(BUILD_PHASE), Stage_1)
 
-# should target be FINAL_TGT?
-CONFIG_OPTS = \
+PREPARE = yes
+$(DIR)/: download
+	@echo; echo; echo "prepare"; echo
+	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_GMP); mv gmp-$(GMP_VER) gmp
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
+	#cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_ISL); mv isl-$(ISL_VER) isl
+
+PATCH = yes
+patch: $(DIR)/
+	@echo; echo; echo "patch"; echo
+	@echo; echo "change the location of GCC's default dynamic linker to use the one installed in /tools."
+	cd $(DIR); \
+	for file in gcc/config/{{linux,i386/linux{,64}}.h,arm/linux-eabi.h,aarch64/aarch64-linux.h}; \
+	do \
+	  cp -uv $$file{,.orig}; \
+	  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+		  -e 's@/usr@/tools@g' $$file.orig > $$file; \
+	  echo "" >> $$file; \
+	  echo "#undef STANDARD_STARTFILE_PREFIX_1" >> $$file; \
+	  echo "#undef STANDARD_STARTFILE_PREFIX_2" >> $$file; \
+	  echo '#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"' >> $$file; \
+	  echo '#define STANDARD_STARTFILE_PREFIX_2 ""' >> $$file; \
+	  touch $$file.orig; \
+	done
+	
+#ifeq ($(mARCH), x86_64)
+#	@echo; echo 'setting the default directory name for 64-bit libraries to “lib”:'
+#	cd $(DIR); \
+#		sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+#endif
+
+CONFIG_OPTS = $(GCC_flags) \
 	      --target=$(SWE_TGT) \
 	      --prefix=$(TOOLS_DIR) \
+	      --with-glibc-version=2.11 \
 	      --with-sysroot=$(ROOT) \
 	      --with-newlib \
 	      --without-headers \
@@ -51,105 +108,82 @@ CONFIG_OPTS = \
 	      --disable-multilib \
 	      --disable-decimal-float \
 	      --disable-threads \
-	      --disable-libmudflap \
-	      --disable-libssp \
+	      --disable-libatomic \
 	      --disable-libgomp \
+	      --disable-libmpx \
 	      --disable-libquadmath \
-	      --enable-languages=c \
-	      --with-mpfr-include=$(SOURCES_DIR)/$(PACKAGE)/$(DIR)/mpfr/src \
-	      --with-mpfr-lib=$(SOURCES_DIR)/$(PACKAGE)/$(COMPILE_DIR)/mpfr/src/.libs
-
-PATCH = yes
-patch: $(DIR)/
-	cd $(DIR); tar -xvf ../../../downloads/$(TAR_GMP); mv gmp-$(GMP_VER) gmp
-	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
-	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
-	cd $(DIR); \
-	  for file in `find gcc/config -name linux64.h -o -name linux.h -o -name sysv4.h`; \
-	  do \
-  	    cp -uv $$file{,.orig}; \
-  	    sed -e 's@/lib\(64\)\?\(32\)\?/ld@$(TOOLS_DIR)&@g' \
-      	        -e 's@/usr@$(TOOLS_DIR)@g' $$file.orig > $$file; \
-  	    echo '#undef STANDARD_STARTFILE_PREFIX_1' >> $$file; \
-  	    echo '#undef STANDARD_STARTFILE_PREFIX_2' >> $$file; \
-  	    echo '#define STANDARD_STARTFILE_PREFIX_1 "$(TOOLS_DIR)/lib/"' >> $$file; \
-  	    echo '#define STANDARD_STARTFILE_PREFIX_2 ""' >> $$file; \
-  	    touch $$file.orig; \
-	  done
-	cd $(DIR); sed -i '/k prot/agcc_cv_libc_provides_ssp=yes' gcc/configure
-
-COMPILE = yes
-compile: configure
-	$(MAKE) $(JOBS) -C $(COMPILE_DIR)
+	      --disable-libssp \
+	      --disable-libvtv \
+	      --disable-libstdcxx \
+	      --enable-languages=c,c++
 
 INSTALL = yes
 install: compile
-	@make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
-	@(cd $(PKG_ROOT)/$(PKG_DIR)/bin; ln -svf gcc cc);
-	@(cd $(PKG_ROOT)/$(PKG_DIR)/lib; ln -svf /$(PKG_DIR)/bin/cpp);
-	cd $(COMPILE_DIR); \
-	  ln -vs libgcc.a `$(SWE_TGT)-gcc -print-libgcc-file-name \
-	                     | sed -e 's/libgcc/&_eh/'`
-endif
+	@echo; echo; echo "install"; echo
+	make -C $(COMPILE_DIR) install
+endif # Stage 1
+
 
 # Tool Chain Build Stage 2
 #
 ifeq ($(BUILD_PHASE), Stage_2)
-PATCH = yes
-COMPILE = yes
-INSTALL = yes
 
+PREPARE = yes
+$(DIR)/: download
+	@echo; echo; echo "prepare"; echo
+	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_GMP); mv gmp-$(GMP_VER) gmp
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
+	#cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_ISL); mv isl-$(ISL_VER) isl
+
+PATCH = yes
 patch: $(DIR)/
+	@echo; echo; echo "patch"; echo
+	@echo "Create a full version of the internal header"
 	cd $(DIR); cat gcc/limitx.h gcc/glimits.h gcc/limity.h > \
 	  `dirname $$($$SWE_TGT-gcc -print-libgcc-file-name)`/include-fixed/limits.h
-	cd $(DIR); cp -v gcc/Makefile.in{,.tmp}; \
-	  sed -e 's/^T_CFLAGS =$$/& -fomit-frame-pointer/' gcc/Makefile.in.tmp \
-	    > gcc/Makefile.in
+
+	@echo; echo "change the location of GCC's default dynamic linker to use the one installed in /tools."
 	cd $(DIR); \
-	for file in `find gcc/config -name linux64.h \
-	                          -o -name linux.h \
-	                          -o -name sysv4.h`; do \
+	for file in gcc/config/{{linux,i386/linux{,64}}.h,arm/linux-eabi.h,aarch64/aarch64-linux.h}; \
+	do \
 	  cp -uv $$file{,.orig}; \
-	  (  sed -e 's@/lib\(64\)\?\(32\)\?/ld@$(TOOLS_DIR)&@g' \
-		 -e 's@/usr@$(TOOLS_DIR)@g' "$$file.orig"; \
-	     echo '#undef STANDARD_STARTFILE_PREFIX_1'; \
-	     echo '#undef STANDARD_STARTFILE_PREFIX_2'; \
-	     echo '#define STANDARD_STARTFILE_PREFIX_1 "$(TOOLS_DIR)/lib/"'; \
-	     echo '#define STANDARD_STARTFILE_PREFIX_2 ""'; \
-	  ) > "$$file"; \
-	  /bin/touch "$$file.orig"; \
+	  sed -e 's@/lib\(64\)\?\(32\)\?/ld@/tools&@g' \
+		  -e 's@/usr@/tools@g' $$file.orig > $$file; \
+	  echo "" >> $$file; \
+	  echo "#undef STANDARD_STARTFILE_PREFIX_1" >> $$file; \
+	  echo "#undef STANDARD_STARTFILE_PREFIX_2" >> $$file; \
+	  echo '#define STANDARD_STARTFILE_PREFIX_1 "/tools/lib/"' >> $$file; \
+	  echo '#define STANDARD_STARTFILE_PREFIX_2 ""' >> $$file; \
+	  touch $$file.orig; \
 	done
-	cd $(DIR); tar -xvf ../../../downloads/$(TAR_GMP); mv gmp-$(GMP_VER) gmp
-	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
-	cd $(DIR); tar -xvf ../../../downloads/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
+	
+#ifeq ($(mARCH), x86_64)
+#	@echo; echo 'change the default directory name for 64-bit libraries to “lib”:'
+#	cd $(DIR); sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+#endif
 
-PRE_CONFIGURE = CC=$(SWE_TGT)-gcc \
-	        AR=$(SWE_TGT)-ar RANLIB=$(SWE_TGT)-ranlib
+PRE_CONFIGURE = \
+		CC=$(SWE_TGT)-gcc \
+		CXX=$(SWE_TGT)-g++ \
+		AR=$(SWE_TGT)-ar \
+		RANLIB=$(SWE_TGT)-ranlib
 
-CONFIG_OPTS = \
-	      --host=$(FINAL_TGT) \
-	      --build=$(FINAL_TGT) \
-	      --target=$(FINAL_TGT) \
-	      --prefix=$(TOOLS_DIR)       \
-	      --with-local-prefix=$(TOOLS_DIR) \
-	      --with-native-system-header-dir=$(TOOLS_DIR)/include \
-	      --enable-clocale=gnu        \
-	      --enable-shared             \
-	      --enable-threads=posix      \
-	      --enable-__cxa_atexit       \
-	      --enable-languages=c,c++    \
-	      --disable-libstdcxx-pch     \
-	      --disable-multilib          \
-	      --disable-bootstrap         \
-	      --disable-libgomp           \
-	      --with-mpfr-include=$(SOURCES_DIR)/$(PACKAGE)/$(DIR)/mpfr/src \
-	      --with-mpfr-lib=$(SOURCES_DIR)/$(PACKAGE)/$(COMPILE_DIR)/mpfr/src/.libs
+CONFIG_OPTS = $(GCC_flags) \
+		--prefix=$(TOOLS_DIR) \
+	    --with-local-prefix=$(TOOLS_DIR) \
+	    --with-native-system-header-dir=$(TOOLS_DIR)/include \
+	    --enable-languages=c,c++ \
+	    --disable-libstdcxx-pch \
+	    --disable-multilib \
+	    --disable-bootstrap \
+	    --disable-libgomp
 
-compile: configure
-	$(MAKE) $(JOBS) -C $(COMPILE_DIR)
-
-install:  compile
-	$(MAKE) -C $(COMPILE_DIR) install
+INSTALL = yes
+install: compile
+	@echo; echo; echo "install"; echo
+	make -C $(COMPILE_DIR) install
 	ln -svf gcc $(TOOLS_DIR)/bin/cc
 endif
 
@@ -157,49 +191,30 @@ endif
 # Final Build
 #
 ifeq ($(BUILD_PHASE), Final)
+
 PATCH = yes
-CONFIGURE = yes
-COMPILE = yes
-
 patch: $(DIR)/
-	cd $(DIR); sed -i 's/install_to_$$(INSTALL_DEST) //' libiberty/Makefile.in
-ifeq ($(BITS_32), yes)
-	cd $(DIR); cp -v gcc/Makefile.in{,.tmp}; \
-	  sed -e 's/^T_CFLAGS =$$/& -fomit-frame-pointer/' gcc/Makefile.in.tmp \
-	    > gcc/Makefile.in
-endif
-	cd $(DIR); sed -i -e '/autogen/d' -e '/check.sh/d' fixincludes/Makefile.in
+	@echo; echo "patch"; echo
+#ifeq ($(BITS_64), yes)
+#	cd $(DIR); sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
+#endif
+	rm -vf /usr/lib/gcc
 
-CONFIG_OPTS =  \
-	        --host=$(FINAL_TGT) \
-	        --build=$(FINAL_TGT) \
-	        --target=$(FINAL_TGT) \
+PRE_CONFIGURE = SED=sed
+
+CONFIG_OPTS = $(GCC_flags) \
 		--prefix=$(PKG_DIR) \
-		--libexecdir=/usr/lib    \
-		--enable-shared          \
-		--enable-threads=posix   \
-		--enable-__cxa_atexit    \
-		--enable-clocale=gnu     \
-		--disable-multilib       \
+	    --host=$(FINAL_TGT) \
+	    --build=$(FINAL_TGT) \
+	    --target=$(FINAL_TGT) \
 		--enable-languages=c,c++ \
+		--disable-multilib \
 		--disable-bootstrap      \
 		--with-system-zlib
-
-configure: patch
-	@sed -i 's/install_to_$(INSTALL_DEST) //' $(DIR)/libiberty/Makefile.in
-	@(if [ ! -e $(COMPILE_DIR) ]; then mkdir $(COMPILE_DIR); fi)
-ifneq ($(DIR), $(COMPILE_DIR))
-	@(cd $(COMPILE_DIR); ../$(DIR)/configure $(CONFIG_OPTS))
-else
-	@(cd $(COMPILE_DIR); ./configure $(CONFIG_OPTS))
-endif
-
-compile: configure
-	@$(MAKE) $(JOBS) -C $(COMPILE_DIR)
-#	@$(MAKE) -C $(COMPILE_DIR) -k check
-
+ 
 INSTALL = yes
 install: compile
+	@echo; echo "install"; echo
 	mkdir -p $(PKG_ROOT)
 	make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 	cd $(PKG_ROOT)$(PKG_DIR)/bin; ln -svf gcc cc;
@@ -209,6 +224,8 @@ install: compile
 endif
 
 libgcc:
+	gcc -v
+	@echo
 	tar -zcvf $(TARGET_DIR)/smoothwall-libgcc.tar.gz -C $(PKG_ROOT) $(PKG_DIR)/lib*/libgcc*
 
 include ../Makefile.rules

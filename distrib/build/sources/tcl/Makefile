@@ -5,23 +5,17 @@
 # This code is distributed under the terms of the GPL v2.
 
 include ../Makefile.conf
-include ../Makefile.versions
 
 PACKAGE = tcl
-VERSION = $(TCL_VER)
-
-BASE_URL = http://downloads.sourceforge.net/project/$(PACKAGE)/Tcl/$(TCL_VER)
-
-#PATCH_FILE1 = configure-tcl-fixes-bash3.patch
-#PATCH_FILE2 = dash-fix.patch
-#PATCH_FILE3 = tcl-unix-config-quote.patch
-
-TARBALL = $(PACKAGE)$(VERSION)-src
-
+TCL_MM = 8.6
+VERSION = $(TCL_MM).9
 DIR = $(PACKAGE)$(VERSION)
+TARBALL = $(PACKAGE)$(VERSION)-src
+BASE_URL = http://downloads.sourceforge.net/tcl
 
 ifeq ($(BITS_64), yes)
 CONFIG_OPTS += --enable-64bit
+#CFLAGS += -m64
 endif
 
 CONFIGURE = yes
@@ -29,15 +23,18 @@ COMPILE = yes
 INSTALL = yes
 
 compile: configure
-	@make $(JOBS) -C $(DIR)/unix
+	@echo; echo; echo "compile"; echo
+	make $(JOBS) -C $(DIR)/unix
 
 ifeq ($(BUILD_PHASE), Stage_3)
 configure: patch
-	@(cd $(DIR)/unix; ./configure --prefix=$(TOOLS_DIR) $(CONFIG_OPTS))
+	@echo; echo; echo "configure"; echo
+	(cd $(DIR)/unix; ./configure --prefix=$(TOOLS_DIR) $(CONFIG_OPTS))
 
 install: compile
+	@echo; echo; echo "install"; echo
 	make -C $(DIR)/unix install
-	chmod -v u+w ${TOOLS_DIR}/lib/libtcl$(TCL_MM).so
+	chmod -v u+w $(TOOLS_DIR)/lib/libtcl$(TCL_MM).so
 	make -C $(DIR)/unix install-private-headers
 	rm -f $(TOOLS_DIR)/bin/tclsh
 	ln -sv tclsh$(TCL_MM) $(TOOLS_DIR)/bin/tclsh
@@ -45,12 +42,14 @@ endif
 
 ifeq ($(BUILD_PHASE), Final)
 configure: patch
-	@(cd $(DIR)/unix; ./configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
+	@echo; echo; echo "configure"; echo
+	(cd $(DIR)/unix; ./configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
 
 install: compile
-	@mkdir -p $(PKG_ROOT)
-	@make -C $(DIR)/unix INSTALL_ROOT=$(PKG_ROOT) install
-	@ln -s tclsh$(TCL_MM) $(PKG_ROOT)$(PKG_DIR)/bin/tclsh
+	@echo; echo; echo "install"; echo
+	mkdir -vp $(PKG_ROOT)
+	make -C $(DIR)/unix INSTALL_ROOT=$(PKG_ROOT) install
+	ln -s tclsh$(TCL_MM) $(PKG_ROOT)$(PKG_DIR)/bin/tclsh
 endif
 
 include ../Makefile.rules

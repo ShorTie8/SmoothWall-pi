@@ -9,7 +9,7 @@ include ../../../Makefile.conf
 PACKAGE = dmidecode
 VERSION = 2.9
 
-BASE_URL = http://download.savannah.gnu.org/releases/dmidecode/
+BASE_URL = http://download-mirror.savannah.gnu.org/releases
 
 CONFIGURE = yes
 COMPILE = yes

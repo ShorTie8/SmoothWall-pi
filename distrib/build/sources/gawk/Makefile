@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = gawk
 VERSION = 4.1.4
 
-BASE_URL = ftp://ftp.gnu.org/gnu/gawk
+BASE_URL = https://ftp.gnu.org/gnu/gawk
 
 ifeq ($(BUILD_PHASE), Stage_3)
 CONFIG_OPTS += --prefix=/tools ac_cv_func_working_mktime=yes

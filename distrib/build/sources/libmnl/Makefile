@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libmnl
-VERSION = 1.0.3
+VERSION = 1.0.4
 
 EXTENSION = .tar.bz2
 

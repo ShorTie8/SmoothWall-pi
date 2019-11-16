@@ -24,7 +24,12 @@ download:
 
 PREPARE = yes
 $(DIR)/: download
-	@tar -xvf $(DOWNLOADS_DIR)/$(DLPACKAGE)-$(VERSION)$(EXTENSION)
+	@tar -xf $(DOWNLOADS_DIR)/$(DLPACKAGE)-$(VERSION)$(EXTENSION)
 	@mv $(DLPACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)
+ifeq ($(mARCH), arm64)
+	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
+		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
+	done
+endif
 
 include ../Makefile.rules

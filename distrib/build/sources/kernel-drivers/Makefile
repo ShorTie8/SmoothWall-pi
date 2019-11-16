@@ -21,12 +21,16 @@ IXGBEVF_VER = 4.5.1
 R8168_VER = 8.046.00
 ASIX_88179_178A_VER = 1.19.0
 
-
-PACKAGES = package-r8168 package-igb package-igbvf \
+ifeq ($(mTUPLE), x86_64)
+PACKAGES = package-r8168 \
 	   package-ixgbe package-ixgbevf \
-	   package-e1000e package-asix-88179_178a
+	   package-e1000e
+else
+PACKAGES = package-r8152
+endif
 
 BROKEN_PKGS = package-e1000 package-i40evf package-i40e package-nct6775 \
+	package-asix-88179_178a package-igb package-igbvf
 # The E1000 driver is no longer maintained.
 # Express doesn't *really* need 40Gb NICs.
 # Roeck is no longer supporting out-of-kernel NCT6775 driver.
@@ -53,6 +57,17 @@ BROKEN_PKGS = package-e1000 package-i40evf package-i40e package-nct6775 \
 #compile-nct6775:
 	#$(MAKE) $(JOBS) V=1 -C nct6775-$(NCT6775_VER)/ -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
 
+#compile-igb:
+	#$(MAKE) $(JOBS) V=1 -C igb-$(IGB_VER)/src -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
+
+#compile-igbvf:
+	#$(MAKE) $(JOBS) V=1 -C igbvf-$(IGBVF_VER)/src -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
+
+#compile-asix-88179_178a:
+	#$(MAKE) $(JOBS) V=1 -C AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
+
+
+
 #package-i40evf: compile-i40evf
 	#install -D $(DRIVER_DIR)/i40evf-$(I40EVF_VER)/src/i40evf.ko \
 		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/intel/i40evf/i40evf.ko
@@ -65,6 +80,19 @@ BROKEN_PKGS = package-e1000 package-i40evf package-i40e package-nct6775 \
 	#install -D $(DRIVER_DIR)/nct6775-$(NCT6775_VER)/nct6775.ko \
 		#$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/hwmon/nct6775.ko
 
+#package-igb: compile-igb
+	#install -D $(DRIVER_DIR)/igb-$(IGB_VER)/src/igb.ko \
+		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/intel/igb/igb.ko
+
+#package-igbvf: compile-igbvf
+	#install -D $(DRIVER_DIR)/igbvf-$(IGBVF_VER)/src/igbvf.ko \
+		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/intel/igbvf/igbvf.ko
+
+#package-asix-88179_178a: compile-asix-88179_178a
+	#install -D $(DRIVER_DIR)/AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE/ax88179_178a.ko \
+		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/usb/ax88179_178a.ko
+
+
 
 
 # The download section
@@ -76,10 +104,12 @@ download:
 	@$(DL_CMD) http://downloads.sourceforge.net/sourceforge/e1000/e1000e-$(E1000E_VER).tar.gz
 	@$(DL_CMD) http://r8168dl.appspot.com/files/r8168-$(R8168_VER).tar.bz2
 	@$(DL_CMD) http://www.asix.com.tw/FrootAttach/driver/AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE.tar.bz2
+	$(DL_CMD) https://marc.info/?l=linux-usb&m=151192477631941&q=p3
 
 
 # The preparation section: unpack and patch
 prepare: download
+ifeq ($(mTUPLE), x86_64)
 	tar -xvf $(DOWNLOADS_DIR)/r8168-$(R8168_VER).tar.bz2
 	cd r8168-$(R8168_VER); patch -p1 < ../r8168-build.patch
 	tar -xvf $(DOWNLOADS_DIR)/igb-$(IGB_VER).tar.gz
@@ -90,16 +120,15 @@ prepare: download
 	tar -xvf $(DOWNLOADS_DIR)/AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE.tar.bz2
 	cd AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE; \
 	  patch -p1 < ../ax88179-makefile.patch
+else
+	tar -xf 0008-r8152.53-2.09.0.tar.bz2
+	cd r8152-2.09.0; patch < ../r8152-makefile.patch
+endif
 	mkdir -p $(PKG_ROOT)
 
 
 # The compile section
-compile-igb:
-	$(MAKE) $(JOBS) V=1 -C igb-$(IGB_VER)/src -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
-
-compile-igbvf:
-	$(MAKE) $(JOBS) V=1 -C igbvf-$(IGBVF_VER)/src -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
-
+ifeq ($(mTUPLE), x86_64)
 compile-ixgbe:
 	$(MAKE) $(JOBS) V=1 -C ixgbe-$(IXGBE_VER)/src -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
 
@@ -111,20 +140,14 @@ compile-e1000e:
 
 compile-r8168:
 	$(MAKE) $(JOBS) V=1 -C r8168-$(R8168_VER)/src -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" modules
-
-compile-asix-88179_178a:
-	$(MAKE) $(JOBS) V=1 -C AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" KSRC=$(KERNEL_DIR) K_VERSION=3.16
+else
+compile-r8152:
+	$(MAKE) $(JOBS) V=1 -C r8152-2.09.0 -j $(PARA_JOBS) CFLAGS="$(CFLAGS)" modules
+endif
 
 
 # The package section: install in buildroot
-package-igb: compile-igb
-	install -D $(DRIVER_DIR)/igb-$(IGB_VER)/src/igb.ko \
-		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/intel/igb/igb.ko
-
-package-igbvf: compile-igbvf
-	install -D $(DRIVER_DIR)/igbvf-$(IGBVF_VER)/src/igbvf.ko \
-		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/intel/igbvf/igbvf.ko
-
+ifeq ($(mTUPLE), x86_64)
 package-ixgbe: compile-ixgbe
 	install -D $(DRIVER_DIR)/ixgbe-$(IXGBE_VER)/src/ixgbe.ko \
 		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/intel/ixgbe/ixgbe.ko
@@ -140,11 +163,13 @@ package-e1000e: compile-e1000e
 package-r8168: compile-r8168
 	install -D $(DRIVER_DIR)/r8168-$(R8168_VER)/src/r8168.ko \
 		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/ethernet/realtek//r8168.ko
-
-package-asix-88179_178a: compile-asix-88179_178a
-	install -D $(DRIVER_DIR)/AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE/ax88179_178a.ko \
-		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/usb/ax88179_178a.ko
-
+else
+package-r8152: compile-r8152
+	install -D $(DRIVER_DIR)/r8152-2.09.0/r8152.ko \
+		$(PKG_ROOT)/lib/modules/$(K_SWE_VERSION)/kernel/drivers/net/usb/r8152.ko
+	mkdir -vp $(PKG_ROOT)/etc/udev/rules.d
+	install --group=root --owner=root --mode=0644 r8152-2.09.0/50-usb-realtek-net.rules $(PKG_ROOT)/etc/udev/rules.d/
+endif
 
 # The tarball section
 $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz: prepare $(PACKAGES)
@@ -166,6 +191,7 @@ clean:
 	@rm -rf r8168-$(R8168_VER)
 	@rm -rf nct6775-$(NCT6775_VER)
 	@rm -rf AX88179_178A_LINUX_DRIVER_v$(ASIX_88179_178A_VER)_SOURCE
+	@rm -rf r8152-2.09.0
 ifeq ($(BUILD_PHASE), Final)
 	@rm -rf $(PKG_ROOT)
 endif
@@ -186,3 +212,4 @@ print-version:
 	@echo "R8168 $(R8168_VER)"
 	@echo "NCT6775 $(NCT6775_VER)"
 	@echo "ASIX_88179_178A $(ASIX_88179_178A_VER)"
+	@echo "r8152 2.09.0"

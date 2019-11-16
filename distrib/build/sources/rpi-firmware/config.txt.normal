@@ -1,0 +1,6 @@
+# SmoothWall cmdline.txt By: ShorTie
+[all]
+kernel=vmlinuz-UNAME
+initramfs initrd-UNAME.gz
+
+hdmi_force_hotplug=1

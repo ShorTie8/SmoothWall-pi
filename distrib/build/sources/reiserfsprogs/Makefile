@@ -7,17 +7,14 @@
 include ../Makefile.conf
 
 PACKAGE = reiserfsprogs
-VERSION = 3.6.21
-
-BASE_URL = http://fossies.org/linux/misc/
-
-#COMPILE_DIR = $(DIR)-compile
-
+VERSION = 3.6.24
+EXTENSION = .tar.xz
+BASE_URL = https://www.kernel.org/pub/linux/kernel/people/jeffm/reiserfsprogs/v$(VERSION)
 
 ifeq ($(BUILD_PHASE), Final)
 
-CONFIG_OPTS += --prefix=$(PKG_DIR) --sbindir=/sbin
-
+CFLAGS += -std=gnu89
+CONFIG_OPTS = --prefix=/usr --sbindir=/sbin
 
 INSTALL = yes
 install: compile

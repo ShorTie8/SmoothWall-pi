@@ -7,9 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = nano
-VERSION = 2.2.3
+VER_MAG = 2.8
+VER_MIN = 6
+VERSION = $(VER_MAG).$(VER_MIN)
 
-BASE_URL = http://www.nano-editor.org/dist/v2.2/
+BASE_URL = http://www.nano-editor.org/dist/v$(VER_MAG)
 
 PRE_CONFIGURE = LIBS=-ltinfo
 

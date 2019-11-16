@@ -9,9 +9,9 @@ include ../Makefile.conf
 PACKAGE = whois
 VERSION = 5.5.2
 
-EXTENSION = .tgz
+EXTENSION = .tar.xz
 
-BASE_URL = http://whois.bw.org/dist/
+BASE_URL = https://fossies.org/linux/privat
 
 CONFIGURE = yes
 COMPILE = yes

@@ -7,10 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = strace
-VERSION = 4.10
+VERSION = 4.21
 
 EXTENSION = .tar.xz
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(VERSION)
+BASE_URL = https://sourceforge.net/projects/strace/files/strace/$(VERSION)
+
+ifeq ($(mARCH), arm64)
+# <ldv> try --enable-mpers=check if you don't need 32-bit personality support on aarch64
+CONFIG_OPTS += --enable-mpers=check
+endif
 
 include ../Makefile.rules

@@ -12,6 +12,10 @@ EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = ftp://ftp.netfilter.org/pub/$(PACKAGE)
+BASE_URL = https://www.netfilter.org/projects/libnetfilter_log/files
+
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
 
 include ../Makefile.rules

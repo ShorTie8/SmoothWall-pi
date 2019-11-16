@@ -82,7 +82,7 @@ set | grep "NO_CHECK_CERT=" >/dev/null 2>&1
 if [ "$?" -eq 0 ]; then
   NO_CHECK_CERT="--no-check-certificate "
 else
-  NO_CHECK_CERT=""
+  NO_CHECK_CERT="--no-check-certificate "
 fi
 
 # Mirror sources
@@ -105,9 +105,11 @@ if [ ! -e "$DIRECTORY/$FILENAME.done" ]; then
 
   # Try first mirror, second mirror, or URL
   # URL can be via wget or git.
-  try_DL "$MIRROR_UNO" "$MIRROR_UNO/$FILENAME" \
-  || try_DL "$MIRROR_DOS" "$MIRROR_DOS/$FILENAME" \
-  || try_DL "$URL" "$URL"
+  try_DL "$URL" "$URL" \
+  || try_DL "$MIRROR_DOS" "$MIRROR_DOS/$FILENAME"
+#  try_DL "$MIRROR_UNO" "$MIRROR_UNO/$FILENAME" \
+#  || try_DL "$MIRROR_DOS" "$MIRROR_DOS/$FILENAME" \
+#  || try_DL "$URL" "$URL"
 
   if [ $? -ne 0 ]; then
     echo "Download failed"

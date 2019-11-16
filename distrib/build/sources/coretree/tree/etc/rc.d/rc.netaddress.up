@@ -2,6 +2,7 @@
 
 . /etc/rc.d/inc.rc-functions
 
+echo -e "${BOUL}    entering rc.netaddress.up, creating nicsToUp ${NO}"
 echolog "" "" "$DEBUG_DHCPCD" "entering rc.netaddress.up [`date`]"
 
 . /var/smoothwall/ethernet/settings
@@ -29,6 +30,7 @@ echolog "e" "s" "" "Poke udev"
 nicsToUp=""
 
 # GREEN
+echo -e "${BOUL}      GREEN ${NO}"
 if [ "$1" != "NOTGREEN" ]; then
 	if [ "$GREEN_DEV" != "" ]; then
 		/usr/sbin/ip addr add $GREEN_ADDRESS/$GREEN_NETMASK dev $GREEN_DEV
@@ -39,6 +41,7 @@ if [ "$1" != "NOTGREEN" ]; then
 fi
 
 # ORANGE
+echo -e "${BOUL}      ORANGE ${NO}"
 if [ "$CONFIG_TYPE" == "1" -o "$CONFIG_TYPE" == "3" -o "$CONFIG_TYPE" == "5" -o "$CONFIG_TYPE" == "7" ]; then
 	if [ "$ORANGE_DEV" != "" ]; then
 		/usr/sbin/ip addr add $ORANGE_ADDRESS/$ORANGE_NETMASK dev $ORANGE_DEV
@@ -49,6 +52,7 @@ if [ "$CONFIG_TYPE" == "1" -o "$CONFIG_TYPE" == "3" -o "$CONFIG_TYPE" == "5" -o 
 fi
 
 # PURPLE
+echo -e "${BOUL}      PURPLE ${NO}"
 if [ "$CONFIG_TYPE" == "4" -o "$CONFIG_TYPE" == "5" -o "$CONFIG_TYPE" == "6" -o "$CONFIG_TYPE" == "7" ]; then
 	if [ "$PURPLE_DEV" != "" ]; then
 		/usr/sbin/ip addr add $PURPLE_ADDRESS/$PURPLE_NETMASK dev $PURPLE_DEV
@@ -59,6 +63,7 @@ if [ "$CONFIG_TYPE" == "4" -o "$CONFIG_TYPE" == "5" -o "$CONFIG_TYPE" == "6" -o 
 fi
 	
 # RED
+echo -e "${BOUL}      RED ${NO}"
 if [ "$CONFIG_TYPE" == "2" -o "$CONFIG_TYPE" == "3" -o "$CONFIG_TYPE" == "6" -o "$CONFIG_TYPE" == "7" ]; then
 	if [ "$RED_DEV" != "" ]; then
                 
@@ -111,4 +116,6 @@ if [ ! -f /var/run/STARTSTOP ]; then
 	. /etc/rc.d/inc.links-up
 fi
 
+echo "nicsToUp is $nicsToUp"
+echo -e "${BOUL}    exiting rc.netaddress.up ${NO}"
 echolog "$DEBUG" "" "$DEBUG_DHCPCD" "exiting rc.netaddress.up [`date`]"

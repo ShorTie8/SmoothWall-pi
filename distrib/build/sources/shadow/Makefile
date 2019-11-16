@@ -7,9 +7,12 @@
 include ../Makefile.conf
 
 PACKAGE = shadow
-VERSION = 4.1.4.2
+#VERSION = 4.1.4.2
+VERSION = 4.7
+EXTENSION = .tar.xz
 
-BASE_URL = http://downloads.smoothwall.org/buildmirror
+#BASE_URL = http://downloads.smoothwall.org/buildmirror
+BASE_URL = https://github.com/shadow-maint/shadow/releases/download/4.7
 
 INSTALL = yes
 

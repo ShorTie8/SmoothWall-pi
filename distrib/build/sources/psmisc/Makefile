@@ -7,8 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = psmisc
-VERSION = 22.16
+VERSION = 23.2
+EXTENSION = .tar.xz
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/
+BASE_URL = http://downloads.sourceforge.net/project/psmisc/psmisc
 
 include ../Makefile.rules

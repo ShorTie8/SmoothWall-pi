@@ -7,8 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = glib
-VER_MM = 2.29
-VERSION = $(VER_MM).12
+VER_MM = 2.34
+VERSION = $(VER_MM).0
 EXTENSION = .tar.xz
 
 BASE_URL =  http://ftp.gtk.org/pub/glib/$(VER_MM)

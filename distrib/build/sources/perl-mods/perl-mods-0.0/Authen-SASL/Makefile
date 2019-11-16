@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = Authen-SASL
-VERSION = 2.15
+VERSION = 2.16
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/G/GB/GBARR/
 
@@ -15,7 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); echo 'y' | perl Makefile.PL
+	#@+cd $(DIR); echo 'y' | perl Makefile.PL
+	@+cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

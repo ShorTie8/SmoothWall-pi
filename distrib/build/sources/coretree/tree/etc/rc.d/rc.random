@@ -1,0 +1,15 @@
+#!/bin/sh
+# Begin $rc_base/init.d/random
+
+# Based on sysklogd script from LFS-3.1 and earlier.
+# Rewritten by Gerard Beekmans  - gerard@linuxfromscratch.org
+# Random script elements by Larry Lawrence
+
+# load our functions {echolog} & colors
+. /etc/rc.d/inc.rc-functions
+
+echo -e "${STEP}          Initializing kernel random number generator... ${NO}"
+echolog "e" "s" "" "Initializing kernel random number generator..."
+/usr/sbin/random start
+
+# End $rc_base/init.d/random

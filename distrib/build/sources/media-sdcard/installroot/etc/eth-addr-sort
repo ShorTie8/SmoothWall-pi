@@ -1,0 +1,221 @@
+#! /bin/bash
+
+#echo -e "${INFO}          Current NIC's${NO}"
+#grep KERNEL /etc/udev/rules.d/70-persistent-net.rules
+
+# Shorthand
+persNetRules=70-persistent-net.rules
+custNICRules=/etc/udev/rules.d/70-Smoothwall-custom-NIC.rules
+
+mv -v /etc/udev/rules.d/$persNetRules /tmp
+
+# Every IF that has a MAC address is assumed to be a NIC, even bridges
+#   Bridges may not appear in this file; see the 75* NIC rule generator.
+
+# Gather the current MAC addrs (NICs only)
+echo -e "${STEP}      Gather the current MAC addrs and sort${NO}"
+cd /sys/class/net
+NICS=`/bin/ls -C1`
+#NICS=`/bin/ls -C1 | egrep -v "ipsec|tun|tap|mast|teq"`
+for i in $NICS; do
+  addr=`cat $i/address`
+  if [ "$addr" != "" -a \
+       "$addr" != "00:00:00:00:00:00" -a \
+       -e $i/device ]; then
+    echo "$addr";
+  fi
+done | sort >/tmp/curMACs
+cd /
+
+echo -en "${INFO}          Current  MAC addrs  ${BOUL}"; cat /tmp/curMACs | tr '\n' '   '; echo -e "${NO}"
+declare -A NICs
+declare -i j n w
+j=0
+
+# Prep new names in MAC addr order
+echo -e "${STEP}      Count up NIC's and setup as an array${NO}"
+while read MAC; do
+  NICs["eth$j"]=$MAC
+  j=j+1
+done < /tmp/curMACs
+lastNIC=$j
+
+# Yank the drivers
+echo -e "${STEP}      Yank the drivers${NO}"
+for f in /sys/class/net/*; do
+  dev=$(basename $f)
+  if [[ "$dev" != "lo" ]]; then
+    driver=$(readlink $f/device/driver/module)
+    if [ $driver ]; then
+      driver=$(basename $driver)
+    fi
+    echo -e "${DONE}          $driver${NO}"
+    addr=$(cat $f/address)
+    operstate=$(cat $f/operstate)
+    description=`modinfo $driver | egrep '^description' | sed -e 's/[^:]*:[ 	]*//'`
+    echo -e "${INFO}            $dev ${DONE} $addr  ${BOUL} $driver      $description ${NO}"
+    rmmod -v $driver
+  fi
+done
+
+# Change all NAME's to FRESHNIC
+echo -e "${STEP}      Change all NAME's to FRESHNIC${NO}"
+sed -i -e 's/, NAME=".*/, NAME="FRESHNIC"/' /tmp/$persNetRules
+
+# Set names for current NICs
+echo -e "${STEP}      Set names for current NICs${NO}"
+j=0
+n=0
+w=0
+while [ $j -lt $lastNIC ]; do
+  if grep ${NICs["eth$j"]} /tmp/$persNetRules | grep wlan >/dev/null 2>&1; then
+    echo -e "${INFO}        wlan nic found    ${DONE} ${NICs["eth$j"]} ${NO}"
+    echo -e "${STEP}          1${NO}) use as nic, renames wlan*'s to eth*"
+    echo -e "${STEP}          2${NO}) use as Bridge for hostapd, leave as wlan"
+    echo -en "${BOUL}            Please chose 1 or 2  ${NO}"
+    while [ 1 == 1 ]; do
+      read a #</dev/tty
+      if [ "$a" == "1" ]; then
+        echo -e "${STEP}          Renaming wlan* NIC's to ethX${NO}"
+        sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/eth'$n'/' /tmp/$persNetRules
+        export WPA_CLIENT=on
+        n=n+1
+        break;
+      elif [ "$a" == "2" ]; then
+        echo -e "${STEP}          Checking if it can support AP mode ${NO}"
+        if [ 'iw list | grep phy'$w' -A 28 | grep "* AP"' ]; then
+          echo -e "${BOUL}              AP mode is supported ${NO}"
+          export AP=ok
+        else
+          echo -e "${BOUL}              AP mode not supported ${NO}"
+          break;
+        fi
+        echo -e "${STEP}          Using as Bridge, set as wlan$w ${NO}"
+        export BRIDGE=on
+        sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/wlan'$w'/' /tmp/$persNetRules
+        echo -e "${INFO}          Bridge to ${DONE} ?? ${NO}"
+        echo -e "${STEP}            1${NO}) Green"
+        echo -e "${STEP}            2${NO}) Orange"
+        echo -e "${STEP}            3${NO}) Purple"
+        echo -en "${BOUL}              Please chose 1,2 or 3  ${NO}"
+        while [ 1 == 1 ]; do
+          read a #</dev/tty
+          if [ "$a" == "1" ]; then
+            echo -e "${STEP}            Using as a hostapd Bridge to GREEN${NO}"
+            if [ -v $GREEN_BRG ]; then
+              echo -e "${LTBL}              Setting ${INFO}GREEN_BRG${LTBL}=grn_brg, and ${INFO}Wlan$w${LTBL} as primary ${NO}"
+              export GREEN_BRG=grn_brg
+              export GREEN_BRG_DEV=""
+              export GREEN_WIFI="wlan$w"
+              echo -e "${STEP}                Creating GREEN_BRG_MAC ${NO}"
+              MAC="02:01"
+			  for i in $(seq 4); do
+				printf -v MAC "${MAC}:%02x" "$(( RANDOM % 256 ))"
+			  done
+			  export GREEN_BRG_MAC="$MAC"
+              export hostapd_client=on
+            else
+              echo -e "${LTBL}              Adding ${INFO}Wlan$w${LTBL} to ${INFO}GREEN_BRG${LTBL} ${NO}"
+              export Wlan$w=grn_brg
+            fi
+            break;
+          elif [ "$a" == "2" ]; then
+            echo -e "${STEP}            Using as a hostapd Bridge to ORANGE${NO}"
+            if [ -v $ORANGE_BRG ]; then
+              echo -e "${LTBL}              Setting ${INFO}ORANGE_BRG${LTBL}=org_brg, and ${INFO}Wlan$w${LTBL} as primary ${NO}"
+              export ORANGE_BRG=org_brg
+              export ORANGE_BRG_DEV=""
+              export ORANGE_WIFI="wlan$w"
+              echo -e "${STEP}                Creating ORANGE_BRG_MAC ${NO}"
+              MAC="02:02"
+			  for i in $(seq 4); do
+				printf -v MAC "${MAC}:%02x" "$(( RANDOM % 256 ))"
+			  done
+			  export ORANGE_BRG_MAC="$MAC"
+              export hostapd_client=on
+            else
+              echo -e "${LTBL}              Adding ${INFO}Wlan$w${LTBL} to ${INFO}ORANGE_BRG${LTBL} ${NO}"
+              export Wlan$w=org_brg
+            fi
+            break;
+          elif [ "$a" == "3" ]; then
+            echo -e "${STEP}            Using as a hostapd Bridge to PURPLE${NO}"
+            if [ -v $PURPLE_BRG ]; then
+              echo -e "${LTBL}              Setting ${INFO}PURPLE_BRG${LTBL}=purp_brg, and ${INFO}Wlan$w${LTBL} as primary ${NO}"
+              export PURPLE_BRG=purp_brg
+              export PURPLE_BRG_DEV=""
+              export PURPLE_WIFI="wlan$w"
+              echo -e "${STEP}                Creating PURPLE_BRG_MAC ${NO}"
+              MAC="02:03"
+			  for i in $(seq 4); do
+				printf -v MAC "${MAC}:%02x" "$(( RANDOM % 256 ))"
+			  done
+			  export PURPLE_BRG_MAC="$MAC"
+              export hostapd_client=on
+            else
+              echo -e "${LTBL}              Adding ${INFO}Wlan$w${LTBL} to ${INFO}PURPLE_BRG${LTBL} ${NO}"
+              export Wlan$w=grn_brg
+            fi
+            break;
+          else
+            echo -en "${WARN}                Say What  ${INFO}??  ${NO}"
+            sleep 2
+          fi
+        done
+        w=w+1
+        break;
+      else
+        echo -en "${WARN}              Say What  ${INFO}??  ${NO}"
+        sleep 2
+      fi
+    done
+  else
+    sed -i -e '/'${NICs["eth$j"]}'/s/FRESHNIC/eth'$n'/' /tmp/$persNetRules
+    n=n+1
+  fi
+  j=j+1
+done
+export NEXT_NIC=$n
+
+# Create 70-Smoothwall-custom-NIC.rules
+echo -e "${BOUL}      Moving 70-persistent-net.rules to 70-Smoothwall-custom-NIC.rules${NO}"
+mv -v /tmp/$persNetRules $custNICRules
+
+# Show custNICRules
+echo -e "${INFO}        Showing custNICRules to be${NO}"
+grep KERNEL /etc/udev/rules.d/70-Smoothwall-custom-NIC.rules
+
+# Create 99-Smoothwall-network-bridges.rules
+if [ -v ${GREEN_BRG} ] || [ -v ${ORANGE_BRG} ] || [ -v ${PURPLE_BRG} ]; then
+  echo -e "${STEP}                Creating 99-Smoothwall-network-bridges.rules ${NO}"
+  (
+	echo "# By ShorTie"
+	echo "# Custom made 99-Smoothwall-network-bridges.rules"
+	echo
+	echo "ACTION==\"add\", SUBSYSTEM==\"module\", KERNEL==\"br_netfilter\", RUN+=\"/usr/sbin/start-bridges\""
+	) > /etc/udev/rules.d/99-Smoothwall-network-bridges.rules
+
+else
+  echo -e "${INFO}      NO bridges found ${NO}"
+fi
+
+# Trigger udev to INS the drivers, thus changing the names
+echo -e "${STEP}      Reload udev, thus changing the names${NO}"
+/sbin/udevadm control --reload
+sleep 2
+
+echo -e "${BOUL}      udevadm trigger${NO}"
+/sbin/udevadm trigger
+sleep 2
+
+echo -e "${BOUL}      udevadm trigger --type=subsystems${NO}"
+/sbin/udevadm trigger --type=subsystems --action=change
+sleep 2
+
+echo -e "${BOUL}      udevadm settle${NO}"
+/sbin/udevadm settle
+
+# Sleepy 4 udev
+echo -e "${DONE}    Finished eth-addr-sort, ${STEP} Sleepy 4 udev${NO}"
+sleep 4
+

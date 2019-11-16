@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = logrotate
-VERSION = 3.8.1
+VERSION = 3.8.7
 
 BASE_URL = http://ftp.debian.org/debian/pool/main/l/logrotate
 

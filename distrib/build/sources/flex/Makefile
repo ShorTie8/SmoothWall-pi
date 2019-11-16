@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = flex
-VERSION = 2.5.35
+VERSION = 2.6.4
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(PACKAGE)-$(VERSION)/
+BASE_URL = https://github.com/westes/flex/files/981163
 
 TARBALL = $(PACKAGE)-$(VERSION)
 

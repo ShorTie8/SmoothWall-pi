@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = attr
-VERSION = 2.4.46
+VERSION = 2.4.47
 
 BASE_URL = http://http.us.debian.org/debian/pool/main/a/attr/
 

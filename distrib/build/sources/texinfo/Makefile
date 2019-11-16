@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = texinfo
-VERSION = 6.0
+VERSION = 6.6
 
-BASE_URL = ftp://ftp.gnu.org/gnu/texinfo
+BASE_URL = https://ftp.gnu.org/gnu/texinfo
 
 ifeq ($(BUILD_PHASE), Final)
 PRE_CONFIGURE = LIBS=-ltinfo

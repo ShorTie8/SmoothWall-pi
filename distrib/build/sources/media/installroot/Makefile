@@ -146,8 +146,9 @@ all: clean bin lib klibc
 	  mkdir dev/ida dev/rd; \
 	  install -d lib/{firmware,udev/devices/{pts,shm}}; \
 	  rm -rf lib/firmware/*; \
-	  cp -av /build/buildroot/linux/lib/firmware lib; \
-	) #> /dev/null 2>&1
+	)
+	#  cp -av /build/buildroot/linux/lib/firmware lib; \
+	#) #> /dev/null 2>&1
 	  #mknod -m0666 lib/udev/devices/null c 1 3; \
 	  #ln -sf proc/kcore /lib/udev/devices/core; \
 	  #ln -sf proc/self/fd /lib/udev/devices/fd; \

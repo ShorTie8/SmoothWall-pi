@@ -1,0 +1,177 @@
+#!/bin/bash
+
+# Format echo output
+CLS="\033[0;0f\033[2J"
+BO="\033[1m"
+UL="\033[4m"
+BOUL="\033[1;4m"
+NO="\033[0m"
+
+# Define message colors
+export BOUL="\033[1;4m"	# light blue
+export OOPS="\033[1;31m"   # red
+export DONE="\033[1;32m"	# green
+export INFO="\033[1;33m"	# yellow
+export STEP="\033[1;34m"	# blue
+export WARN="\033[1;35m"	# hot pink
+export NO="\033[0m"		# normal/light
+
+echo -e "${WARN}  Running /etc/init, after trigger-lock removel${NO}"
+
+echo -e "${BOUL}Wait for udev to settle tmp/trigger-lock${NO}"
+while [ -e /tmp/trigger-lock ]; do
+  usleep 100000
+done
+
+echo -e "${DONE}  Loading, please wait..."
+echo -e "${STEP}    Running init ${NO}"
+
+echo -e "${STEP}    Installing busybox${NO}"
+/bin/busybox --install
+
+echo -e "${STEP}    Running depmod -a${NO}"
+/sbin/depmod -a
+
+echo -e "${STEP}    Making directories if not there${NO}"
+[ -d /dev ] || mkdir -v -m 0755 /dev
+[ -d /root ] || mkdir -v -m 0700 /root
+[ -d /sys ] || mkdir -v /sys
+[ -d /proc ] || mkdir -v /proc
+[ -d /tmp ] || mkdir -v -m 0777 /tmp
+[ -d /run ] || mkdir -v -m 0755 /run
+[ -d /var/lock ] || mkdir -vp -m 755 /var/lock
+
+# Mount proc, sys, dev
+echo -e "${STEP}    Mounting /proc and /sys${NO}"
+/bin/mount -v -t proc proc /proc
+/bin/mount -v -t sysfs sysfs /sys
+
+echo -e "${STEP}    Mounting devtmpfs as /dev${NO}"
+/bin/mount -v -t devtmpfs devtmpfs /dev
+/bin/mkdir -v -p /dev/pts
+/bin/mount -v -t devpts -o gid=5,mode=620 devpts /dev/pts
+
+# Setup hotplug
+echo -e "${STEP}    Setting up hotplug${NO}"
+echo -e '\000\000\000\000' > /proc/sys/kernel/hotplug
+
+# Populating dev
+echo -e "${STEP}    Starting eudev. Please be patient.${NO}"
+/sbin/udevd --daemon
+sleep 2
+
+echo -e "${STEP}    Updating hardware database index:  /sbin/udevadm hwdb --update${NO}"
+/sbin/udevadm hwdb --update
+sleep 2
+
+echo -e "${INFO}    Triggering eudev${NO}"
+/sbin/udevadm trigger
+sleep 2
+
+echo -e "${STEP}    udevadm trigger --type=subsystems${NO}"
+/sbin/udevadm trigger --type=subsystems --action=change
+sleep 2
+
+echo -e "${STEP}    udevadm settle${NO}"
+/sbin/udevadm settle
+
+echo -e "${STEP}    Nappie 4 udev${NO}"
+sleep 4
+
+echo -en "${INFO}  ls /sys/class/net ${WARN}is  ${STEP} "
+#echo -n "ls /sys/class/net is  "
+ls /sys/class/net
+echo -en "${NO}"
+
+#echo -e "${INFO}  wait for udev${NO}"
+#wait
+#ps -aux
+#sleep 22
+
+# Load any modules explicitly required
+echo -e "${STEP}    Loading modules${NO}"
+test -e /etc/modules && egrep -v "^$|^#" /etc/modules | while read a; do modprobe -v $a; done
+sleep 2
+
+# Brute-force create harddisk links if udev didn't;
+echo -e "${STEP}    Checking for harddisk symlinks${NO}"
+typeset -i i; i=0
+while [ ! -e "/dev/harddisk4" ]; do
+
+  # Feedback after one second
+  if [ $i -eq 10 ]; then
+    echo "Waiting for storage to become ready..."
+  fi
+
+  # If the partition node is available but the harddisk symlink isn't,
+  #   make all of the symlinks and bust out.
+  if [ -e "/dev/mmcblk0p4" ]; then
+    # Wait a /12 second, in case udev is about to do it
+    sleep .5
+    if [ ! -e "/dev/harddisk4" ]; then
+      echo -e "${INFO}  Checking for mmcblk or sda${NO}"
+      if [ -e "/dev/mmcblk1" ]; then
+        DISK=mmcblk1
+      elif [ -e "/dev/mmcblk0" ]; then
+        DISK=mmcblk0
+      elif [ -e "/dev/sda" ]; then
+        DISK=sda
+      fi
+      echo -e "${BOUL}  Making missing /dev/harddisk* symlinks to /dev/${DISK}*${NO}"
+	  ln -sv -f /dev/${DISK} /dev/harddisk
+	  if [[ ${DISK} != "sda" ]]; then DISK=${DISK}p; fi
+	  for i in 1 2 3 4; do
+		ln -sv -f /dev/${DISK}$i /dev/harddisk$i
+	  done
+    fi
+    # Either way, the symlink(s) now exist
+    break;
+  fi
+
+  sleep .1
+  i=i+1
+  # 15 seconds should be plenty long enough for SCSI to come to life
+  if [ $i -eq 150 ]; then
+    echo "Could not find root storage device. Cannot boot!"
+    sleep 2
+    exit 1
+  fi
+done
+
+
+# Switch to hard drive and start the system
+echo -e "${STEP}    Switching to harddisk${NO}"
+/bin/mount -v /harddisk -o ro
+
+echo -e "${STEP}    Stop udevd; missed events will be caught later${NO}"
+udevadm control --exit
+
+echo -e "${STEP}    Start the system${NO}"
+echo "1 4 1 7" >/proc/sys/kernel/printk
+
+echo -e "${STEP}    Moving /dev to /harddisk/dev${NO}"
+/bin/mount -v -n --move /dev /harddisk/dev
+
+echo -e "${STEP}    Checking for 70-persistent-net.rules, cause by changing of nic's${NO}"
+PNR="/etc/udev/rules.d/70-persistent-net.rules"
+if [ -f "$PNR" ]; then
+  cp -v "$PNR" /harddisk/dev
+fi
+
+echo -e "${WARN}    Nuking /dev and relink against /harddisk/dev${NO}"
+#/bin/busybox nuke /dev
+/usr/lib/klibc/bin/nuke /dev
+/bin/ln -sv /harddisk/dev /dev
+
+echo -e "${STEP}    Moving sys and proc to harddisk${NO}"
+/bin/mount -v -n --move /sys /harddisk/sys
+/bin/mount -v -n --move /proc /harddisk/proc
+
+echo -e "${STEP}    Loaded modules are${NO}"
+lsmod
+
+echo -e "${DONE}Done with initrd, ${BOUL}Starting system after nap${NO}\n\n"
+
+sleep 4
+
+exec /usr/lib/klibc/bin/run-init /harddisk /sbin/init

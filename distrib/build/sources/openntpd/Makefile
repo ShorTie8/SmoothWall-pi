@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = openntpd
 VERSION = 5.7p4
 
-BASE_URL = ftp://ftp.openbsd.org/pub/OpenBSD/OpenNTPD/
+BASE_URL = https://openbsd.mirror.constant.com/pub/OpenBSD/OpenNTPD
 
 PATCH_FILE1 = openntpd-username.patch
 

@@ -7,8 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = sed
-VERSION = 4.2.1
+VERSION = 4.4
+EXTENSION = .tar.xz
 
-BASE_URL = ftp://ftp.gnu.org/gnu/sed
+BASE_URL = https://ftp.gnu.org/gnu/sed
 
 include ../Makefile.rules

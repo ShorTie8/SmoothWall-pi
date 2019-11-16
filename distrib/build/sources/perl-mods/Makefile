@@ -18,6 +18,9 @@ VERSION = 0.0
 #   version dir below. IO-Socket-SSL seems to depend on Net-SSLeay; both
 #   are moved to the end of the list.
 export PERL_MODS = \
+	    inc-latest \
+	    Module-Build \
+	    ExtUtils-PkgConfig \
 	    App-Control \
 	    Authen-NTLM \
 	    Authen-SASL \
@@ -39,13 +42,13 @@ export PERL_MODS = \
 	    RRD-Simple \
 	    Set-IntSpan \
 	    URI \
-	    libnet \
 	    libwww-perl \
 	    local-lib \
 	    Net-SSLeay \
 	    IO-Socket-SSL \
 	    XML-Parser \
-	    XML-Simple
+	    XML-Simple \
+	    LWP-Protocol-https
 
 DOWNLOAD = yes
 download:

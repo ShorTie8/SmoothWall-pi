@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = gperf
-VERSION = 3.0.4
+VERSION = 3.1
 
 DIR = $(PACKAGE)-$(VERSION)
 

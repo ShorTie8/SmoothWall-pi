@@ -1,0 +1,4 @@
+# SmoothWall cmdline.txt By: ShorTie
+[all]
+kernel=vmlinuz-UNAME
+initramfs installrootimage.gz

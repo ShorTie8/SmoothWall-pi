@@ -1,15 +1,38 @@
 #!/bin/bash
 
+echo -e "${INFO}  Starting /etc/rc.d/rc.sysinit${NO}"
+
 . /etc/rc.d/inc.rc-functions
 
+echo -e "${STEP}    Starting early syslogd${NO}"
 mkdir -p /dev/earlylog
 echo "*.*		-/dev/earlylog/messages" > /dev/earlylog/syslog.conf
 (/usr/sbin/syslogd -d -m 0 -f /dev/earlylog/syslog.conf >/dev/null 2>&1 &)
-echolog "e" "s" "" "Started early syslogd"
+echolog "" "s" "" "Started early syslogd"
 
 # Initialize the system clock with the hardware clock ASAP
-echolog "e" "s" "" "Initialize the clock"
-/sbin/hwclock --hctosys --localtime
+echo -e "${STEP}    Initialize hwclock and load localtime${NO}"
+echolog "" "s" "" "Initialize the clock"
+
+if [ -e /sys/class/i2c-adapter/i2c-1/new_device ]; then
+  echo -e "${STEP}      Starting i2s hwclock${NO}"
+  echolog "" "s" "" "    Starting i2s hwclock"
+  killall -v fake-hwclock
+  modprobe -v rtc-ds1307
+  echo -e "${DONE}    Found i2c ${STEP}device ${DONE}$(cat /sys/class/rtc/rtc0/device/name) ${STEP}@ ${INFO}rtc0${NO}"
+  sleep 4
+  i2cdetect -y 1
+  /sbin/hwclock --hctosys --localtime
+elif [ -e /sbin/fake-hwclock ]; then
+  echo -e "${STEP}      Starting fake hwclock${NO}"
+  echolog "" "s" "" "    Starting fake hwclock"
+  /sbin/fake-hwclock load force
+else
+  echo -e "${STEP}      Starting hwclock${NO}"
+  echolog "" "s" "" "    Starting hwclock"
+  /sbin/hwclock --hctosys --localtime
+fi
+echo -en "${DONE}      "; /bin/date; echo -en "${NO}"
 
 . /var/smoothwall/main/settings
 
@@ -101,6 +124,7 @@ if [ -e /dev/${PNR} ]; then
 fi
 
 # Re-run udevd
+echo -e "${WARN}Re-run udevd ${NO}"
 /sbin/udevd --daemon
 /sbin/udevadm trigger
 /sbin/udevadm settle
@@ -141,23 +165,54 @@ if [ $RC -gt 1 ]; then
   	reboot -f
 fi
 
-echolog "e" "s" "" "Mount other filesystems"
-mount /boot&
-mount /var/log&
+echo -e "${STEP}    Mount other filesystems ${NO}"
+echolog "" "s" "" "Mount other filesystems"
+mount -v /boot&
+mount -v /var/log&
 
 # Sync background tasks
+echo -e "${STEP}    Sync background tasks, wait >/dev/null 2>&1  ${NO}"
 wait >/dev/null 2>&1
 
-echolog "e" "s" "" "Kill early syslogd"
-killall syslogd
+echo -e "${STEP}    Kill early syslogd ${NO}"
+echolog "" "s" "" "Kill early syslogd"
+killall -v syslogd
 cat /dev/earlylog/messages >> /var/log/messages
 rm -rf /dev/earlylog
 
 /usr/sbin/syslogd -m 0
-echolog "e" "s" "" "Started syslogd"
+echo -e "${STEP}    Started syslogd ${NO}"
+echolog "" "s" "" "Started syslogd"
+
+echo
+grep SUBSYSTEM  /etc/udev/rules.d/70-Smoothwall-custom-NIC.rules
+echo
+grep SUBSYSTEM  /dev/70-persistent-net.rules
+grep SUBSYSTEM /etc/udev/rules.d/${PNR}
 
 # Deal with potentially changed NICs
 /usr/sbin/compareMACs
+
+echo -e "${STEP}    Initializing random number generator... ${NO}"
+echolog "" "s" "" "Initializing random number generator..."
+#. /etc/rc.d/rc.random
+/usr/sbin/random start
+
+echo -e "${BOUL}    Intialize all wlan's with wpa_supplicant ${NO}"
+echolog "" "s" "" "Intialize all wlan's with wpa_supplicant "
+for f in /sys/class/net/*; do
+	dev=$(basename $f)
+	if [[ `echo ${dev} | grep wlan` ]]; then
+		echo -e "${DONE}      Intializing ${dev} with wpa and country=${OOPS}${Country_Code} ${NO}"
+		echolog "" "s" "" "  Intializing ${dev} with wpa and country=${Country_Code}"
+		wpa_supplicant -B -i ${dev} -P /var/run/wpa_${dev}.pid -c <(
+			ctrl_interface=/var/run/wpa_${dev}
+			update_config=1
+			country=${Country_Code}
+			)
+		sleep 2
+	fi
+done
 
 (
 echolog "e" "s" "" "Direct core dumps to /var/log"
@@ -166,13 +221,16 @@ chmod 700 /var/log/coredumps
 echo "/var/log/coredumps/%e-%t-%s.%p" >/proc/sys/kernel/core_pattern
 )&
 
-echolog "e" "s" "" "Turn on swap"
+echo -e "${STEP}    Turn on swap ${NO}"
+echolog "" "s" "" "Turn on swap"
 /sbin/swapon -a&
 
-echolog "e" "s" "" "Redo module dependencies"
+echo -e "${STEP}    Redo module dependencies ${NO}"
+echolog "" "s" "" "Redo module dependencies"
 /sbin/depmod -a&
 
-echolog "e" "s" "" "Clear old files"
+echo -e "${STEP}    Clear old files ${NO}"
+echolog "" "s" "" "Clear old files"
 chmod 660 /dev/ttyS*&
 chmod 660 /dev/ttyI* >/dev/null 2>&1&
 
@@ -183,6 +241,7 @@ chmod 622 /dev/tty13 >/dev/null 2>&1&
 chgrp nobody /dev/tty13 >/dev/null 2>&1&
 
 # Prepare red files
+echo -e "${STEP}    Prepare red files ${NO}"
 . /etc/rc.d/inc.clearRED&
 
 echolog "e" "s" "" "Start klogd"

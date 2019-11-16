@@ -92,12 +92,12 @@ int main(int argc, char *argv[])
 		sections[1] = ctr[TR_KEYBOARD_MAPPING];
 		sections[2] = ctr[TR_TIMEZONE];
 		sections[3] = ctr[TR_HOSTNAME];
-		sections[4] = ctr[TR_WEB_PROXY];
-		sections[5] = ctr[TR_DEFAULT_SECURITY_LEVEL];
-		sections[6] = ctr[TR_ISDN_CONFIGURATION];
-		sections[7] = ctr[TR_ADSL_CONFIGURATION];
-		sections[8] = ctr[TR_NETWORKING];	
-		sections[9] = ctr[TR_DHCP_SERVER_CONFIGURATION],
+		sections[4] = ctr[TR_NETWORKING];	
+		sections[5] = ctr[TR_DHCP_SERVER_CONFIGURATION],
+		sections[6] = ctr[TR_WEB_PROXY];
+		sections[7] = ctr[TR_DEFAULT_SECURITY_LEVEL];
+		sections[8] = ctr[TR_ISDN_CONFIGURATION];
+		sections[9] = ctr[TR_ADSL_CONFIGURATION];
 		sections[10] = ctr[TR_ROOT_PASSWORD];
 		sections[11] = ctr[TR_SETUP_PASSWORD];
 		sections[12] = ctr[TR_ADMIN_PASSWORD];
@@ -141,29 +141,29 @@ int main(int argc, char *argv[])
 					break;
 
 				case 4:
-					handlewebproxy();
-					break;
-					
-				case 5:
-					handledefaults();
-					break;
-
-				case 6:
-					handleisdn();
-					break;
-
-				case 7:
-					handleadsl();
-					break;
-				
-				case 8:
 					handlenetworking();
 					break;
 					
-				case 9:
+				case 5:
 					handledhcp();
 					break;
 									
+				case 6:
+					handlewebproxy();
+					break;
+					
+				case 7:
+					handledefaults();
+					break;
+
+				case 8:
+					handleisdn();
+					break;
+
+				case 9:
+					handleadsl();
+					break;
+				
 				case 10:
 					handlerootpassword();
 					break;

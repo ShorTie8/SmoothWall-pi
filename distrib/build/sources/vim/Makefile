@@ -11,7 +11,7 @@ MAJ = 7
 MIN = 3
 VERSION = $(MAJ).$(MIN)
 
-BASE_URL = ftp://ftp.vim.org/pub/vim/unix/
+BASE_URL = https://ftp.vim.org/pub/vim/unix
 EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)$(MAJ)$(MIN)

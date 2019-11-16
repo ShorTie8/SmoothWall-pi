@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = patch
 VERSION = 2.7.5
 
-BASE_URL = ftp://ftp.gnu.org/gnu/patch
+BASE_URL = https://ftp.gnu.org/gnu/patch
 
 ifeq ($(BUILD_PHASE), Stage_3)
 CONFIG_OPTS += --prefix=$(TOOLS_DIR)

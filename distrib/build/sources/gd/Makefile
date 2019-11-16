@@ -8,7 +8,14 @@ include ../Makefile.conf
 
 PACKAGE = gd
 VERSION = 2.0.33
+#VERSION = 2.2.5
+#TARBALL = $(PACKAGE)-$(VERSION)
+#DIR = libgd-gd-$(VERSION)
 
-BASE_URL = http://www.boutell.com/gd/http/
+BASE_URL = https://github.com/libgd/libgd/archive
+
+ifeq ($(mARCH), arm64)
+ReConfigure = yes
+endif
 
 include ../Makefile.rules

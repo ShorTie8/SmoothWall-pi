@@ -7,10 +7,17 @@
 include ../Makefile.conf
 
 PACKAGE = Python
-VERSION = 2.7.2
+VERSION = 2.7.16
 EXTENSION = .tar.xz
 
 BASE_URL = http://www.python.org/ftp/python/$(VERSION)
+
+CONFIG_OPTS += \
+		--enable-shared     \
+		--with-system-expat \
+		--with-system-ffi   \
+		--with-system-gdbm  \
+		--with-ensurepip=yes
 
 COMPILE = yes
 compile: configure

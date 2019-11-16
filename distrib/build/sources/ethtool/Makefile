@@ -9,6 +9,6 @@ include ../Makefile.conf
 PACKAGE = ethtool
 VERSION = 2.6.36
 
-BASE_URL = http://hivelocity.dl.sourceforge.net/project/gkernel/$(PACKAGE)/$(VERSION)/
+BASE_URL = https://www.kernel.org/pub/software/network/ethtool
 
 include ../Makefile.rules

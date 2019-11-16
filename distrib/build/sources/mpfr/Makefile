@@ -10,12 +10,11 @@ include ../Makefile.versions
 PACKAGE = mpfr
 VERSION = $(MPFR_VER)
 
-BASE_URL = http://www.mpfr.org/
+BASE_URL = https://ftp.gnu.org/gnu/mpfr
 
 EXTENSION = .tar.bz2
 
-CONFIG_OPTS += --prefix=$(PKG_DIR) \
-	      --enable-thread-safe \
-	      --docdir=/usr/share/doc/mpfr-3.1.1
+CONFIG_OPTS += --enable-thread-safe \
+	      --docdir=/usr/share/doc/mpfr-$(MPFR_VER)
 
 include ../Makefile.rules

@@ -2,6 +2,17 @@
 #
 # This file contains some functions commonly useful in RC scripts.
 
+# Added colors, ShorTie, 5/19/2019
+# Define message colors
+BOUL="\033[1;4m"	    # light blue
+OOPS="\033[1;31m"    # red
+DONE="\033[1;32m"    # green
+INFO="\033[1;33m"    # yellow
+STEP="\033[1;34m"    # blue
+WARN="\033[1;35m"    # hot pink
+LTBL="\033[1;36m"	# light blue
+NO="\033[0m"         # normal/light
+
 # Enable/disable optional output
 if [ -f /var/run/debug-bootup ]; then
   export DEBUG="e"
