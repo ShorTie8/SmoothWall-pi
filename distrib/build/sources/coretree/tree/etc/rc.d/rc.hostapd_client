@@ -9,7 +9,7 @@ if [ "$hostapd_client" = "on" ]; then
   echo -e "${BOUL}    hostapd_client is turned on${NO}"
   echolog "" "s" "" "hostapd_client is turned on"
 
-  if [ ! -v $GREEN_BRG ]; then
+  if [ ! -v $GREEN_WIFI ]; then
     echo -e "${STEP}          Starting Green hostapd ${NO}"
     echolog "" "s" "" "  Starting Green hostapd "
     /usr/sbin/wifi start green
@@ -18,7 +18,7 @@ if [ "$hostapd_client" = "on" ]; then
     echolog "" "s" "" "  No Green hostapd found "
   fi
 
-  if [ ! -v $ORANGE_BRG ]; then
+  if [ ! -v $ORANGE_WIFI ]; then
     echo -e "${STEP}          Starting Orange hostapd ${NO}"
     echolog "" "s" "" "  Starting Orange hostapd "
     /usr/sbin/wifi start orange
@@ -27,7 +27,7 @@ if [ "$hostapd_client" = "on" ]; then
     echolog "" "s" "" "  No Orange hostapd found "
   fi
 
-  if [ ! -v $PURPLE_BRG ]; then
+  if [ ! -v $PURPLE_WIFI ]; then
     echo -e "${STEP}          Starting Purple hostapd ${NO}"
     echolog "" "s" "" "  Starting Purple hostapd "
     /usr/sbin/wifi start purple

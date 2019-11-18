@@ -385,9 +385,9 @@ int changedrivers(void)
 	char mac[STRING_SIZE];
 	int driverc = 0;
 	/* define our bridges */
-	char greenbridge[STRING_SIZE];
-	char orangebridge[STRING_SIZE];
-	char purplebridge[STRING_SIZE];
+	char greenbridge[STRING_SIZE] = "";
+	char orangebridge[STRING_SIZE] = "";
+	char purplebridge[STRING_SIZE] = "";
 	
 	if (!(readkeyvalues(kv, CONFIG_ROOT "ethernet/settings")))
 	{
@@ -473,7 +473,7 @@ int changedrivers(void)
 				/* Now we see which iface needs its settings changed. */
 				if (strcmp(sections[choice], green) == 0)
 				{
-					if (!(strlen(greenbridge))) {
+					if (strcmp(greenbridge, "!") == 0) {
 						replacekeyvalue(kv, "GREEN_DEV", nexteth);
 					} else {
 						replacekeyvalue(kv, "GREEN_DEV", greenbridge);
@@ -490,7 +490,7 @@ int changedrivers(void)
 				}
 				if (strcmp(sections[choice], orange) == 0)
 				{
-					if (!(strlen(orangebridge))) {
+					if (strcmp(orangebridge, "!") == 0) {
 						replacekeyvalue(kv, "ORANGE_DEV", nexteth);
 					} else {
 						replacekeyvalue(kv, "ORANGE_DEV", orangebridge);
@@ -507,7 +507,7 @@ int changedrivers(void)
 				}
 				if (strcmp(sections[choice], purple) == 0)
 				{
-					if (!(strlen(purplebridge))) {
+					if (strcmp(purplebridge, "!") == 0) {
 						replacekeyvalue(kv, "PURPLE_DEV", nexteth);
 					} else {
 						replacekeyvalue(kv, "PURPLE_DEV", purplebridge);
@@ -742,7 +742,7 @@ int dnsgatewaymenu(void)
 	}
 
 	entries[DNS1].text = ctr[TR_PRIMARY_DNS];
-	strcpy(temp, "8.8.8.8"); findkey(kv, "DNS1", temp);
+	strcpy(temp, "1.1.1.1"); findkey(kv, "DNS1", temp);
 	values[DNS1] = strdup(temp);
 	entries[DNS1].value = (char **) &values[DNS1];
 	entries[DNS1].flags = 0;

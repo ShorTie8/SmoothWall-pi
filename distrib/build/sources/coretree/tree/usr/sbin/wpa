@@ -19,13 +19,13 @@ case "${1}" in
 		if [ -n "${RED_DEV}" ]; then
 		  if [ ! -d "/sys/class/net/${RED_DEV}/wireless" ]; then
 			echo -e "${OOPS}    No wireless device found${NO}"
-			echo -e "${INFO}        device=${1}${NO}"
-			echolog "e" "s" "" "  No wireless device found"
-			echolog "e" "s" "" "    device=${1}"
+			echo -e "${INFO}        device=${RED_DEV}${NO}"
+			echolog "" "s" "" "  No wireless device found"
+			echolog "" "s" "" "    device=${RED_DEV}"
 			exit 1
 		  fi
 	      echo -e "${STEP}      wpa_supplicant start, ${RED_DEV}${NO}"
-	      echolog "e" "s" "" "    wpa_supplicant start, ${RED_DEV}"
+	      echolog "" "s" "" "    wpa_supplicant start, ${RED_DEV}"
 		  /sbin/wpa_supplicant -i ${RED_DEV} -D wext -B -c /etc/wpa_supplicant/wpa_supplicant.conf
 		fi
 		;;
@@ -33,7 +33,7 @@ case "${1}" in
 	stop)
 		if [ -n "${RED_DEV}" ]; then
 	      echo -e "${STEP}      killall wpa_supplicant, stop, ${RED_DEV}${NO}"
-	      echolog "e" "s" "" "    killall wpa_supplicant, stop, ${RED_DEV}"
+	      echolog "" "s" "" "    killall wpa_supplicant, stop, ${RED_DEV}"
 		  killall -v wpa_supplicant
 		fi
 		;;
@@ -46,7 +46,7 @@ case "${1}" in
 
 	status)
 	    echo -en "${STEP}      pidof wpa_supplicant  ${NO}"
-	    echolog "en" "s" "" "    pidof wpa_supplicant  "
+	    echolog "" "s" "" "    pidof wpa_supplicant  "
 		pidof wpa_supplicant
 		iwconfig ${RED_DEV}
 		;;

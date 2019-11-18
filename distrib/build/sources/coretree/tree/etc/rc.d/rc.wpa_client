@@ -5,7 +5,7 @@
 # read in our variables
 . /var/smoothwall/ethernet/settings
 
-if [ "$wpa_client" = "on" ]; then
+if [ "$WPA_CLIENT" = "on" ]; then
 	echo -e "${BOUL}    wpa_client is turned on${NO}"
 	echo -e "${BOUL}      wpa_client Device type is ${RED_DEV}${NO}"
 	echolog "" "s" "" "wpa_client is turned on"

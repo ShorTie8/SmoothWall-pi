@@ -9,8 +9,7 @@ if [ "$bridge_client" = "on" ]; then
   echo -e "${BOUL}    Bridging is turned on${NO}"
   echolog "" "s" "" "Bridging is turned on "
 
-  #if [ "$GREEN_BRG" == "grn_brg" ] ; then
-  if [ ! -v $GREEN_BRG ]; then
+  if [ "$GREEN_BRG" != "!" ] ; then
     echo -e "${STEP}          Starting Green Bridge ${NO}"
     echolog "" "s" "" "  Starting Green Bridge "
     /usr/sbin/brg start green
@@ -18,8 +17,8 @@ if [ "$bridge_client" = "on" ]; then
     echo -e "${STEP}          No Green Bridge found ${NO}"
     echolog "" "s" "" "  No Green Bridge found "
   fi
-  #if [ "$ORANGE_BRG" == "org_brg" ] ; then
-  if [ ! -v $ORANGE_BRG ]; then
+
+  if [ "$ORANGE_BRG" != "!" ] ; then
     echo -e "${STEP}          Starting Orange Bridge ${NO}"
     echolog "" "s" "" "  Starting Orange Bridge "
     /usr/sbin/brg start orange
@@ -27,8 +26,8 @@ if [ "$bridge_client" = "on" ]; then
     echo -e "${STEP}          No Orange Bridge found ${NO}"
     echolog "" "s" "" "  No Orange Bridge found "
   fi
-  #if [ "$PURPLE_BRG" == "purp_brg" ] ; then
-  if [ ! -v $PURPLE_BRG ]; then
+
+  if [ "$PURPLE_BRG" != "!" ] ; then
     echo -e "${STEP}          Starting Purple Bridge ${NO}"
     echolog "" "s" "" "  Starting Purple Bridge "
     /usr/sbin/brg start purple

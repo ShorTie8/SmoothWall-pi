@@ -39,9 +39,20 @@ case "${1}" in
         echo -e "${STEP}        Make run directory ${NO}"
         mkdir -vp /var/run/hostapd
 
-        echo -e "${STEP}        Start hostapd ${NO}"
+        echo -e "${STEP}        Starting hostapd ${NO}"
         /usr/sbin/hostapd -B -P /var/run/hostapd.${GREEN_WIFI}.pid -i ${GREEN_WIFI} /etc/hostapd/hostapd.green.conf
-        
+
+        echo -e "${STEP}        Checking for 2nd wlan ${NO}"
+        echolog "" "s" "" "  Checking for 2nd wlan"
+        if [ "$Wlan1" == "grn_brg" ]; then
+          echo -e "${STEP}          Starting 2nd wlan ${NO}"
+          echolog "" "s" "" "    Starting  2nd wlan "
+          /usr/sbin/hostapd -B -P /var/run/hostapd.wlan1.pid -i wlan1 /etc/hostapd/hostapd.green.conf
+        else
+          echo -e "${STEP}        No 2nd wlan found ${NO}"
+          echolog "" "s" "" "    No 2nd wlan found "
+        fi
+
         #sleep 22
 
 # Orange

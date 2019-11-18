@@ -67,6 +67,10 @@ echo -e "${STEP}      Set names for current NICs${NO}"
 j=0
 n=0
 w=0
+export BRIDGE=off
+export GREEN_BRG="!"
+export ORANGE_BRG="!"
+export PURPLE_BRG="!"
 while [ $j -lt $lastNIC ]; do
   if grep ${NICs["eth$j"]} /tmp/$persNetRules | grep wlan >/dev/null 2>&1; then
     echo -e "${INFO}        wlan nic found    ${DONE} ${NICs["eth$j"]} ${NO}"
@@ -102,7 +106,7 @@ while [ $j -lt $lastNIC ]; do
           read a #</dev/tty
           if [ "$a" == "1" ]; then
             echo -e "${STEP}            Using as a hostapd Bridge to GREEN${NO}"
-            if [ -v $GREEN_BRG ]; then
+            if [ "$GREEN_BRG" == "!" ]; then
               echo -e "${LTBL}              Setting ${INFO}GREEN_BRG${LTBL}=grn_brg, and ${INFO}Wlan$w${LTBL} as primary ${NO}"
               export GREEN_BRG=grn_brg
               export GREEN_BRG_DEV=""
@@ -121,7 +125,7 @@ while [ $j -lt $lastNIC ]; do
             break;
           elif [ "$a" == "2" ]; then
             echo -e "${STEP}            Using as a hostapd Bridge to ORANGE${NO}"
-            if [ -v $ORANGE_BRG ]; then
+            if [ "$ORANGE_BRG" == "!" ]; then
               echo -e "${LTBL}              Setting ${INFO}ORANGE_BRG${LTBL}=org_brg, and ${INFO}Wlan$w${LTBL} as primary ${NO}"
               export ORANGE_BRG=org_brg
               export ORANGE_BRG_DEV=""
@@ -140,7 +144,7 @@ while [ $j -lt $lastNIC ]; do
             break;
           elif [ "$a" == "3" ]; then
             echo -e "${STEP}            Using as a hostapd Bridge to PURPLE${NO}"
-            if [ -v $PURPLE_BRG ]; then
+            if [ "$PURPLE_BRG" == "!" ]; then
               echo -e "${LTBL}              Setting ${INFO}PURPLE_BRG${LTBL}=purp_brg, and ${INFO}Wlan$w${LTBL} as primary ${NO}"
               export PURPLE_BRG=purp_brg
               export PURPLE_BRG_DEV=""
@@ -184,20 +188,6 @@ mv -v /tmp/$persNetRules $custNICRules
 # Show custNICRules
 echo -e "${INFO}        Showing custNICRules to be${NO}"
 grep KERNEL /etc/udev/rules.d/70-Smoothwall-custom-NIC.rules
-
-# Create 99-Smoothwall-network-bridges.rules
-if [ -v ${GREEN_BRG} ] || [ -v ${ORANGE_BRG} ] || [ -v ${PURPLE_BRG} ]; then
-  echo -e "${STEP}                Creating 99-Smoothwall-network-bridges.rules ${NO}"
-  (
-	echo "# By ShorTie"
-	echo "# Custom made 99-Smoothwall-network-bridges.rules"
-	echo
-	echo "ACTION==\"add\", SUBSYSTEM==\"module\", KERNEL==\"br_netfilter\", RUN+=\"/usr/sbin/start-bridges\""
-	) > /etc/udev/rules.d/99-Smoothwall-network-bridges.rules
-
-else
-  echo -e "${INFO}      NO bridges found ${NO}"
-fi
 
 # Trigger udev to INS the drivers, thus changing the names
 echo -e "${STEP}      Reload udev, thus changing the names${NO}"

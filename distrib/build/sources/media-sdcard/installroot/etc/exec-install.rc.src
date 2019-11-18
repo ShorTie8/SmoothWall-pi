@@ -431,14 +431,14 @@ if [ $restore -eq 1 -o $restore -eq 2 ]; then
   echo -e "${STEP}      create /harddisk/etc/modules${NO}"
   echo "ext4" >/harddisk/etc/modules
   echo "vfat" >>/harddisk/etc/modules
-  if [ "$hostapd_client" == "on" ]; then
+  if [ "$BRIDGE" == "on" ]; then
     echo -e "${STEP}        adding br_netfilter module ${NO}"
     echo "bridge" >>/harddisk/etc/modules
     echo "br_netfilter" >>/harddisk/etc/modules
   fi
 
   if [ "$rpisys" == "BCM2835" ]; then
-    echo -e "${STEP}        add rpi modules${NO}"
+    echo -e "${STEP}        adding pi modules${NO}"
     #echo "" >> /harddisk/etc/modules
     #echo "snd-bcm2835" >>/harddisk/etc/modules
     echo "bcm2835-rng" >>/harddisk/etc/modules
@@ -863,12 +863,6 @@ fi
 
 # Build smoothwall ethernet settings
 
-if [ "$AP" == "ok" ]; then
-  echo "WIFI=on" >> /harddisk/var/smoothwall/ethernet/settings
-  echo "AP=$AP" >> /harddisk/var/smoothwall/ethernet/settings
-  echo "BRIDGE=$BRIDGE" >> /harddisk/var/smoothwall/ethernet/settings
-fi
-
 # Set Country_Code
 case $country_code in
   1) echo "Country_Code=US" >> /harddisk/var/smoothwall/ethernet/settings;;
@@ -877,25 +871,29 @@ case $country_code in
   *) echo "Country_Code=$country_code" >> /harddisk/var/smoothwall/ethernet/settings;;
 esac
 
-if [ "$hostapd_client" == "on" ]; then
+echo "BRIDGE=$BRIDGE" >> /harddisk/var/smoothwall/ethernet/settings
+echo "GREEN_BRG=$GREEN_BRG" >> /harddisk/var/smoothwall/ethernet/settings
+echo "ORANGE_BRG=$ORANGE_BRG" >> /harddisk/var/smoothwall/ethernet/settings
+echo "PURPLE_BRG=$PURPLE_BRG" >> /harddisk/var/smoothwall/ethernet/settings
+
+if [ "$AP" == "ok" ]; then
+  echo "WIFI=on" >> /harddisk/var/smoothwall/ethernet/settings
+  echo "AP=$AP" >> /harddisk/var/smoothwall/ethernet/settings
   echo -e "${BOUL}        Setting up hostapd  ${NO}"
   if [ ! -v $GREEN_WIFI ]; then 
 	echo -e "${LTBL}              Setting GREEN_BRG to $GREEN_BRG, and $GREEN_BRG_DEV as primary${NO}"
-	echo "GREEN_BRG=$GREEN_BRG" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "GREEN_BRG_DEV=$GREEN_BRG_DEV" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "GREEN_WIFI=$GREEN_WIFI" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "GREEN_BRG_MAC=$GREEN_BRG_MAC" >> /harddisk/var/smoothwall/ethernet/settings
   fi
   if [ ! -v $ORANGE_WIFI ]; then 
 	echo -e "${LTBL}              Setting ORANGE_BRG to $ORANGE_BRG, and $ORANGE_BRG_DEV as primary${NO}"
-	echo "ORANGE_BRG=$ORANGE_BRG" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "ORANGE_BRG_DEV=$ORANGE_BRG_DEV" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "ORANGE_WIFI=$ORANGE_WIFI" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "ORANGE_BRG_MAC=$ORANGE_BRG_MAC" >> /harddisk/var/smoothwall/ethernet/settings
   fi
   if [ ! -v $PURPLE_WIFI ]; then 
 	echo -e "${LTBL}              Setting PURPLE_BRG to $PURPLE_BRG, and $PURPLE_BRG_DEV as primary${NO}"
-	echo "PURPLE_BRG=$PURPLE_BRG" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "PURPLE_BRG_DEV=$PURPLE_BRG_DEV" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "PURPLE_WIFI=$PURPLE_WIFI" >> /harddisk/var/smoothwall/ethernet/settings
 	echo "PURPLE_BRG_MAC=$PURPLE_BRG_MAC" >> /harddisk/var/smoothwall/ethernet/settings
