@@ -1,0 +1,213 @@
+# SmoothWall Build system.
+#
+# (c) SmoothWall Ltd 2005 && ShorTie
+#
+# This code is distributed under the terms of the GPL v2.
+
+export KERNEL_DIR = $(SOURCES_DIR)/linux$(KERNEL_TYPE)/linux
+
+PACKAGE = linux$(KERNEL_TYPE)
+
+COMPILER = /usr/bin/gcc
+
+download:
+	@$(DL_CMD) $(KERNEL_URL)
+
+unpack: download
+	rm -f linux
+	@echo; echo; echo "unpack"
+	tar xf $(DOWNLOADS_DIR)/linux-rpi-$(KERNEL_VER).tar.gz
+	mv -v linux-$(KERNEL_COM) linux-$(KERNEL_VER)
+	ln -sv linux-$(K_RAW_VERSION) linux
+
+prepare: unpack
+	@echo; echo; echo "make mrproper"
+	make $(JOBS) -C linux mrproper
+
+	@echo; echo "Setting scmversion to plus"
+	echo + > linux/.scmversion
+
+	@echo; echo; echo "Creating .config"
+	# CONFIG_LOCALVERSION needs reset for libreswan
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0 pi0w rpi))
+	@echo; echo; echo "pi0 pi0w rpi, config adjust"
+	cd linux; make bcmrpi_defconfig
+
+else ifeq ($(mTUPLE), rpi3)
+	@echo; echo "  rpi3 config adjust"; echo
+	cd linux; make bcm2709_defconfig
+	@echo; echo "  Reset CONFIG_LOCALVERSION"
+	sed -e 's/CONFIG_LOCALVERSION="-v7"/CONFIG_LOCALVERSION=""/' -i linux/.config
+
+else ifeq ($(mTUPLE), pi3-64)
+	@echo; echo "  pi3-64 config"
+	cd linux; make bcmrpi3_defconfig
+	@echo; echo "  Reset CONFIG_LOCALVERSION"
+	sed -e 's/CONFIG_LOCALVERSION="-v8"/CONFIG_LOCALVERSION=""/' -i linux/.config
+
+else ifeq ($(mTUPLE), rpi4)
+	@echo; echo "  rpi4 config"
+	cd linux; make bcm2711_defconfig
+	@echo; echo "  Reset CONFIG_LOCALVERSION"
+	sed -e 's/CONFIG_LOCALVERSION="-v7l"/CONFIG_LOCALVERSION=""/' -i linux/.config
+
+else ifeq ($(mTUPLE), pi4-64)
+	@echo; echo "  pi4-64 config"
+	cd linux; make bcm2711_defconfig
+	@echo; echo "  Reset CONFIG_LOCALVERSION"
+	sed -e 's/CONFIG_LOCALVERSION="-v8"/CONFIG_LOCALVERSION=""/' -i linux/.config
+
+else
+	$(info Un-supported kernel config!)
+	$(error FAIL)
+endif
+
+	@echo; echo "  Set hostname"
+	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
+
+	@echo; echo "  disable multi media support"
+	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
+
+	@# turn off wifi power save
+	@#sed -e 's/CONFIG_CFG80211_DEFAULT_PS=y/# CONFIG_CFG80211_DEFAULT_PS is not set/' -i linux/.config
+
+	@echo; echo "  return nic's to modules"
+	@# pi0 pi0w rpi
+	sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
+	@# pi3
+	sed -e 's/CONFIG_USB_LAN78XX=y/CONFIG_USB_LAN78XX=m/' -i linux/.config
+	@# pi4
+	sed -e 's/CONFIG_BROADCOM_PHY=y/CONFIG_BROADCOM_PHY=m/' -i linux/.config
+	sed -e 's/CONFIG_BCMGENET=y/CONFIG_BCMGENET=m/' -i linux/.config
+	sed -e 's/CONFIG_USB_RTL8152=y/CONFIG_USB_RTL8152=m/' -i linux/.config
+	#sed -e 's/CONFIG_GENERIC_PHY=y/CONFIG_GENERIC_PHY=m/' -i linux/.config
+	#sed -e 's/CONFIG_NET_VENDOR_BROADCOM=y/CONFIG_NET_VENDOR_BROADCOM=m/' -i linux/.config
+
+
+	@echo; echo "  Adjust Ciphers"
+	sed -e 's/# CONFIG_CRYPTO_AES_TI is not set/CONFIG_CRYPTO_AES_TI=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_ANUBIS is not set/CONFIG_CRYPTO_ANUBIS=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_BLOWFISH is not set/CONFIG_CRYPTO_BLOWFISH=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_CAMELLIA is not set/CONFIG_CRYPTO_CAMELLIA=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_CAST6 is not set/CONFIG_CRYPTO_CAST6=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_FCRYPT is not set/CONFIG_CRYPTO_FCRYPT=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_KHAZAD is not set/CONFIG_CRYPTO_KHAZAD=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SALSA20 is not set/CONFIG_CRYPTO_SALSA20=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_CHACHA20 is not set/CONFIG_CRYPTO_CHACHA20=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SEED is not set/CONFIG_CRYPTO_SEED=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SERPENT is not set/CONFIG_CRYPTO_SERPENT=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_SM4 is not set/CONFIG_CRYPTO_SM4=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_TEA is not set/CONFIG_CRYPTO_TEA=m/' -i linux/.config
+	sed -e 's/# CONFIG_CRYPTO_TWOFISH is not set/CONFIG_CRYPTO_TWOFISH=m/' -i linux/.config
+
+	@echo; echo; echo "make oldconfig"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig
+	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(mTUPLE)-$(KERNEL_MMR).new
+
+
+compile-kernel: prepare
+	@echo; echo; echo "compile-kernel"
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4))
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) zImage
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
+	make $(JOBS) V=1 -C linux CC=$(COMPILER)
+else
+	$(info Unsupported kernel compile)
+	$(error FAIL)
+endif
+
+	@echo; echo; echo "Make modules"
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
+
+	@echo; echo; echo "Make dtbs"
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
+
+
+package-kernel: compile-kernel
+	@echo; echo; echo "Package Kernel"
+	mkdir -vp $(PKG_ROOT)/boot/overlays
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi3 rpi4))
+	@echo; echo "Make modules_install"; echo
+	(cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
+#	echo; echo; echo "scripts/mkknlimg"; echo
+#	(cd $(KERNEL_DIR); scripts/mkknlimg arch/arm/boot/zImage $(KERNEL).img)
+#	cp -v $(KERNEL_DIR)/$(KERNEL).img $(PKG_ROOT)/boot/$(KERNEL).img
+	@echo; echo "Some copies"; echo
+	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
+ifeq ($(mTUPLE), pi0w)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2708-rpi-0-w.dtb $(PKG_ROOT)/boot
+else ifeq ($(mTUPLE), rpi3)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2709-rpi-2-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-cm3.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
+else ifeq ($(mTUPLE), rpi4)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+endif
+
+else ifeq ($(mTUPLE), pi4-64)
+	echo; echo "Make modules_install"
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
+	#(cd $(PKG_ROOT); ARCH=arm64 make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
+
+	@echo; echo "Some copies"
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/Image $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
+	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
+	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+
+else
+	$(info Unsupported package-kernel)
+	$(error FAIL)
+endif
+ 
+
+
+build-tarball: package-kernel $(PACKAGES)
+	@echo; echo; echo "Build Tarball"
+	@(cd $(PKG_ROOT); \
+	tar -zcvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz .);
+	@echo; echo; echo "Install Tarball"
+	tar -xvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /
+
+
+clean:
+ifndef BUILD_PHASE
+	@echo -n " $(PACKAGE)"
+	@rm -f linux
+	@rm -rf linux-$(KERNEL_VER)
+	@rm -rf $(PKG_ROOT)
+
+else
+	@echo "$(PACKAGE)"
+	@echo; echo "clean rpi"
+	rm -vf linux
+	rm -rf linux-$(KERNEL_VER)
+	rm -rf $(PKG_ROOT)
+	@rm -vf ../linux-firmware/Final.built
+	@rm -vf ../ipset/Final.built
+	@rm -vf ../xtables-addons/Final.built
+	@rm -vf ../$(FREESWAN_TYPE)/Final.built
+	@rm -vf ../rpi-firmware/Final.built
+	@rm -vf ../../crumbs/Final.grp5.compiled
+	@rm -vf ../../crumbs/Final.grp6.compiled
+endif
+
+cleanall: clean build-tarball
+
+
+all: build-tarball
+
+
+packageinfo.html:
+	@echo "<li><span style='font-size:large;'>$(PACKAGE) $(VERSION)</span><br>" >>/tmp/packageinfo.html
+	@cp -avR $(DOWNLOADS_DIR)/linux-$(KERNEL_VER).tar.bz2 /tmp/downloads
+	@echo "(<a href='downloads/linux-$(KERNEL_VER)'>Local mirror</a>)<br>" >>/tmp/packageinfo.html
