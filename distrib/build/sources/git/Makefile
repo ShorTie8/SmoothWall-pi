@@ -37,7 +37,6 @@ else
 	@echo; echo "clean"
 	rm -rf $(DIR)
 	rm -rf $(COMPILE_DIR)
-	rm -rf $(PKG_ROOT)
 ifeq ($(BITS_64), yes)
 	@echo; echo "BITS_64"
 	mkdir -vp $(PKG_ROOT)/{lib,usr/lib}
