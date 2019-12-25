@@ -48,7 +48,9 @@ export PERL_MODS = \
 	    IO-Socket-SSL \
 	    XML-Parser \
 	    XML-Simple \
-	    LWP-Protocol-https
+	    LWP-Protocol-https \
+	    Archive-Zip \
+	    Net-DNS
 
 DOWNLOAD = yes
 download:

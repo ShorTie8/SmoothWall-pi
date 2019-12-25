@@ -360,7 +360,7 @@ fi
       build audit
       build libreswan
       build wireless-regdb
-#exit 22
+
       build wireless_tools
       build setuptools
       build M2Crypto
@@ -373,6 +373,9 @@ fi
       build hostapd
       build bridge-utils
       build iw
+
+      build lzo
+      build openvpn
 
       build noip
       build ez-ipupdate
