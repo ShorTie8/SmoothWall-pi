@@ -3,37 +3,48 @@
 include ../Makefile.conf
 
 PACKAGE = git
-VERSION = 2.9.3
+VERSION = 2.9.5
 
 EXTENSION = .tar.gz
 
-BASE_URL = https://www.kernel.org/pub/software/scm/git/
+BASE_URL = https://www.kernel.org/pub/software/scm/git
 
+ifeq ($(BUILD_PHASE), Stage_3)
 CONFIG_OPTS += --with-openssl --without-curl --without-tcltk --without-python
+else
+CONFIG_OPTS += --with-openssl --without-tcltk
+endif
 
 COMPILE = yes
 INSTALL = yes
 CLEAN = yes
 
 compile: configure
+	@echo; echo; echo "compile"
 	make $(JOBS) -C $(COMPILE_DIR) PREFIX=$(PKG_DIR) V=1
 
 install: compile
-	@mkdir -p $(PKG_ROOT)
+	@echo; echo; echo "install"
+	mkdir -vp $(PKG_ROOT)
 	make -C $(COMPILE_DIR) PREFIX=$(PKG_DIR) DESTDIR=$(PKG_ROOT) install
 
 clean:
+ifndef BUILD_PHASE
 	@echo -n " $(PACKAGE)"
 	@rm -rf $(DIR)
 	@rm -rf $(COMPILE_DIR)
-ifeq ($(BUILD_PHASE), Final)
-	@rm -rf $(PKG_ROOT); mkdir -p $(PKG_ROOT)
+else
+	@echo; echo "clean"
+	rm -rf $(DIR)
+	rm -rf $(COMPILE_DIR)
+	rm -rf $(PKG_ROOT)
 ifeq ($(BITS_64), yes)
-	mkdir -p $(PKG_ROOT)/{lib,usr/lib}
-	@cd $(PKG_ROOT); ln -s lib lib64
-	@cd $(PKG_ROOT)/usr; ln -s lib lib64
+	@echo; echo "BITS_64"
+	mkdir -vp $(PKG_ROOT)/{lib,usr/lib}
+	cd $(PKG_ROOT); ln -sv lib lib64
+	cd $(PKG_ROOT)/usr; ln -sv lib lib64
 endif
-	@rm -f $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz
+	rm -vf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz
 endif
 
 include ../Makefile.rules
