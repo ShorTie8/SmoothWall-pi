@@ -410,7 +410,7 @@ fi
       build cmake
       build rpi-userland
       build i2c-tools
-      build wiringPi
+    #  build wiringPi
       build rng-tools
       #echo "done"; exit 1
    elif [ "$mTUPLE" == "xu4" ]; then
