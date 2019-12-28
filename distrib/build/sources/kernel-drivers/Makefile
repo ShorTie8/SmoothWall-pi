@@ -23,7 +23,6 @@ ASIX_88179_178A_VER = 1.19.0
 
 ifeq ($(mTUPLE), x86_64)
 PACKAGES = package-r8168 \
-	   package-ixgbe package-ixgbevf \
 	   package-e1000e
 else
 PACKAGES = package-r8152

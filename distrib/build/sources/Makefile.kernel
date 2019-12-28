@@ -14,12 +14,12 @@ download:
 	@$(DL_CMD) $(KERNEL_URL)
 
 unpack: download
-	@tar -xvf $(DOWNLOADS_DIR)/linux-$(K_RAW_VERSION).tar.xz
+	tar -xf $(DOWNLOADS_DIR)/linux-$(K_RAW_VERSION).tar.xz
 
 
 prepare: unpack
 	rm -f linux
-	ln -s linux-$(K_RAW_VERSION) linux
+	ln -sv linux-$(K_RAW_VERSION) linux
 
 	make -C linux mrproper
 
