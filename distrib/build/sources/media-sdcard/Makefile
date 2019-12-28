@@ -44,7 +44,7 @@ ifeq ($(mTUPLE),$(filter $(mTUPLE),i586 i686 x86_64))
   #export GRUB = grub2 kernel-drivers cdrtools libelf
 else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
   export GRUB = fake-hwclock rpi-firmware i2c-tools rng-tools
-  RPI_PKGS = rpi-userland wiringPi
+  RPI_PKGS = rpi-userland
   #ADV_PKGS +=
 else ifeq ($(mTUPLE),ODROID-XU3)
   export GRUB = u-boot
