@@ -8,9 +8,9 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = squid
-VERSION = 3.5.28
+VERSION = 4.9
 
-BASE_URL = http://www.squid-cache.org/Versions/v3/3.5/
+BASE_URL = http://www.squid-cache.org/Versions/v4
 
 CONFIG_OPTS += --disable-arch-native \
 	       --enable-async-io \
