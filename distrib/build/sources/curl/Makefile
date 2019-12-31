@@ -14,9 +14,10 @@ EXTENSION = .tar.xz
 
 PKG_DIR = 
 
-CONFIG_OPTS += --prefix= --exec-prefix= \
+CONFIG_OPTS += --prefix= --exec-prefix=/usr \
 	       --datarootdir=/usr/share \
 	       --libexecdir=/usr/libexec \
-	       --includedir=/usr/include
+	       --includedir=/usr/include \
+	       --with-ca-path=/usr/lib/ssl/certs
 
 include ../Makefile.rules

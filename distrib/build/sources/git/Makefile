@@ -12,7 +12,7 @@ BASE_URL = https://www.kernel.org/pub/software/scm/git
 ifeq ($(BUILD_PHASE), Stage_3)
 CONFIG_OPTS += --with-openssl --without-curl --without-tcltk --without-python
 else
-CONFIG_OPTS += --with-openssl --without-tcltk
+CONFIG_OPTS += --with-openssl=/usr/lib/ssl/certs --without-tcltk
 endif
 
 include ../Makefile.rules
