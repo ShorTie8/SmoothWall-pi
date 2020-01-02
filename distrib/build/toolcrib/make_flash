@@ -152,6 +152,11 @@ case $serialbaud in
   3) BAUD=9600;;
 esac
 
+echo "Make image of flash drive ??"
+echo -n "Enter 'yes' to continue or press <ENTER> to skip this step: "
+read ans
+if [ "$ans" == "yes" ]; then IMAGE=yes; fi
+
 # Shorthand
 CD="isomnt${RANDOM}"
 FL="flmnt${RANDOM}"
@@ -229,6 +234,11 @@ cleanup $CD $FL
 
 # Clear the exit booby trap
 trap "" EXIT
+
+if [ "$IMAGE" == "yes" ]; then
+  echo "Making image"
+  dd if=/dev/${fldev} conv=sync,noerror status=progress bs=128K | gzip -c > SmoothWall-pi_x86_64.gz
+fi
 
 echo
 echo "iso2flash complete."

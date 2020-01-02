@@ -55,12 +55,25 @@ build-tarball: package-kernel $(PACKAGES)
 
 
 clean:
+ifndef BUILD_PHASE
 	@echo -n " $(PACKAGE)"
 	@rm -f linux
 	@rm -rf linux-$(KERNEL_VER)
 	@rm -rf $(FREESWAN_TYPE)-$(FREESWAN_VER)
 	@rm -rf $(PKG_ROOT)
-
+else
+	@echo "$(PACKAGE)"
+	@echo; echo "clean"
+	rm -vf linux
+	rm -rf linux-$(KERNEL_VER)
+	rm -rf $(PKG_ROOT)
+	@rm -vf ../linux-firmware/Final.built
+	@rm -vf ../ipset/Final.built
+	@rm -vf ../xtables-addons/Final.built
+	@rm -vf ../$(FREESWAN_TYPE)/Final.built
+	@rm -vf ../../crumbs/Final.grp5.compiled
+	@rm -vf ../../crumbs/Final.grp6.compiled
+endif
 
 cleanall: clean build-tarball
 

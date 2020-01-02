@@ -120,6 +120,9 @@ ifeq ($(mTUPLE),$(mARCH))
 	echo "      cdromboot" >>$(MEDIA_BUILD_OUT)
 	@echo -e "\n\ncdromboot"
 	make -C cdromboot KERNEL_TYPE=$(KERNEL_TYPE)
+	mkdir -vp distrib/boot/grub
+	cp -v cdromboot/backdrop.xpm.gz distrib/boot/grub
+	cp -v cdromboot/express_boot_protect.xpm.gz distrib/boot/grub
 endif
 
 cdrom/smoothwall.tgz:
