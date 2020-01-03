@@ -7,9 +7,9 @@
 include ../../../Makefile.conf
 
 PACKAGE = URI
-VERSION = 1.60
+VERSION = 1.76
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/G/GA/GAAS/
+BASE_URL = https://cpan.metacpan.org/authors/id/O/OA/OALDERS
 
 CONFIGURE = yes
 CLEAN = yes

@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = NetAddr-IP
-VERSION = 4.073
+VERSION = 4.079
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/M/MI/MIKER/
 
@@ -15,8 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

@@ -15,15 +15,17 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 INSTALL = yes
 install: compile
+	@echo; echo "install"
 	mkdir -p $(PKG_ROOT)
-	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
-	# Also need 'installed' for the rst of the modules
-	tar cvf - -C ${PKG_ROOT} . | tar xvf - -C /
+	$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
+	# Also need 'installed' for the rest of the modules
+	@echo; echo "install in /"
+	tar cf - -C ${PKG_ROOT} . | tar xf - -C /
 
 clean:
 	@echo -n " $(PACKAGE)"

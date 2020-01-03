@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = CGI-Fast
-VERSION = 2.12
+VERSION = 2.15
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/L/LE/LEEJO
 
@@ -15,8 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

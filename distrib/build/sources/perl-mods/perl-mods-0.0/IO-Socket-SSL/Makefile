@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = IO-Socket-SSL
-VERSION = 2.052
+VERSION = 2.066
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/S/SU/SULLR/
 
@@ -15,8 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

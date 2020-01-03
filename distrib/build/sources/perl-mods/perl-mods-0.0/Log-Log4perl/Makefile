@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = Log-Log4perl
-VERSION = 1.37
+VERSION = 1.49
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/M/MS/MSCHILLI/
 
@@ -15,8 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

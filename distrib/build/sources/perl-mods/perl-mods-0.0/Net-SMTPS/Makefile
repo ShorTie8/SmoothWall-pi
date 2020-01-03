@@ -7,9 +7,9 @@
 include ../../../Makefile.conf
 
 PACKAGE = Net-SMTPS
-VERSION = 0.04
+VERSION = 0.09
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/T/TO/TOMO/src/
+BASE_URL = https://cpan.metacpan.org/authors/id/T/TO/TOMO/src
 
 CONFIGURE = yes
 CLEAN = yes

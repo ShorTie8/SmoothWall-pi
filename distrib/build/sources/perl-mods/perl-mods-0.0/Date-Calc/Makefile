@@ -15,8 +15,15 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
+
+#** BEWARE: Use "make install UNINST=1" to install! 
+INSTALL = yes
+install: compile
+	@echo; echo "install"
+	mkdir -p $(PKG_ROOT)
+	$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install UNINST=1
 
 clean:
 	@echo -n " $(PACKAGE)"

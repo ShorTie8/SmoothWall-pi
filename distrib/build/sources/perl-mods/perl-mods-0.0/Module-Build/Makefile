@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = Module-Build
-VERSION = 0.4224
+VERSION = 0.4229
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/L/LE/LEONT
 
@@ -16,13 +16,16 @@ INSTALL = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 install: compile
+	@echo; echo "install"
 	mkdir -p $(PKG_ROOT)
-	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
-	# Also need 'installed' for the rst of the modules
-	tar cvf - -C ${PKG_ROOT} . | tar xvf - -C /
+	$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
+	@echo; echo "install in /"
+	# Also need 'installed' for the rest of the modules
+	tar cf - -C ${PKG_ROOT} . | tar xf - -C /
 
 clean:
 	@echo -n " $(PACKAGE)"

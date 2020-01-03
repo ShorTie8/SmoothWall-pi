@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = HTML-Parser
-VERSION = 3.71
+VERSION = 3.72
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/G/GA/GAAS/
 
@@ -15,8 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

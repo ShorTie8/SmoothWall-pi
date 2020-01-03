@@ -7,9 +7,9 @@
 include ../../../Makefile.conf
 
 PACKAGE = XML-Parser
-VERSION = 2.44
+VERSION = 2.46
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/T/TO/TODDR
+BASE_URL = https://cpan.metacpan.org/authors/id/T/TO/TODDR
 
 CONFIGURE = yes
 CLEAN = yes

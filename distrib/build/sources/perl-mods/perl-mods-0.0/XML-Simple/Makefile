@@ -7,9 +7,9 @@
 include ../../../Makefile.conf
 
 PACKAGE = XML-Simple
-VERSION = 2.22
+VERSION = 2.25
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/G/GR/GRANTM
+BASE_URL = https://cpan.metacpan.org/authors/id/G/GR/GRANTM
 
 CONFIGURE = yes
 CLEAN = yes

@@ -7,14 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = rrdtool
+VERSION = 1.7.2
+BASE_URL = http://oss.oetiker.ch/rrdtool/pub
 
-#VERSION = 1.4.5
-VERSION = 1.4.9
-#VERSION = 1.7.2
-#ReConfigure = yes
-
-BASE_URL = http://oss.oetiker.ch/rrdtool/pub/
-
-CONFIG_OPTS += --disable-tcl --disable-python
+CONFIG_OPTS +=  --enable-perl-site-install --disable-tcl
 
 include ../Makefile.rules

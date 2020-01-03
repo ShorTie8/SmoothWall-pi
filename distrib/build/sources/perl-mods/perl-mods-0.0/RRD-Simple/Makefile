@@ -9,13 +9,14 @@ include ../../../Makefile.conf
 PACKAGE = RRD-Simple
 VERSION = 1.44
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/N/NI/NICOLAW/
+BASE_URL = https://cpan.metacpan.org/authors/id/N/NI/NICOLAW
 
 CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

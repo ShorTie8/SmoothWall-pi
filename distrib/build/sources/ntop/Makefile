@@ -16,6 +16,8 @@ CONFIG_OPTS += --prefix=/usr --with-ssl --with-ossl-root=/usr --with-ossl-lib=/u
 CONFIGURE = yes
 
 configure: $(DIR)/
+	@echo; echo "configure"
+	cd $(DIR); patch -p1 < ../configure.in.patch
 ifeq ($(mARCH), arm64)
 	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
 		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \

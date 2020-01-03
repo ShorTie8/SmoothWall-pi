@@ -7,15 +7,16 @@
 include ../../../Makefile.conf
 
 PACKAGE = Net-SMTP-SSL
-VERSION = 1.03
+VERSION = 1.04
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/R/RJ/RJBS/
+BASE_URL = https://cpan.metacpan.org/authors/id/R/RJ/RJBS
 
 CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

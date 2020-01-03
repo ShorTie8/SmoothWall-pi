@@ -19,7 +19,10 @@ VERSION = 0.0
 #   are moved to the end of the list.
 export PERL_MODS = \
 	    inc-latest \
+	    File-Remove \
+	    YAML-Tiny \
 	    Module-Build \
+	    Module-Install \
 	    ExtUtils-PkgConfig \
 	    App-Control \
 	    Authen-NTLM \
@@ -31,8 +34,10 @@ export PERL_MODS = \
 	    GD \
 	    GDTextUtil \
 	    GDGraph \
+	    HTTP-Date \
 	    HTML-Parser \
 	    HTML-Tagset \
+	    HTTP-Message \
 	    Log-Log4perl \
 	    Net-CIDR \
 	    Net-Netmask \
@@ -42,6 +47,8 @@ export PERL_MODS = \
 	    RRD-Simple \
 	    Set-IntSpan \
 	    URI \
+	    Net-HTTP \
+	    Mozilla-CA \
 	    libwww-perl \
 	    local-lib \
 	    Net-SSLeay \

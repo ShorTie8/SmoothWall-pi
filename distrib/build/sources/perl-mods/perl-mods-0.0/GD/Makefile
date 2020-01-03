@@ -7,21 +7,16 @@
 include ../../../Makefile.conf
 
 PACKAGE = GD
-#VERSION = 2.53
-VERSION = 2.66
+VERSION = 2.70
 
-#VERSION = 2.55		# broken
-#VERSION = 2.56		# broken
-
-#BASE_URL = http://search.cpan.org/CPAN/authors/id/L/LD/LDS/
-BASE_URL = https://www.cpan.org/modules/by-module/GD/
+BASE_URL = https://www.cpan.org/modules/by-module/GD
 
 CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); echo 'y' | perl Makefile.PL
-	#@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

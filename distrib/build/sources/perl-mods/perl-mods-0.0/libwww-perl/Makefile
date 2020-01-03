@@ -7,15 +7,25 @@
 include ../../../Makefile.conf
 
 PACKAGE = libwww-perl
-VERSION = 5.837
+VERSION = 6.05
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/G/GA/GAAS/
 
 CONFIGURE = yes
+INSTALL = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	@+cd $(DIR); perl Makefile.PL -n
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL -n
+
+install: compile
+	@echo; echo "install"
+	mkdir -p $(PKG_ROOT)
+	$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
+	@echo; echo "install in /"
+	# Also need 'installed' for the rest of the modules
+	tar cf - -C ${PKG_ROOT} . | tar xf - -C /
 
 clean:
 	@echo -n " $(PACKAGE)"

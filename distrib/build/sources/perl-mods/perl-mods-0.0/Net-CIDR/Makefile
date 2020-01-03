@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = Net-CIDR
-VERSION = 0.11
+VERSION = 0.20
 
 BASE_URL = http://search.cpan.org/CPAN/authors/id/M/MR/MRSAM/
 
@@ -15,8 +15,8 @@ CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"

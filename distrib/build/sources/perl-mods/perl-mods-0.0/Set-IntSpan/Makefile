@@ -7,16 +7,16 @@
 include ../../../Makefile.conf
 
 PACKAGE = Set-IntSpan
-VERSION = 1.16
+VERSION = 1.19
 
-BASE_URL = http://search.cpan.org/CPAN/authors/id/S/SW/SWMCD/
+BASE_URL = https://cpan.metacpan.org/authors/id/S/SW/SWMCD
 
 CONFIGURE = yes
 CLEAN = yes
 
 configure: $(DIR)/
-	#@+cd $(DIR); echo 'y' | perl Makefile.PL
-	@+cd $(DIR); perl Makefile.PL
+	@echo; echo "configure"
+	cd $(DIR); perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"
