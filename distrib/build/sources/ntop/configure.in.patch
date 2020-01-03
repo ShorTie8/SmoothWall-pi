@@ -1,0 +1,25 @@
+--- ntop-5.0.1/configure.in.orig	2012-08-13 03:35:26.000000000 -0400
++++ ntop-5.0.1/configure.in	2019-12-31 10:40:59.000000000 -0500
+@@ -892,9 +892,9 @@
+    fi
+ fi
+ 
+-RRD_LIB="-L${RRD_HOME}/lib -lrrd_th"
++RRD_LIB="-L${RRD_HOME}/lib -lrrd"
+ 
+-if test -f "$RRD_HOME/lib/librrd_th.so"; then
++if test -f "$RRD_HOME/lib/librrd.so"; then
+    AC_MSG_RESULT(checking for rrdtool... yes)
+ else
+   if test -f "$RRD_HOME/lib/librrd_th.dylib"; then # OSX
+@@ -903,8 +903,8 @@
+      if test -f "$RRD_HOME/lib/librrd_th.a"; then
+        AC_MSG_RESULT(checking for rrdtool... yes)
+      else
+-       AC_CHECK_LIB([rrd_th], [main])
+-       if test ".${ac_cv_lib_rrd_th_main}" != ".yes"; then
++       AC_CHECK_LIB([rrd], [main])
++       if test ".${ac_cv_lib_rrd_main}" != ".yes"; then
+          AC_MSG_ERROR(Unable to find RRD at $RRD_HOME: please use --with-rrd-home=DIR);
+ 	 AC_MSG_ERROR(RRD source can be downloaded from http://www.rrdtool.org/);
+        else
