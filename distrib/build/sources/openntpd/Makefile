@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = openntpd
-VERSION = 5.7p4
+VERSION = 6.2p3
 
 BASE_URL = https://openbsd.mirror.constant.com/pub/OpenBSD/OpenNTPD
 

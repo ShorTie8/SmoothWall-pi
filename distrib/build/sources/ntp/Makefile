@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = ntp
-VERSION = 4.2.8p10
+VERSION = 4.2.8p13
 
 PATCH_FILE1 = mod_nano.patch
 

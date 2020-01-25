@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = openssh
-VERSION = 7.9p1
+VERSION = 8.1p1
 
 BASE_URL = http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/
 

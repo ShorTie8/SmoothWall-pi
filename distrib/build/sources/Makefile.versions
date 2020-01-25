@@ -7,7 +7,7 @@
 # The system's kernel.
 KERNEL_MAJOR = 4
 KERNEL_MMR = $(KERNEL_MAJOR).19
-KERNEL_VER = $(KERNEL_MMR).89
+KERNEL_VER = $(KERNEL_MMR).97
 
 # The kernel version headers needed to build glibc
 # Unrelated to the system's kernel
@@ -25,8 +25,8 @@ KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K
 KERNELHEADER_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNELHEADER_MAJOR).x/linux-$(KERNELHEADERVER).tar.xz
 
 ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
-    KERNEL_VER = $(KERNEL_MMR).89+
-    KERNEL_COM = 7e5ca955ac4d111b5d572e5aa2241cad07b85a3a
+    KERNEL_VER = $(KERNEL_MMR).97+
+    KERNEL_COM = 63739afcdd3662e9f9e1f04c81b63b743a12f9d1
     KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-rpi-$(KERNEL_VER).tar.gz
     K_RAW_VERSION = $(KERNEL_VER)
     K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
