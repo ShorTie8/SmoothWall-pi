@@ -246,7 +246,6 @@ endif
 ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
 	@echo "        setting fake-harware clock" >>$(MEDIA_BUILD_OUT)
 	@echo -e "\n\nsetting fake-harware clock"; echo
-	sed -i 's/hwclock --hctosys --localtime/fake-hwclock load force/' distrib/etc/rc.d/rc.sysinit
 	echo "`date -u '+%Y-%m-%d %H:%M:%S'`" > distrib/etc/fake-hwclock.data
 else ifeq ($(mTUPLE),xu4)
 	@echo "        Copy boot.ini" >>$(MEDIA_BUILD_OUT)
