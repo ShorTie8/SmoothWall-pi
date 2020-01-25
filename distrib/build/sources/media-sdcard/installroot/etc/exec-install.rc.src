@@ -847,7 +847,7 @@ elif [ "$rpisys" == "BCM2835" ] || [ "$x86sys" == "aarch64" ]; then
   if [ "$I2C_DEV" == "on" ]; then
     echo -e "${STEP}          Enabling i2c Time${NO}"
     echo "" >> /harddisk/boot/config.txt
-    echo "dtparam=i2s=on" >> /harddisk/boot/config.txt
+    echo "dtparam=i2c_arm=on" >> /harddisk/boot/config.txt
     echo "dtoverlay=i2c-rtc,$I2C_rtc" >> /harddisk/boot/config.txt
     mkdir -v /harddisk/var/smoothwall/clock
     echo "$I2C_rtc" > /harddisk/var/smoothwall/clock/clock
