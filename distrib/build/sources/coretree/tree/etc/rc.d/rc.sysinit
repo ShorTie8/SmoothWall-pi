@@ -15,12 +15,13 @@ echo -e "${STEP}    Initialize hwclock and load localtime${NO}"
 echolog "" "s" "" "Initialize the clock"
 
 if [ -e /sys/class/i2c-adapter/i2c-1/new_device ]; then
-  echo -e "${STEP}      Starting i2s hwclock${NO}"
-  echolog "" "s" "" "    Starting i2s hwclock"
+  echo -e "${STEP}      Starting i2s hwclock, ${DONE} Clock is $(cat /var/smoothwall/clock/clock) ${NO}"
+  echolog "" "s" "" "    Starting i2s hwclock,  Clock is $(cat /var/smoothwall/clock/clock)"
   killall -v fake-hwclock
   modprobe -v rtc-ds1307
   echo -e "${DONE}    Found i2c ${STEP}device ${DONE}$(cat /sys/class/rtc/rtc0/device/name) ${STEP}@ ${INFO}rtc0${NO}"
-  sleep 4
+  echolog "" "s" "" "    Found i2c device $(cat /sys/class/rtc/rtc0/device/name) @ rtc0"
+  sleep 2
   i2cdetect -y 1
   /sbin/hwclock --hctosys --localtime
 elif [ -e /sbin/fake-hwclock ]; then
@@ -410,7 +411,9 @@ echolog "e" "s" "" "  Start traffic control (QoS)"
 /usr/bin/smoothcom trafficrestart&
 
 # Sync background tasks
-wait >/dev/null 2>&1
+echo -e "${STEP}    Sync background tasks, ${DONE} wait ${NO}"
+echolog "" "s" "" "  Sync background tasks, wait"
+wait
 
 # Services here depend on the IFs being up.
 
@@ -420,7 +423,7 @@ wait >/dev/null 2>&1
 #   wait up to three seconds, then let ntpdate kvetch.
 typeset -i i; i=0
 while [ $i -lt 15 ]; do
-  ps -ef | grep "/usr/bin/\dnsmasq" >/dev/null 2>&1
+  ps -ef | grep "/usr/bin/\dnsmasq"
   case $? in
     0) break;;
     *) echo -e -n "o"; sleep .1; echo -e -n " "; sleep .1;;
@@ -428,14 +431,22 @@ while [ $i -lt 15 ]; do
   i=i+1
 done
 
-echolog "e" "s" "" "  Set the system time; and start time service (if enabled)"
+echo -e "${STEP}    Set the system time; and start time service (if enabled)${NO}"
+echolog "" "s" "" "  Set the system time; and start time service (if enabled)"
 eval `grep NTP_SERVER /var/smoothwall/time/settings`
 if [ "$NTP_SERVER" == "" ]; then
   NTP_SERVER="pool.ntp.org"
 fi
+
+echo -e "${INFO}    ntpdate ${DONE} ${NTP_SERVER}${NO}"
 ntpdate ${NTP_SERVER}
+
+echo -e "${STEP}    hwclock --systohc --localtime${NO}"
 /sbin/hwclock --systohc --localtime
+
+echo -e "${STEP}    smoothcom ntpdrestart${NO}"
 /usr/bin/smoothcom ntpdrestart
+
 echolog "e" "s" "" "  Start dhcpd (if enabled)"
 /usr/bin/smoothcom dhcpdrestart&
 echolog "e" "s" "" "  APCupsd server (if enabled)"
