@@ -42,7 +42,7 @@ CONFIG_OPTS +=  --enable-iproute2 \
 	@echo; echo "1st-install"
 	make -C $(DIR) DESTDIR=$(PKG_ROOT) install
 	@echo; echo "1st-install move"
-	mv -v $(PKG_ROOT)/usr/sbin/openvpn $(PKG_ROOT)/var/smoothwall/mods/zerina/usr/bin64/openvpn_enable_passwd_save
+	mv -v $(PKG_ROOT)/usr/local/sbin/openvpn $(PKG_ROOT)/var/smoothwall/mods/zerina/usr/bin64/openvpn_enable_passwd_save
 
 redo: 1st-install
 	@echo; echo "redo prepare"
@@ -59,9 +59,9 @@ INSTALL = yes
 install: compile
 	@echo; echo; echo "2nd install"
 	make -C $(DIR) DESTDIR=$(PKG_ROOT) install
-@echo; echo "move"
-	mv -v $(PKG_ROOT)/usr/sbin/openvpn $(PKG_ROOT)/var/smoothwall/mods/zerina/usr/bin64/openvpn_no_enable_passwd_save
-	mv -v $(PKG_ROOT)/usr/include/openvpn-plugin.h $(PKG_ROOT)/var/smoothwall/mods/zerina/include/no-openvpn-plugin.h
+	@echo; echo "move"
+	mv -v $(PKG_ROOT)/usr/local/sbin/openvpn $(PKG_ROOT)/var/smoothwall/mods/zerina/usr/bin64/openvpn_no_enable_passwd_save
+	mv -v $(PKG_ROOT)/usr/local/include/openvpn-plugin.h $(PKG_ROOT)/var/smoothwall/mods/zerina/include/no-openvpn-plugin.h
 	@echo; echo "ls"
 	ls -l $(PKG_ROOT)/var/smoothwall/mods/zerina/include
 	@echo
