@@ -44,7 +44,7 @@ else ifneq ($(mARCH),$(mTUPLE))
 endif
 
 FREESWAN_TYPE = libreswan
-FREESWAN_VER = 3.29
+FREESWAN_VER = 3.30
 
 IPTABLES_VER = 1.6.0
 # 1.6.1 & 2 don't give /iptables/xshared.o

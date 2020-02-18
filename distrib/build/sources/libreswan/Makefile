@@ -11,16 +11,16 @@ include ../Makefile.versions
 PACKAGE = $(FREESWAN_TYPE)
 VERSION = $(FREESWAN_VER)
 
-#BASE_URL = https://download.libreswan.org
+BASE_URL = https://download.libreswan.org
 
 #### or github
 ## you need full commitID for DIR to work
 ## to update, since your playing
 ## rm -v downloads/libreswan-3.29.tar.g*
 #gitCommitID = c75b7a09764fe18b54bcc7b57d2a7013f3ccbfe7
-gitCommitID = a993a13879c3367445dd6907bc77d2cabe9c270c
-BASE_URL = https://github.com/libreswan/libreswan/archive/$(gitCommitID)
-DIR = $(FREESWAN_TYPE)-$(gitCommitID)
+#gitCommitID = a993a13879c3367445dd6907bc77d2cabe9c270c
+#BASE_URL = https://github.com/libreswan/libreswan/archive/$(gitCommitID)
+#DIR = $(FREESWAN_TYPE)-$(gitCommitID)
 #### end github
 
 TARBALL = $(FREESWAN_TYPE)-$(VERSION)
