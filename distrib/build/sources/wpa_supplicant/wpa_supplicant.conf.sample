@@ -1,10 +1,11 @@
-# SmoothWall-arm wpa_supplicant.conf.sample
-country=us
+# SmoothWall-pi wpa_supplicant.conf.sample
+country=US
 update_config=1
 ctrl_interface=/var/run/wpa_supplicant
 
 network={
   scan_ssid=1
-  ssid="wifi"
+  ssid="MyFi"
   psk="password"
+  key_mgmt=WPA-PSK
   }
