@@ -1,11 +1,11 @@
 include ../Makefile.conf
 
 PACKAGE = c_icap
-VERSION = 0.5.5
+VERSION = 0.5.6
 
 PACKAGE_ALT = c-icap
 
-BASE_URL = http://downloads.sourceforge.net/project/$(PACKAGE_ALT)/$(PACKAGE_ALT)/0.5.x
+BASE_URL = http://downloads.sourceforge.net/project/c-icap/c-icap/0.5.x
 
 CONFIG_OPTS += --prefix= --exec-prefix= \
 	       --datarootdir=/usr/share \
