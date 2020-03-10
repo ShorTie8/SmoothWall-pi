@@ -29,9 +29,11 @@ install: compile
 	$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 	install -v -m644 $(DIR)/hostapd/hostapd.conf $(PKG_ROOT)/etc/hostapd/hostapd.conf.orig
 	install -v -m644 $(DIR)/hostapd/logwatch/hostapd.conf $(PKG_ROOT)/etc/hostapd/logwatch/hostapd.conf
-	#install -v -m644 hostapd.conf $(PKG_ROOT)/etc/hostapd/hostapd.conf
 	install -v -m644 hostapd.green.conf $(PKG_ROOT)/etc/hostapd/hostapd.green.conf
 	install -v -m644 hostapd.orange.conf $(PKG_ROOT)/etc/hostapd/hostapd.orange.conf
 	install -v -m644 hostapd.purple.conf $(PKG_ROOT)/etc/hostapd/hostapd.purple.conf
+	chown -v nobody:nobody $(PKG_ROOT)/etc/hostapd/hostapd.green.conf
+	chown -v nobody:nobody $(PKG_ROOT)/etc/hostapd/hostapd.orange.conf
+	chown -v nobody:nobody $(PKG_ROOT)/etc/hostapd/hostapd.purple.conf
 
 include ../Makefile.rules

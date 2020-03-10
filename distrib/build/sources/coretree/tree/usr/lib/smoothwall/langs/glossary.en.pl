@@ -56,6 +56,8 @@
 	'IGMP' => "<strong>Internet Group Management Protocol</strong> This is a communications protocol used to manage the membership of Internet Protocol multicast groups. It should generally be ignored unless a machine is part of such a group.",
 	'Isochronous' => "Things that happen at regular intervals, such as the packets of an active VoIP channel.",
 	'UPS' => 'Uninterruptable Power Supply.',
+	'Wi-Fi' => 'Wi-Fi Settings',
+
 );
 
 1;

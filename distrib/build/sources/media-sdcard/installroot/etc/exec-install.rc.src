@@ -939,6 +939,8 @@ if [ "$WPA_CLIENT" == "on" ]; then
   echo "WPA_CLIENT=on" >> /harddisk/var/smoothwall/ethernet/settings
 fi
 
+cat /harddisk/var/smoothwall/ethernet/settings > /harddisk/root/settings.orig
+
 
 # Copy files
 echo -e "${BOUL}        Copy config files${NO}"
@@ -946,7 +948,8 @@ echo -e "${BOUL}        Copy config files${NO}"
 if [ -f /cdrom/wpa_supplicant.conf ]; then
   # Debian root:root 0644
   cp -v /cdrom/wpa_supplicant.conf /harddisk/etc/wpa_supplicant/wpa_supplicant.conf
-  #chown -v nobody:nobody /harddisk/etc/wpa_supplicant/wpa_supplicant.conf
+  chown -v nobody:nobody /harddisk/etc/wpa_supplicant/wpa_supplicant.conf
+  chmod -v 644 /harddisk/etc/wpa_supplicant/wpa_supplicant.conf
 fi
 
 if [ -f /cdrom/hostapd.green.conf ]; then

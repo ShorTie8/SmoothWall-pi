@@ -1533,4 +1533,27 @@
 'unsuccesful mail' => 'MAIL WAS NOT SENT SUCCESSFULLY. PLEASE REVIEW YOUR EMAIL CONNECTION SETTINGS',
 'will shutdown Smoothwall in response to a power failure' => 'will shutdown Smoothwall in response to a power failure',
 'will simulate the response to a power failure; it will not shutdown Smoothwall or the UPS' => 'will simulate the response to a power failure; it will not shutdown Smoothwall or the UPS',
+
+# Wi-Fi
+'sswifi' => 'Wi-Fi',
+'wifi' => 'Wi-Fi',
+'Country_Code' => 'Country Code',
+'ssid' => 'ssid',
+'brg_namec' => 'Bridge Name',
+'brg_macc' => 'Bridge mac',
+'wifi devicec' => 'WiFi Device',
+'net addressc' => 'net address',
+'nic devicec' => 'Nic Device',
+'addressc' => 'address',
+'wifi interfaces configuration' => 'Wi-Fi Interfaces configuration',
+'GREENsave' => 'Save Green wifi',
+'ORANGEsave' => 'Save Orange wifi',
+'PURPLEsave' => 'Save Purple wifi',
+'invalid green GREEN_SSID' => 'GREEN_SSID is invalid',
+'invalid green GREEN_WPA_PASSPHRASE' => 'GREEN_WPA_PASSPHRASE is invalid',
+'invalid orange ORANGE_SSID' => 'ORANGE_SSID is invalid',
+'invalid orange ORANGE_WPA_PASSPHRASE' => 'ORANGE_WPA_PASSPHRASE is invalid',
+'invalid purple PURPLE_SSID' => 'PURPLE_SSID is invalid',
+'invalid purple PURPLE_WPA_PASSPHRASE' => 'PURPLE_WPA_PASSPHRASE is invalid',
+
 );
