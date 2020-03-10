@@ -1,0 +1,4 @@
+MOD_DIR=/var/smoothwall/mods/fullfirewall
+MOD_NAME=fullfirewall
+MOD_VERSION=3.1.8.2
+MOD_LONG_NAME='Full Firewall Control'

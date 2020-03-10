@@ -1,0 +1,57 @@
+<P><FONT SIZE='3'><STRONG><U>Interfaces</U></STRONG></FONT></P>
+
+<p>This page is used to configure the IP addresses of the various internal
+interfaces, and to configure the external (RED) interface.</p>
+
+<p>The network interfaces displayed will vary depending on which interfaces
+have been inserted in the computer running Smoothwall Express, and the
+Configuration Type selected in the Setup program's Networking section.</p>
+
+<p>For each of the internal interfaces presented (GREEN, PURPLE and ORANGE),
+the <strong>IP address</strong> and <strong>Netmask</strong> can be
+configured.  In addition, to aid in NIC identification, the NIC type (make
+and model) as well as the MAC address is displayed.</p>
+
+<p>For the external interface, assuming it is configured for Ethernet, you can
+set what <strong>Connection method</strong> it should use.  You have a choice
+of Static, DHCP or PPPoE.  If you are using DHCP, you can also specify the
+DHCP hostname to send when obtaining an IP address from your ISP.</p>
+
+<p>When configuring RED you can also configure the <strong>Default
+gateway</strong>, <strong>Primary DNS</strong> and <strong>Secondary
+DNS</strong>.</p>
+
+<p>With the modifications made by the FFC mod secondary or alias IP addresses
+may be added to the RED interface. These secondary IP addresses may be used
+in port forwarding rules when the administrator needs to forward traffic
+from a RED address different from the primary assigned RED IP address. An
+example would be if there were two web servers on a network. Normally you
+cannot forward traffic from a single IP address to the same port (80 for example)
+on multiple web servers. With the addition of a secondary RED IP address
+traffic can be forwarded from the promary RED IP address to one of the web servers
+and traffic destined for the second web server can be forwarded to it from the
+secondary RED IP address.<p>
+
+<p>Secondary (alias) IP addresses are provided by the ISP who provides your
+internet service. To add these addresses to the RED interface, enter each
+IP address you have been provided in the "Secondary RED IP address" field
+and click "Save". The newly added secondary IP address will appear in the
+"Secondary IP address(es)" drop down selection menu.</p>
+
+<p>Sometimes there may be a service on your network (for example a mail server)
+that requires that outgoing packets have the same IP address associated with
+them as the incoming packets did. Normally with a stock configuration of Smoothwall
+all outgoing packets will have the primary RED address associated with those packets
+even though the incoming traffic may have had a secondary address associated with them.
+If the administrator needs to have outgoing packets have the secondary IP address
+associated with them, he would need to "map" the private internal IP address of the
+mail server to the secondary IP used to forward packets to the mail server. This
+is usually called 1:1 NAT. To do this, after entering the secondary IP address that needs
+to be mapped to an internal private address in the "Secondary RED IP address" enter the
+internal address to be mapped in the "Map from IP address" field and click "Save" to add
+both addresses together. When any port forward rule is created using a secondary IP
+address that has been mapped to an internal IP address. that mapped address will appear
+in the "Comments" field of the display table for that particular rule.</p>
+
+<p><strong>Please note:</strong> This page supplements the functionality
+provided by the Setup program.</p>

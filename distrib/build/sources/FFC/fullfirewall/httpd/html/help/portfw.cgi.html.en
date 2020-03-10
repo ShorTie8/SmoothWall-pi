@@ -1,0 +1,177 @@
+<P><FONT SIZE='3'><B><U>Firewall Control Page</U></B></FONT></P>
+
+<P>SmoothWall is able to control the access to/from any interface (WAN (RED)
+and LAN (GREEN PURPLE ORANGE)) based on the IP/MAC address and ports. 
+Using this page you are able to control incoming (WAN to LAN), 
+outgoing (LAN to WAN) and internal (LAN to LAN) traffic.</P>
+
+<p><strong>Incoming (port forwarded) configuration:</strong></p>
+
+<p>Traffic from an IP address of an external device (the "internet") to
+a device like a web server for example, on a LAN (like say ORANGE)
+behind your Smoothwall (an "intranet") can be NATd (forwarded) from your public
+RED IP or secondary (alias) address to the private IP address and port
+of the server on your LAN. By default Smoothwall will block all "unsolicited"
+incoming traffic "hitting" your public IP address on RED. The only unsolicited
+incoming traffic that is allowed is that traffic that has a port fowarding
+rule created for it.</p>
+
+<p>To create an incoming (port fowarding) rule:</p>
+
+<ul>
+<li> Select the RED interface or alias from the "Traffic from interface"
+(also called the "source interface"), drop down box and the LAN interface 
+your server is on (GREEN ORANGE or PURPLE) from the "Traffic to interface" 
+(also called the "destination interface") drop down box.</li>
+
+<li> For the "Traffic from IP/Network/MAC" text field, leave this blank if
+you wish to allow any external host or network access to your server. If you
+wish to limit access to a specific external host (IP address) or range of IP
+addresses then enter those addresses here. You may enter a single IP, a range
+of IP addresses (1.2.3.4-2.3.4.5 for example) or a network (1.2.3.4/16 for instance).</li>
+
+<li> For the "Traffic to IP or Network" field you would enter the IP address
+of the server/device you are forwarding traffic to.</li>
+
+<li>For the port on your device/server that traffic is being forwarded to, either
+select a service from the "Applications/Services" drop down menu, for example
+"Web" for a web server (ports 80/http and 443/https), or you can enter the
+individual port (80), a range of ports (6112:6119) or any combination of these
+two as comma separated values (80,443,6112:6119).</li>
+
+<li> For the majority of incoming rules, the "New Destination Port" field should
+be left blank. You would enter a single port in this field if you need to redirect
+traffic that was originally intended for one port to another port. For instance,
+say you have a mail (smtp) server that is "listening" for traffic on a non-standard
+port 2525 (the standard port for SMTP is port 25). You would have selected SMTP
+previously from the "Application/Services" menu or entered port 25 in the user
+specified "Ports" field and then you would enter 2525 in the "New Destination Port"
+field. If you haven't changed any standard ports on your devices then you would 
+leave this field blank.</li>
+
+<li> Select the protocol you are forwarding</li>
+
+<li> Select the action you wish to be taken for the traffic arriving at your server.
+Selecting a "LOG&'ACTION'" like "LOG&REJECT" option will first log all traffic matching
+this rule and then take the action requested like "REJECT".</li>
+
+<li> You may select the order number you wish to assign to your rule or leave the order
+number set at the default value shown. This is for those situations when, for some groups
+of rules, the order of the rules may be important.</li>
+
+<li> You may enter a comment/description of the rule you are creating or leave blank
+if no comment is needed.</li>
+
+<li> Once you have all the fields you need to create your incoming rule filled in,
+click on the "Add" button. If there are no errors in the data you have entered 
+(errors will appear in the "alert box" at the top of the page), your rule will be created
+and will appear in the display table at the bottom of the page.</li>
+</ul>
+
+<p><strong>Outgoing configuration:</strong></p>
+
+<p>Network traffic that originates from a LAN ("intranet" behind your Smoothwall) directed to an
+external host on the "internet" through Smoothwall's RED device is termed "outgoing" traffic.
+For example, anytime you click on a link in the web browser on your PC for an internet
+service (like maybe Google when you want to do a search for "Networking 101" tutorials) would
+be an outgoing request.</p>
+
+<p>There are some crucial differences between outgoing control on a stock Smoothwall and outgoing
+control on a FFC modified Smoothwall. The most important difference is with FFC, the default
+security policy with FFC is always "Blocked with exceptions" whereas with a stock Smoothwall
+there is a level of "openness" that is chosen (open, half-open or closed). What this means is
+that unless there is a rule created to allow certain outgoing traffic out of your LAN network
+to the "internet" that outgoing traffic will be blocked by default. To mitigate this strict
+policy, whenever Smoothwall is booted for the first time a set of default outgoing rules are
+created for each existing LAN device (GREEN PURPLE ORANGE) for the most commonly used ports and
+services.</p>
+
+<p>To create an outgoing rule:</p>
+
+<ul>
+<li> At the "Traffic from interface" selection box select the LAN device (GREEN PURPLE ORANGE)
+from which the outgoing traffic will originate.</li>
+
+<li> At the "Traffic to interface" selection box select the RED device.</li>
+
+<li> In the "Traffic from IP/Network/MAC" text entry field enter the IP address of the device 
+from which the outgoing traffic will originate. You may enter a single IP address, a network
+(192.168.0.2/24), a range of IP adrresses (192.168.0.1-192.168.0.254) or a MAC address of the
+LAN device. Leave this field blank if you want all adresses on this LAN allowed or blocked
+depending on how you are setting up your outgoing rules.</li>
+
+<li> In the "Traffic to IP or Network" field you would usually leave this blank. You would only
+enter an IP address, network or range of IP addresses if you want to limit the outgoing traffic
+for this particular rule to a specific IP/Network/Range of addresses.</li>
+
+<li> For the "Application/Services" drop down selection menu or the "Orig Destination Port" text 
+entry field, select or enter the service(s) or port for the outgoing service(s) or port(s) you 
+want to allow or block. For example, to allow "Web" traffic outbound you would select "Web" in 
+the selection menu or enter "80,443" in the "Orig Destination Port(s)" text entry field.</li>
+
+<li> For outgoing rules, the "New destination port" field is not used and any value entered here
+for an outgoing rule is ignored.</li>
+
+<li> Select the outgoing protocol for your outgoing rule.</li>
+
+<li> Select the action(s) to be taken on the outgoing traffic defined by your outgoing rule.</li>
+
+<li> Select the order number for your outgoing rule or leave the default order number displayed.</li>
+
+<li> When all the necessary values for your outgoing rule have been entered, click "Add". If
+there are no errors in your values the iptables rule will be created and it will appear in
+the display table at the bottom of the page.</li>
+</ul>
+
+<P><strong>Internal Pinhole Configuration</strong></P>
+
+<P>The administrator can configure "holes" between the various local networks.  The standard 
+configuration, without any pinholes setup, for communication between LAN segments is as follows:</P>
+
+<UL>
+<LI>GREEN can talk to PURPLE and ORANGE</LI>
+<LI>PURPLE can talk to ORANGE</LI>
+<LI>ORANGE can talk to no other LAN segment</LI>
+</UL>
+
+<p>The major difference between internal pinhole configuration for a stock Smoothwall installation
+and a FFC modified Smoothwall is that the standard allowed communication between LANs described
+above can be blocked instead of always being allowed. This could be useful for a situation where
+the administrator would want to prevent communication between a device on GREEN with a device on
+ORANGE like a web server, for example.</p>
+
+<P>In order to allow communcations in the reverse direction (for example ORANGE talking to GREEN) 
+or for blocking communication in the allowed direction (for example GREEN talking to ORANGE) 
+a pinhole most be created. To create a pinhole:</P>
+
+<ul>
+<li> At the "Traffic from interface" selection menu select the LAN interface where "inter-LAN"
+communication will be originating. This would be any but RED.</li>
+
+<li> At the "Traffic to interface" menu select the LAN interface traffic is going to.</li>
+
+<li> Enter the IP address, network or range of IP addresses where the pinhole traffic will
+be originating in the "Traffic from IP/Network/MAC" field. Leave blank for all addresses.</li>
+
+<li> Enter the IP address, network or range of IP addresses where the pinhole traffic will be
+going to in the "Traffic going to IP/Network" field. Leave blank for all addresses.</li>
+
+<li> Enter or select the port(s) on the destination machine to be allowed or blocked in the 
+pinhole communications.</li>
+
+<li> Enter or select the protocol and action to be taken with the pinhole traffic.</li>
+
+<li> Select the action to be taken on the pinhole traffic.</li>
+
+<li> Select the order number if necessary or leave the default order number displayed.</li>
+
+<li> Click the Add button once all values have been entered.  If there are no errors 
+in your values the iptables rule will be created and it will appear in the display table 
+at the bottom of the page.</li>
+</ul>
+
+<P>Typically this would be used to allow a web server on ORANGE to connect to
+a mail server on GREEN for web mail purposes. Another scenario is to allow all
+wireless hosts on the PURPLE network to access a webserver on the GREEN network.
+This would involve using a subnet that covers the PURPLE network for the Source
+IP.</P>

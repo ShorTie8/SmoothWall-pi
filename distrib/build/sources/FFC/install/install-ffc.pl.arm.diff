@@ -1,0 +1,83 @@
+--- install-ffc.pl.orig	2020-03-07 10:56:50.000000000 -0500
++++ install-ffc.pl.arm	2020-03-04 11:59:03.000000000 -0500
+@@ -7,49 +7,12 @@
+ 
+ my $flag = '';
+ 
+-open(FILE, "/var/smoothwall/patches/installed") or die "Unable to open patches file";
+-while (<FILE>) {
+- if ($_ =~ /^008/) {
+-  $flag = 'y';
+- }
+-} 
+-close FILE;
+-
+-if ($flag ne 'y') {
+- print "This mod requires that Update8 be installed.\n\n";
+- print "Please update your SWE 3.1 to Update8 before proceeding with the installation of this mod.\n\n";
+- goto EXIT;
+-}
+-
+ my %prodata;
+ my $response;
+ my $flag = '';
+ 
+ &readhash("/var/smoothwall/main/productdata", \%prodata);
+ 
+-if (-e "/var/smoothwall/mods/fullfirewall/installed")
+-{
+- PRINT $YELLOW . "There is a previous version of FFC installed...\n\n$NORMAL ";
+- print "Please uninstall the previous version before installing this new version..\n\n";
+- print "During the uninstall of FFC you will have the option of backing up your config files...\n";
+- print "You may then restore your config files during installation of this update of FFC...\n\n";
+- goto EXIT;
+-}
+-
+-if (-d "/var/smoothwall/mods/fullfirewall/usr/lib/smoothwall/menu/5000_Logs")
+-{
+- system("/bin/rm -rdf /var/smoothwall/mods/fullfirewall/usr/lib/smoothwall/menu/5000_Logs");
+- system("/bin/rm -rdf /var/smoothwall/mods/fullfirewall/httpd/cgi-bin/logs.cgi/log.dat");
+-}
+-
+-if (-e "/var/smoothwall/mods/fullfirewall/usr/lib/smoothwall/menu/6000_Tools")
+-{
+- system("/bin/rm -rf /var/smoothwall/mods/fullfirewall/usr/lib/smoothwall/menu/6000_Tools");
+- unlink "/var/smoothwall/mods/fullfirewall/httpd/cgi-bin/smoothinfo.cgi";
+- unlink "/var/smoothwall/mods/fullfirewall/usr/lib/smoothd/syssmoothinfo.so";
+- system("/bin/rm -rf /var/smoothwall/mods/fullfirewall/usr/bin/smoothwall/smoothinfo*");
+-}
+-
+ my (@lines, $key, $pattern, $filename);
+ 
+ $filename = "/etc/rc.d/rc.firewall.up";
+@@ -204,30 +167,6 @@
+ 
+ print "Done editing rc.updatered...\n\n";
+ 
+-system("/usr/bin/tar -jxf /tmp/ffc-modfiles.tar.bz2 -C /");
+-unlink "/tmp/ffc-modfiles.tar.bz2";
+-
+-system("/bin/mv -f /usr/sbin/setup /var/smoothwall/mods/fullfirewall/backup/setup");
+-
+-# If installing 32 bit
+-if ($prodata{'ARCH'} eq 'i586')
+-{
+- print "Installing 32-bit version of mod...\n\n";
+- system("/bin/mv -f /var/smoothwall/mods/fullfirewall/bin/setup /usr/sbin/setup");
+-}
+-# If installing 64 bit
+-elsif ($prodata{'ARCH'} eq 'x86_64')
+-{
+- print "Installing 64-bit version of mod...\n\n";
+- system("/bin/mv -f /var/smoothwall/mods/fullfirewall/bin/sysiptables64.so /var/smoothwall/mods/fullfirewall/usr/lib/smoothd/sysiptables.so");
+- #system("/bin/mv -f /var/smoothwall/mods/fullfirewall/bin/syssmoothinfo64.so /var/smoothwall/mods/fullfirewall/usr/lib/smoothd/syssmoothinfo.so");
+- system("/bin/mv -f /var/smoothwall/mods/fullfirewall/bin/setup-64 /usr/sbin/setup");
+-} else {
+- print "ERROR: Unable to detect correct SWE architecture type!\n\n";
+- print "Exiting installation.\n";
+- goto EXIT;
+-}
+-
+ system("/bin/touch", '/var/smoothwall/mods/fullfirewall/installed');
+ 
+ #print "Editing dispaliastab...\n";

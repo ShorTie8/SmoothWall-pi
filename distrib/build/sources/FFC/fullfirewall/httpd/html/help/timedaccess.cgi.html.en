@@ -1,0 +1,25 @@
+<P><FONT SIZE='3'><B><U>Timed Access of Port Forward Rules</U></B></FONT></P>
+
+<P>This page is used to set time frames for allowing or denying access into
+(incoming), out of (outgoing) and behind (internal LAN pinholes) your Smoothwall.</P>
+
+<P>How to setup timed access.</P>
+
+<P>The iptables rule must first be created in the FFC port forwarding section.
+Then select the timed access page and look at the display table. Check mark 
+the rule you wish to set time frames for. Then select the time frames you wish
+and the days of the week you want the time frames to be in effect.
+Then press the schedule button. If you wish to set more than one time frame for 
+the rule, you would select the rule again in the display table and just select 
+the additional time frames.</P>
+
+<P><B><FONT SIZE='3'>Other functions</FONT></B></P>
+
+<P><B>Remove time frames:</B></P>
+<P>You may select any timed access rule in the display table and remove any time
+frames by clicking on "Remove Times". This will set the rule as not being a timed
+rule and return the rule to its original state.</P>
+
+<P><B>Enable/Disable Rule:</B></P>
+
+<P>This will disable a rule without removing it from the config file.</P>

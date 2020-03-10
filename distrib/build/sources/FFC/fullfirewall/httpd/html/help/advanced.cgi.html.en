@@ -1,0 +1,17 @@
+<P><FONT SIZE='3'><B><U>Advanced Control</U></B></FONT></P>
+
+<P>Use this page to control whether or not FFC checks IP addresses to make
+sure they are in the proper subnets and to generate diagnostic reports to
+help with troubleshooting problems with firewall rules.</P>
+
+<P>To use the subnet checking feature just place a checkmark in the box next 
+to the interface you want to enable or disable then click Save. Enabled means 
+do not allow IP addresses not in their proper subnets to be entered. Disabled 
+is the same, except IPs not in their proper subnets are allowed to be entered.</P>
+
+<P>To generate diagnostic reports place a checkmark by the iptables chains or
+configurations you wish to generate reports for and click "Generate report".
+The report will appear in the display window. Highlight the text in this window
+an copy it to the clipboard. You can then paste the report directly to a forum
+post. The report is already formatted for a forum post and shouldn't need any
+modifications to the text.</P>

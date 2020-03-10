@@ -1,0 +1,6 @@
+,,0.0.0.0/0,Web,,0.0.0.0/0,0,6,ACCEPT,on,off,,
+,,0.0.0.0/0,Infrastructure,,0.0.0.0/0,0,TCP&UDP,ACCEPT,on,off,,
+,,0.0.0.0/0,Email and News,,0.0.0.0/0,0,6,ACCEPT,on,off,,
+,,0.0.0.0/0,Remote access,,0.0.0.0/0,0,6,ACCEPT,on,off,,
+,,0.0.0.0/0,File transfer,,0.0.0.0/0,0,6,ACCEPT,on,off,,
+,,0.0.0.0/0,VPNs,,0.0.0.0/0,0,VPNs,ACCEPT,on,off,,

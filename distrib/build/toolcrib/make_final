@@ -441,6 +441,7 @@ fi
       build usb-modeswitch
       build zip
       build pv
+      build FFC
 
       touch crumbs/Final.grp6.compiled
     fi

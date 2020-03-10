@@ -1,0 +1,16 @@
+FORWARD
+INPUT
+portfwf
+portfwi
+portfw
+portfw_pre
+portfw_post
+portfwb
+tofcScreen
+tofcPrxScreen
+tofcfwd2Ext
+tofcfwd2Int
+tofcblock
+subnetchk
+xtaccess
+dmzholes

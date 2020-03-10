@@ -1,0 +1,13 @@
+%filters = (
+%filters,
+
+'ffc' => '(smoothd: -- FFC Log.*)',
+);
+
+%optionText = (
+%optionText,
+
+'ffc' => 'FFC Messages'
+);
+
+1;

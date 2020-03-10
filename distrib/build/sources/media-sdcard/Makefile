@@ -74,10 +74,10 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    mtools nano reiserfsprogs parted xtables-addons cpio dialog \
 	    eudev lm_sensors xz pcmciautils qemu sysfsutils db squidGuard \
 	    apcupsd cacert-bundle setkerneltz fping \
-	    \
+	    kernel-drivers \
 	    linux-firmware acl libelf bridge-utils $(RPI_PKGS) \
 	    iw libgcrypt libgpg-error crda hostapd M2Crypto wireless-regdb \
-	    coretree $(GRUB) $(ADV_PKGS) device-ids
+	    coretree $(GRUB) $(ADV_PKGS) device-ids FFC
 
 #	    kernel-drivers \
 
