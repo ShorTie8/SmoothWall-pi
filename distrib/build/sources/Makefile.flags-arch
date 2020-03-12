@@ -183,6 +183,7 @@ endif
 ifeq ($(mARCH),arm64)
   ifeq ($(shell cat /proc/cpuinfo | grep "CPU part" | head -1 | cut -d " " -f3 | awk '{print$1}'),0xd08)
     # For pi64
+    #export mTUPLE = "pi3-64"
     export mTUPLE = "pi4-64"
     export ARCH_OK = yes
     export ARCHset = linux64

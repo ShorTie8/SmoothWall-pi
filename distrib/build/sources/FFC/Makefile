@@ -60,7 +60,7 @@ install: compile
 	cp -vR fullfirewall distrib/var/smoothwall/mods
 
 	@echo; echo "install our sysiptables.so"
-	cp -v smoothd/sysiptables.so $(FFC_ROOT)/usr/lib/smoothd/sysiptables.so
+	install -D smoothd/sysiptables.so $(FFC_ROOT)/usr/lib/smoothd/sysiptables.so
 
 	@echo; echo "install our setup"
 	cp -v $(DIR)/setup/setup distrib/usr/sbin/setup

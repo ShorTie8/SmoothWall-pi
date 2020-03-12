@@ -51,7 +51,7 @@ else ifeq ($(mTUPLE), rpi4)
   GCC_flags = --with-cpu=cortex-a72 --with-fpu=vfp --with-float=hard --enable-linker-build-id
 else ifeq ($(mTUPLE), xu4)
   GCC_flags = --with-cpu=cortex-a15 --with-cpu=cortex-a7 --with-fpu=vfpv3-d16 --with-float=hard 
-else ifeq ($(mTUPLE), pi4-64)
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
   GCC_flags =  --with-arch=armv8-a+crc --with-cpu=cortex-a72 --enable-linker-build-id
 else
   GCC_flags = Un-known GCC_flags

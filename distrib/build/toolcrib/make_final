@@ -401,8 +401,8 @@ fi
    if [ "$mTUPLE" == "$mARCH" ]; then
       build grub
    elif [ "$mTUPLE" == "pi0w" ] || [ "$mTUPLE" == "rpi2" ] \
-			|| [ "$mTUPLE" == "rpi3" ] || [ "$mTUPLE" == "rpi4" ] \
-			|| [ "$mTUPLE" == "pi4-64" ]; then
+			|| [ "$mTUPLE" == "rpi3" ] || [ "$mTUPLE" == "pi3-64" ] \
+			|| [ "$mTUPLE" == "rpi4" ] || [ "$mTUPLE" == "pi4-64" ]; then
       build rpi-firmware
       build fake-hwclock
       build libuv

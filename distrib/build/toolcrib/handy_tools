@@ -87,6 +87,10 @@ function redo ()
     return 1
   fi
 
+ if [ $1 == media ]; then
+      rm -v sources/media-sdcard/Media.mediaISO.built
+      make media
+ else
   # Get on with it already!
   while [ $# -gt 0 ]; do
     # escape the package name (mostly for libsmooth+setup)
@@ -109,4 +113,54 @@ function redo ()
 
   # And build
   make build
+ fi
 }
+
+
+function sync-cdrom-dev () {
+	echo "sync'n cdrom-dev"
+
+  death=0
+  if [ `basename $PWD` != 'build' ]; then
+      # If you'd listened to your mother, you'd be in the build dir
+      tput smso; echo "Can't sync-cdrom-dev; you must be in the build directory"; tput rmso
+      death=1;
+  fi;
+
+  if [ $death -ne 0 ]; then
+    # Die, you gravy-sucking pig!
+    return 1
+  fi
+
+	echo "Plug in flash drive"
+
+	# Wait until a new [0-9] node appears in /dev
+	#   This should be OK because there should be few device changes during operation
+	DEV_FILE="/tmp/inotify_devs"
+	INOTIFY_CMD="inotifywait -q"
+	WATCH="CREATE"
+
+	# Watch for CREATEs in /dev of xxx[0-9]*
+	$INOTIFY_CMD -m --exclude "t[my]" /dev | while read a b c; do
+	  if [ "$b" != "$WATCH" ]; then continue; fi
+	  C="${c/[0-9]*/}"
+	  if [ "$c" != "$C" -a -e "$a$C" -a -e "$a${C}1" ]; then
+		echo "${C}" > ${DEV_FILE}
+		exit  # This exits the 'while read' subprocess
+	  fi
+	done
+	read fldev <$DEV_FILE
+	rm -f $DEV_FILE
+
+	# Pause for reflection
+	sleep 2
+
+	echo; echo "Flash drive is /dev/${fldev}"; echo; sleep 4
+
+	mount -v /dev/${fldev}1 temp2
+	#sleep 4
+	rsync --progress -r -u sources/media-sdcard/cdrom-dev/* temp2
+	umount -v temp2
+}
+
+

@@ -27,43 +27,33 @@ prepare: unpack
 	@echo; echo "Setting scmversion to plus"
 	echo + > linux/.scmversion
 
-	@echo; echo; echo "Creating .config"
-	# CONFIG_LOCALVERSION needs reset for libreswan
+	@echo; echo; echo "Creating $(mTUPLE) .config"
 ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0 pi0w rpi))
-	@echo; echo; echo "pi0 pi0w rpi, config adjust"
 	cd linux; make bcmrpi_defconfig
 
+else ifeq ($(mTUPLE), rpi2)
+	cd linux; make bcm2708_defconfig
+
 else ifeq ($(mTUPLE), rpi3)
-	@echo; echo "  rpi3 config adjust"; echo
 	cd linux; make bcm2709_defconfig
-	@echo; echo "  Reset CONFIG_LOCALVERSION"
-	sed -e 's/CONFIG_LOCALVERSION="-v7"/CONFIG_LOCALVERSION=""/' -i linux/.config
 
 else ifeq ($(mTUPLE), pi3-64)
-	@echo; echo "  pi3-64 config"
 	cd linux; make bcmrpi3_defconfig
-	@echo; echo "  Reset CONFIG_LOCALVERSION"
-	sed -e 's/CONFIG_LOCALVERSION="-v8"/CONFIG_LOCALVERSION=""/' -i linux/.config
 
-else ifeq ($(mTUPLE), rpi4)
-	@echo; echo "  rpi4 config"
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi4 pi4-64))
 	cd linux; make bcm2711_defconfig
-	@echo; echo "  Reset CONFIG_LOCALVERSION"
-	sed -e 's/CONFIG_LOCALVERSION="-v7l"/CONFIG_LOCALVERSION=""/' -i linux/.config
-
-else ifeq ($(mTUPLE), pi4-64)
-	@echo; echo "  pi4-64 config"
-	cd linux; make bcm2711_defconfig
-	@echo; echo "  Reset CONFIG_LOCALVERSION"
-	sed -e 's/CONFIG_LOCALVERSION="-v8"/CONFIG_LOCALVERSION=""/' -i linux/.config
 
 else
-	$(info Un-supported kernel config!)
+	$(info Un-supported $(mTUPLE) kernel config!)
 	$(error FAIL)
 endif
 
 	@echo; echo "  Set hostname"
 	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
+
+	@echo; echo "  Reset CONFIG_LOCALVERSION"
+	# CONFIG_LOCALVERSION needs reset for libreswan
+	sed -e 's/CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=""/' -i linux/.config
 
 	@echo; echo "  disable multi media support"
 	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
@@ -128,11 +118,9 @@ package-kernel: compile-kernel
 	mkdir -vp $(PKG_ROOT)/boot/overlays
 ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi3 rpi4))
 	@echo; echo "Make modules_install"; echo
-	(cd $(PKG_ROOT); make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
-#	echo; echo; echo "scripts/mkknlimg"; echo
-#	(cd $(KERNEL_DIR); scripts/mkknlimg arch/arm/boot/zImage $(KERNEL).img)
-#	cp -v $(KERNEL_DIR)/$(KERNEL).img $(PKG_ROOT)/boot/$(KERNEL).img
-	@echo; echo "Some copies"; echo
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
+
+	@echo; echo "Some $(mTUPLE) copies"; echo
 	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
 	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
 	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
@@ -148,21 +136,32 @@ else ifeq ($(mTUPLE), rpi3)
 	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
 else ifeq ($(mTUPLE), rpi4)
 	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+else
+	$(info Un-supported $(mTUPLE) Some copies dtb's !!)
+	$(error FAIL)
 endif
 
-else ifeq ($(mTUPLE), pi4-64)
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
 	echo; echo "Make modules_install"
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
-	#(cd $(PKG_ROOT); ARCH=arm64 make -C $(KERNEL_DIR) CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install)
 
-	@echo; echo "Some copies"
+	@echo; echo "Some $(mTUPLE) copies"
 	cp -v $(KERNEL_DIR)/arch/arm64/boot/Image $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
 	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
 	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
 	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
 	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
 	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
+ifeq ($(mTUPLE), pi3-64)
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2710-rpi-3-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2710-rpi-cm3.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
+else ifeq ($(mTUPLE), pi4-64)
 	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+else
+	$(info Un-supported $(mTUPLE) Some copies dtb's !!)
+	$(error FAIL)
+endif
 
 else
 	$(info Unsupported package-kernel)

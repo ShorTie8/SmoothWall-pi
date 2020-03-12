@@ -33,7 +33,7 @@ CONFIGURE = yes
 configure: patch
 	@echo; echo; echo "configure"; echo
 	mkdir $(COMPILE_DIR)
-ifeq ($(mTUPLE), pi4-64)
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
 	cd $(COMPILE_DIR); cmake -DARM64=ON -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/usr -DVMCS_INSTALL_PREFIX=/usr ../$(DIR)
 else
 	cd $(COMPILE_DIR); cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=/usr -DVMCS_INSTALL_PREFIX=/usr ../$(DIR)

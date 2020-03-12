@@ -22,7 +22,7 @@ download:
 install: download
 ifeq ($(mARCH),$(mTUPLE))
 	tar -xf $(DOWNLOADS_DIR)/linux-$(KERNELHEADERVER).tar.xz
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64 xu4))
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64 xu4))
 	tar -xf $(DOWNLOADS_DIR)/linux-rpi-$(KERNEL_VER).tar.gz
 	#unzip -q $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).zip
 	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)

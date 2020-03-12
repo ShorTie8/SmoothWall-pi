@@ -103,7 +103,7 @@ endif
 	install -m 0644 $(DIR)/boot/cmdline.txt $(PKG_ROOT)/boot/cmdline.txt.foundation
 	install -m 0644 $(DIR)/boot/config.txt $(PKG_ROOT)/boot/config.txt.foundation
 
-ifeq ($(mTUPLE), pi4-64)
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
 	echo "arm_64bit=1" >> $(PKG_ROOT)/boot/config.txt.install
 	echo "arm_64bit=1" >> $(PKG_ROOT)/boot/config.txt.normal
 	echo "arm_64bit=1" >> $(PKG_ROOT)/boot/config.txt.foundation

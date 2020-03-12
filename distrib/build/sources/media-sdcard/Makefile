@@ -42,7 +42,7 @@ KVM_PKGS = samba
 ifeq ($(mTUPLE),$(filter $(mTUPLE),i586 i686 x86_64))
   export GRUB = grub
   #export GRUB = grub2 kernel-drivers cdrtools libelf
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64))
   export GRUB = fake-hwclock rpi-firmware i2c-tools rng-tools
   RPI_PKGS = rpi-userland
   #ADV_PKGS +=
@@ -243,7 +243,7 @@ endif
 	fi);
 
 # fake-hwclock adjustment
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64))
 	@echo "        setting fake-harware clock" >>$(MEDIA_BUILD_OUT)
 	@echo -e "\n\nsetting fake-harware clock"; echo
 	echo "`date -u '+%Y-%m-%d %H:%M:%S'`" > distrib/etc/fake-hwclock.data
@@ -409,7 +409,7 @@ ifeq ($(mTUPLE),$(mARCH))
 	    -V $(BASENAME) --publisher "Smoothwall Express (OffRoad)" offroad; \
 	  echo -e "$${ISONAME} assembly complete\n\n"; \
 	)
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4 pi4-64))
+else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64))
 	#cp -v cdrom/cmdline.txt.install cdrom/cmdline.txt
 	#cp -v cdrom/config.txt.install cdrom/config.txt
 	cp -v cdrom-dev/cmdline.txt.install cdrom-dev/cmdline.txt
