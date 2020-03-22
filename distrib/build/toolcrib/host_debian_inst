@@ -19,7 +19,7 @@ for package in build-essential bison flex gawk inotify-tools screen zip libxml-s
   if [ $MUST_INST -eq 1 ]; then
     echo -ne $MSG1; MSG1=""
     tput smso; echo "$package:"; tput rmso
-    apt-get -y install $package | sed -e 's/^/  /'
+    apt -y install $package | sed -e 's/^/  /'
     echo
   fi
 done
