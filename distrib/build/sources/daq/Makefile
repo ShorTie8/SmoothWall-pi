@@ -7,6 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = daq
+ReConfigure = yes
 
 # Deal with snort: get the latest version number dynamically. :)
 #

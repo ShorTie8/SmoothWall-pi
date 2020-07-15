@@ -4,6 +4,8 @@
 #
 # This code is distributed under the terms of the GPL v2.
 
+# http://raspbian.raspberrypi.org/raspbian/pool/main/k/klibc/
+
 include ../Makefile
 include ../Makefile.conf
 include ../Makefile.versions
@@ -14,13 +16,13 @@ include ../Makefile.versions
 
 PACKAGE = klibc
 VER_MM = 2.0
-VERSION = $(VER_MM).4
-EXTENSION = .tar.gz
+VERSION = $(VER_MM).7
+EXTENSION = .tar.xz
 BASE_URL = http://www.kernel.org/pub/linux/libs/klibc/$(VER_MM)/
 export NO_CHECK_CERT = 1
 
-PATCH_FILE1 = klibc_2.0.4-9.debian.tar.xz
-PATCH_URL1 = http://http.debian.net/debian/pool/main/k/klibc/$(PATCH_FILE1)
+#PATCH_FILE1 = klibc_2.0.4-9.debian.tar.xz
+#PATCH_URL1 = http://http.debian.net/debian/pool/main/k/klibc/$(PATCH_FILE1)
 
 ifeq ($(mTUPLE),$(mARCH))
   ARM_STUFF = 
@@ -54,7 +56,8 @@ configure: patch
 	done
 
 COMPILE = yes
-compile: configure
+compile: $(DIR)/
+#compile: configure
 	@echo; echo; echo "compile"; echo
 	# KLIBCKERNELSRC defualts to ./usr, not valid in chroot, so use /usr instead
 	cd $(DIR); \

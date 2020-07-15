@@ -35,12 +35,13 @@ OTHER_PKGS = updates jam udev udev-config cnxadsl \
 TARGET_DIR = /build/target
 
 ADV_PKGS = gdbm GeoIP Python libmnl openldap gperf attr \
-	   subversion ntop iperf
+	   subversion iperf
+# ntop
 KVM_PKGS = samba
 
 # use this to include mTUPLE specifics
 ifeq ($(mTUPLE),$(filter $(mTUPLE),i586 i686 x86_64))
-  export GRUB = grub
+  export GRUB = grub kernel-drivers
   #export GRUB = grub2 kernel-drivers cdrtools libelf
 else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64))
   export GRUB = fake-hwclock rpi-firmware i2c-tools rng-tools
@@ -74,10 +75,9 @@ INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    mtools nano reiserfsprogs parted xtables-addons cpio dialog \
 	    eudev lm_sensors xz pcmciautils qemu sysfsutils db squidGuard \
 	    apcupsd cacert-bundle setkerneltz fping \
-	    kernel-drivers \
 	    linux-firmware acl libelf bridge-utils $(RPI_PKGS) \
 	    iw libgcrypt libgpg-error crda hostapd M2Crypto wireless-regdb \
-	    coretree $(GRUB) $(ADV_PKGS) device-ids FFC
+	    coretree $(GRUB) $(ADV_PKGS) device-ids FFC GAR git
 
 #	    kernel-drivers \
 
@@ -198,8 +198,9 @@ endif
 	
 	@echo "        move docs to distrib-doc" >>$(MEDIA_BUILD_OUT)
 	@echo -e "\n\nMoving docs to distrib-doc"
+	# share/ntop/html
 	for I in man info share/man share/info share/doc share/gtk-doc \
-	      share/ntop/html share/slsh/help examples; do \
+	       share/slsh/help examples; do \
 	  if [ -d distrib/usr/$$I ]; then \
 	    mkdir -p distrib-doc/usr/$$I; \
 	    mv distrib/usr/$$I/* distrib-doc/usr/$$I/; fi; \
@@ -301,7 +302,7 @@ endif
 	@ln -s /var/smoothwall/vpn/ipsec.conf distrib/etc/ipsec.conf
 	@ln -s /var/smoothwall/vpn/ipsec.secrets distrib/etc/ipsec.secrets
 	@ln -sf /usr/bin/hostname distrib/bin/hostname
-	@cd distrib; chown -R root:root usr/share/ntop usr/etc/ntop
+	#@cd distrib; chown -R root:root usr/share/ntop usr/etc/ntop
 	@cd distrib/etc; mkdir -p apcupsd/scripts && chown root:root apcupsd/scripts && chmod 755 apcupsd/scripts
 	@cd distrib/etc; chmod 644 logrotate.{base,conf,d/*}
 	@cd distrib-doc; chown -R root:root .

@@ -1,0 +1,12 @@
+--- GAR.orig	2020-07-07 19:39:57.403230372 +0100
++++ GAR	2020-07-07 19:42:51.000000000 +0100
+@@ -720,6 +720,9 @@
+   {
+     # Do something to fail gracefully. 'die' can cause the UI to not display correctly,
+     #   or at all, when used in a .cgi script.
++		if (/^Interface\s+(.*)/i)       {${interface} = $1;}
++		if (/^HostIpAddr\s+(.*)/i)      {${host_ip_address} = $1;}
++		if (/^HostGatewayByte\s+(.*)/i) {${host_gateway_byte} = $1;}
+   }
+ 
+   ##### end of new config reading #####

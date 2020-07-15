@@ -268,7 +268,7 @@ fi
       build linux
       #build linux-backports
       build linux-firmware
-      build kernel-drivers
+  #    build kernel-drivers
       build iptables
       build ipset
       build xtables-addons
@@ -375,7 +375,7 @@ fi
       build iw
 
       build lzo
-      build openvpn
+  #    build openvpn
 
       build noip
       build ez-ipupdate
@@ -442,6 +442,7 @@ fi
       build zip
       build pv
       build FFC
+      build GAR
 
       touch crumbs/Final.grp6.compiled
     fi

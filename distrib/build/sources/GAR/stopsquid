@@ -1,0 +1,62 @@
+#! /bin/bash
+
+# This only does something if squid is running
+if [ -f /var/run/squid.pid ] && [ -d /proc/`cat /var/run/squid.pid` ]; then
+
+  # Get the conf file location
+  SQUID_CONF="$1"
+  if [ -z "$SQUID_CONF" ]; then
+    echo "stopsquid did not receive the path to squid.conf; no action taken." >&2
+    logger -t smoothwall "stopsquid did not receive the path to squid.conf; no action taken."
+    exit 1
+  fi
+
+  # Look for swap.state being written and closed in the background
+  inotifywait -e close_write /var/spool/squid/cache/swap.state >/dev/null 2>&1 &
+  INWpid=$!
+
+  # Give it a moment to start
+  sleep .01
+
+  # Prevent new connections; allow existing conns to continue
+  /usr/sbin/squid -f "$SQUID_CONF" -k shutdown
+
+  # Enough time for squid to return from the signal handler
+  sleep .01
+
+  # Close all existing connections, write swap.state, and exit
+  /usr/sbin/squid -f "$SQUID_CONF" -k shutdown
+
+  # Wait for inotifywait to receive the close_write notice and exit
+  wait $INWpid
+
+  # And wait 10ms for squid to finish exiting
+  sleep .01
+
+  logger -t smoothwall "Squid stopped"
+fi
+
+# https://community.smoothwall.org/forum/viewtopic.php?f=126&t=43647&p=349012&hilit=gar.conf#p349027
+
+# This only does something if GAR is running
+echo "Checking for GAR"
+echo -e "${BOUL}    Checking for GAR ${NO}"
+if [ -f /var/run/GAR.pid ] && [ -d /proc/`cat /var/run/GAR.pid` ]; then
+
+  # Look for GAR.pid to be deleted in the background
+  inotifywait -e delete /var/run/GAR.pid >/dev/null 2>&1 &
+  INWpid=$!
+
+  # Give it a moment to start
+  sleep .01
+
+  # Shut down GAR, and wait for it to finish primping
+  smoothcom GARstop
+
+  # Wait for inotifywait to receive the delete notice
+  wait $INWpid
+
+  echo "  GAR stopped"
+  logger -t smoothwall "GAR stopped"
+fi
+

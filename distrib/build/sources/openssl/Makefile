@@ -6,12 +6,13 @@
 
 include ../Makefile.conf
 
-OPENSSL_VER = 1.0.2t
+OPENSSL_VER = 1.0.2u
 
 PACKAGE = openssl
 VERSION = $(OPENSSL_VER)
 
-BASE_URL = http://www.openssl.org/source/
+#BASE_URL = http://www.openssl.org/source/
+BASE_URL = https://www.openssl.org/source/old/1.0.2
 
 # If building for 486, generate only 386 code. Otherwise, building
 #   'modern' code should be OK.

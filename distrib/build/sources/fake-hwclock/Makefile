@@ -10,10 +10,10 @@
 include ../Makefile.conf
 
 PACKAGE = fake-hwclock
-VERSION = 0.11
+VERSION = 0.12
 EXTENSION = .tar.gz
 BASE_FHC = http://http.debian.net/debian/pool/main/f/fake-hwclock
-TAR_FHC = fake-hwclock_$(VERSION).tar.gz
+TAR_FHC = fake-hwclock_$(VERSION).tar.xz
 
 
 DOWNLOAD = yes
@@ -22,7 +22,7 @@ download:
 
 INSTALL = yes
 install: download
-	tar xf $(DOWNLOADS_DIR)/$(PACKAGE)_$(VERSION).tar.gz
+	tar xf $(DOWNLOADS_DIR)/$(PACKAGE)_$(VERSION).tar.xz
 
 	mkdir -p $(PKG_ROOT)
 	mkdir -vp $(PKG_ROOT)/{etc,sbin}
@@ -40,6 +40,7 @@ CLEAN = yes
 clean:
 	@echo -n " $(PACKAGE)"
 	@rm -rf git
+	@rm -rf $(PKG_ROOT)
 	@rm -f $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz
 
 

@@ -7,7 +7,7 @@
 # The system's kernel.
 KERNEL_MAJOR = 4
 KERNEL_MMR = $(KERNEL_MAJOR).19
-KERNEL_VER = $(KERNEL_MMR).102
+KERNEL_VER = $(KERNEL_MMR).127
 
 # The kernel version headers needed to build glibc
 # Unrelated to the system's kernel
@@ -25,8 +25,8 @@ KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K
 KERNELHEADER_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNELHEADER_MAJOR).x/linux-$(KERNELHEADERVER).tar.xz
 
 ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64))
-    KERNEL_VER = $(KERNEL_MMR).102+
-    KERNEL_COM = 65cd479134433363e1235a3aee4e41e281384cf6
+    KERNEL_VER = $(KERNEL_MMR).127+
+    KERNEL_COM = fe915debc1925397f78db8bbfc9f488b0ce4e009
     KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-rpi-$(KERNEL_VER).tar.gz
     K_RAW_VERSION = $(KERNEL_VER)
     K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
@@ -44,16 +44,16 @@ else ifneq ($(mARCH),$(mTUPLE))
 endif
 
 FREESWAN_TYPE = libreswan
-FREESWAN_VER = 3.30
+FREESWAN_VER = 3.32
 
 IPTABLES_VER = 1.6.0
 # 1.6.1 & 2 don't give /iptables/xshared.o
 #IPTABLES_VER = 1.6.2
 
-#XTABLES_ADDONS_VER = 2.10
+XTABLES_ADDONS_VER = 3.9
 #XTABLES_ADDONS_VER = 2.14
 # warning Kernels below 4.15 not supported.
-XTABLES_ADDONS_VER = 3.3
+#XTABLES_ADDONS_VER = 3.3
 
 BIN_VER = 2.28
 GCC_VER = 6.5.0

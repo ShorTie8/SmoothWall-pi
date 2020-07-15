@@ -8,18 +8,14 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = rpi-firmware
-#VERSION = a154f2136850dba827cf4bc40794854376902cbd
-#VERSION = 08262019
-#GIT_COMMIT = 7163480fff007dc98978899b556dcf06f8a462c8
+VERSION = 20200704
+GIT_COMMIT = 9a3a10bf1019ebb2d59053564dc6b90068bad27d
 
-#VERSION = 10282019
-#GIT_COMMIT = 4ee44af381d55bc2221cf80c1433842a48ed09e1
-
-VERSION = 11062019
-GIT_COMMIT = 00daf85ffa373ecce7836df7543c6ebe4cf43639
-
-FILES = LICENCE.broadcom bootcode.bin \
-		fixup.dat fixup4.dat start.elf start4.elf
+ifeq ($(mARCH), arm)
+FILES = LICENCE.broadcom bootcode.bin fixup.dat start.elf
+else ifeq ($(mARCH), arm64)
+FILES = LICENCE.broadcom  fixup4.dat start4.elf
+endif
 
 DOWNLOAD = yes
 download:
@@ -44,8 +40,8 @@ download:
 			done;)); \
 		echo; echo; echo "config.txt -n- cmdline.txt"; echo; \
 		(cd $(DIR)/boot; \
-			wget https://raw.githubusercontent.com/RPi-Distro/pi-gen/9cffa42a3514cd2a4d0aa648a6e52860ae86e1b5/stage1/00-boot-files/files/config.txt; \
-			wget https://raw.githubusercontent.com/RPi-Distro/pi-gen/9cffa42a3514cd2a4d0aa648a6e52860ae86e1b5/stage1/00-boot-files/files/cmdline.txt; \
+			wget https://raw.githubusercontent.com/RPi-Distro/pi-gen/$(GIT_COMMIT)/stage1/00-boot-files/files/config.txt; \
+			wget https://raw.githubusercontent.com/RPi-Distro/pi-gen/$(GIT_COMMIT)/stage1/00-boot-files/files/cmdline.txt; \
 			sed -e 's@ROOTDEV@/dev/mmcblk0p4@' cmdline.txt); \
 		tar -zcvf $(DOWNLOADS_DIR)/$(PACKAGE)-$(VERSION).tar.gz $(DIR); \
 		touch $(DOWNLOADS_DIR)/$(PACKAGE)-$(VERSION).tar.gz.done; \
