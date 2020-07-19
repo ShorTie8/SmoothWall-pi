@@ -40,7 +40,7 @@ reconf: patch
 	@echo; echo; echo "autoreconf --install"; echo
 	cd $(DIR); autoreconf --install
 	@echo; echo; echo "autoreconf --force"; echo
-	cd $(DIR); autoreconf --force
+	cd $(DIR); autoreconf --force -i
 
 CONFIGURE = yes
 configure: reconf

@@ -1,0 +1,18 @@
+#! /bin/bash
+
+cd distrib
+
+# delete the docs and includes
+for i in usr/{doc,man,info} usr/share/{doc,man,info} \
+         usr/include include share/{doc,man,info}; do
+  rm -rf $i &
+done
+
+# delete the static libs.
+for i in lib usr/lib; do
+  find $i -name \*.a -delete >/dev/null 2>&1 &
+  find $i -name \*.la -delete >/dev/null 2>&1 &
+done
+
+# Wait for all children to die 
+wait

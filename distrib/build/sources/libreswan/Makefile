@@ -26,8 +26,11 @@ BASE_URL = https://download.libreswan.org
 TARBALL = $(FREESWAN_TYPE)-$(VERSION)
 
 PATCH_FILE1 = makefile.patch
+#PATCH_FILE1 = kernel.mk.patch
 PATCH_FILE2 = setup.in.smoothwall.patch
 PATCH_FILE3 = ipsec.init.in.patch
+PATCH_FILE4 = ipsec_kversion.h.patch
+#PATCH_FILE5 = pf_key.c.patch
 
 KNL_SRC = ../linux$(KERNEL_TYPE)/linux
 MOD_DEST = /lib/modules/$(K_RAW_VERSION)$(KERNEL_TYPE)/kernel/net/ipsec
@@ -84,7 +87,7 @@ LIBRE_FLAGS:=\
 	DEST_DIR=/build/buildroot/libreswan \
 	FINALLIBEXECDIR=/usr/libexec/ipsec \
 	FINALRUNDIR=/var/run/pluto \
-	KERNELRSC=../../linux/linux \
+	KERNELRSC=/build/sources/linux/linux \
 	INC_RCDIRS=/etc/rc.d \
 	INC_RCDEFAULT=/etc/rc.d \
 	INC_USRLOCAL=/usr \

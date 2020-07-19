@@ -11,6 +11,21 @@ echolog "e" "s" "" "Shutting down..."
 # Block all inbound packets on all NICs
 . /etc/rc.d/inc.block-ingress
 
+# Adapted from Steve McNeill's ModInstall
+echolog "e" "s" "" "  Run mods' rc.halt scripts"
+# if any; limited to .../mods/*/etc/rc.d, 00-99 to allow mods to cooperate
+#   when shutting down.
+# It is the mod's responsibility to ensure that its rc.halt *does* terminate
+#   in a reasonable time.
+# FIXME: this should be ordered by number, then by mod; use an assoc. array.
+shopt -s nullglob
+unset i
+for i in /var/smoothwall/mods/*/etc/rc.d/[0-9][0-9]rc.halt; do
+  $i
+done&
+shopt -u nullglob
+
+
 # Squid can take a while to write swap.state, so it rides
 #   the short bus.
 

@@ -56,7 +56,7 @@ int restart_dhcpd(std::vector<std::string> & parameters, std::string & response)
 		error = start_dhcpd(parameters, response);
 	
 	if (!error)
-		response = "DHCPD Restart Successful";
+		response = "DHCPD restart succeeded";
 	
 	return error;
 }
@@ -66,7 +66,7 @@ int stop_dhcpd(std::vector<std::string> & parameters, std::string & response)
 	int error = 0;
 	
 	killprocess("/var/run/dhcpd.pid");
-	response = "DHCPD Process Terminated";
+	response = "DHCPD stopped";
 	unlink("/var/run/dhcpd.pid");
 	
 	return error;
@@ -88,6 +88,7 @@ int start_dhcpd(std::vector<std::string> & parameters, std::string & response)
 
 	int error = 0;
 	ConfigSTR green("/var/smoothwall/dhcp/green");
+	ConfigSTR orange("/var/smoothwall/dhcp/orange");
 	ConfigSTR purple("/var/smoothwall/dhcp/purple");
 	std::vector<std::string> args;
 	
@@ -95,6 +96,8 @@ int start_dhcpd(std::vector<std::string> & parameters, std::string & response)
 
 	if (green.str() != "")
 		args.push_back(green.str());
+	if (orange.str() != "")
+		args.push_back(orange.str());
 	if (purple.str() != "")
 		args.push_back(purple.str());
 		
@@ -103,9 +106,9 @@ int start_dhcpd(std::vector<std::string> & parameters, std::string & response)
 		error = simplesecuresystemvector(args);
 		
 		if (error)
-			response = "DHCPD Start failed!";
+			response = "DHCPD start FAILED!";
 		else
-			response = "DHCPD Start Successful";
+			response = "DHCPD start succeeded";
 	}
 	
 	return error;
@@ -114,18 +117,23 @@ int start_dhcpd(std::vector<std::string> & parameters, std::string & response)
 int clean_dhcpd(std::vector<std::string> & parameters, std::string & response)
 {
 	int error = 0;
-
-	response = "DHCP Leases Cleaned and Restarted";
-
-	system("/bin/echo > /usr/etc/dhcpd.leases");
-	system("/bin/echo > /usr/etc/dhcpd.leases~");
-
-	error = restart_dhcpd(parameters, response);
+	std::vector<std::string> args;
+	
+	args.push_back("/usr/bin/smoothwall/scrub-dhcp-leases.pl");
+	error = simplesecuresystemvector(args);
 
 	if (error)
-		response = "DHCPD Lease Clean and Restart Failed!";
-	else
-		response = "DHCPD Lease Clean and Restart Successful";
+		response = "DHCPD lease scrub FAILED!";
+	else {
+
+		error = restart_dhcpd(parameters, response);
+
+		if (error)
+			response = "DHCPD restart FAILED!";
+		else
+			response = "DHCP leases cleaned and restarted";
+	}
+
 
 	return error;
 }

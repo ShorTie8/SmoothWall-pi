@@ -12,14 +12,14 @@ all the boxes in this form and the details filled into the form on the other
 end must match <B>EXACTLY</B> with yours. This is why the Import and Export
 features are useful. Fields are as follows:</P>
 
-<P><B>Name:</B> A simple name to reference this connection.  Use lower case
-letters only.</P>
+<P><B>Name:</B> A simple name to reference this connection.  Uletterssi A-Z, a-z, 0-9,
+- (dash), _ (underscore) and . (period) only.</P>
 
 <P><B>Left/Right:</B> The internet IP address of the Left/Right side of the
 connection.</P>
 
-<P><B>Left/Right subnet:</B> The network of the left/right hand side (e.g.
-192.168.0.0/24 would include 192.168.0.*).</P>
+<P><B>Left/Right subnet:</B> The internal network of the left/right hand side
+(e.g.  192.168.0.0/24 would include 192.168.0.*).</P>
 
 <P><B>Secret:</B> The password for the connection.
 Re-enter the secret into the <B>Again</B> box.</P>
@@ -27,7 +27,10 @@ Re-enter the secret into the <B>Again</B> box.</P>
 <P><B>Compression:</B> Check this to enable compression on the link.  This
 can enhance the performance of the link for certain kinds of traffic.  Note
 that both ends of the VPN tunnel must agree on whether to use compression or
-not.</P>
+not. Note that compression is really only useful on slow internet connections
+or when both ends of the link have very fast processors; in between these
+extremes, the time compression and decompression take often negates the benefit
+of the increased data transfer rate.</P>
 
 <p><b>Comment:</b> Optionally you may enter a description or comment for the
 tunnel.</p>

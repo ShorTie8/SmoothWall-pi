@@ -43,3 +43,4 @@ done
 . /etc/rc.d/inc.clearRED
 
 /usr/bin/smoothcom dnsproxystop
+/usr/bin/killall dhcpcd

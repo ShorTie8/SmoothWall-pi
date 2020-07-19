@@ -266,15 +266,30 @@ package:
 	done
 
 patch:
-	@echo "Making swe-u10-arm-pi4-64-patch.tar.xz ..."
-	git diff > swe-u10-arm-pi4-64-patch.diff
+	@echo "Making swe-u11-patch.tar.xz ..."
+	git diff > swe-u11-patch.diff
 	#diff -ru sources/media sources/media-sdcard > media-sdcard.diff
-	tar -cJf swe-u10-arm-pi4-64-patch.tar.xz \
-			swe-u10-arm-pi4-64-patch.diff
-#			sources/ed/Makefile \
+	tar -cJf swe-u11-patch.tar.xz \
+			swe-u11-patch.diff \
+			sources/c_icap_modules/clamav_version.patch \
+			sources/coretree/tree/usr/bin/smoothwall/scrub-dhcp-leases.pl \
+			sources/coretree/tree/usr/lib/smoothwall/services/dhcpcd \
+			sources/coretree/tree/var/smoothwall/main/teammsg.conf \
+			sources/dhcpcd/if-linux.c.patch \
+			sources/dhcpcd/if.c-v911.patch \
+			sources/dhcpcd/if.c.patch \
+			sources/libreswan/ipsec_kversion.h.patch \
+			sources/libreswan/kernel.mk.patch \
+			sources/updates/update11/Makefile \
+			sources/updates/update11/coretree.list \
+			sources/updates/update11/pre-tar-setup \
+			sources/updates/update11/setup \
+			toolcrib/2i586 \
+			toolcrib/filter-oui \
+			sources/perl-mods/perl-mods-0.0/Encode-Locale/Makefile
 
-	@echo "Checking swe-u10-arm-pi4-64-patch.tar.xz ..."
-	tar -tf swe-u10-arm-pi4-64-patch.tar.xz
+	@echo "Checking swe-u11-patch.tar.xz ..."
+	tar -tf swe-u11-patch.tar.xz
 
 
 # Get tossed in the pokey with the proper environment

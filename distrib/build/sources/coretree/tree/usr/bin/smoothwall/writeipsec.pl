@@ -63,6 +63,7 @@ foreach $line (@current)
 		print SECRETS "$conn{'LEFT'} $conn{'RIGHT'} : PSK \"$conn{'SECRET'}\"\n";
 
 		print CONF "conn $connname\n";
+		print CONF "\tikev2=yes\n";
 		print CONF "\tike=aes-sha,3des-md5\n";
 		print CONF "\tphase2alg=aes-sha,3des-md5\n";
 		print CONF "\tauthby=secret\n";

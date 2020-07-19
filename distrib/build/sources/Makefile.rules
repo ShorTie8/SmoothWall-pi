@@ -49,6 +49,7 @@ ifdef PATCH_FILE1
 	done; \
 	(cd $(DIR); \
 	for PATCH in $(PATCH_FILE1) $(PATCH_FILE2) $(PATCH_FILE3) $(PATCH_FILE4) $(PATCH_FILE5); do \
+	  tput smso; echo $$PATCH; tput rmso; \
 	  FILENAME=../$$PATCH; \
 	  echo; echo $$FILENAME; \
 	  [ -f $$FILENAME ] || exit 8; \

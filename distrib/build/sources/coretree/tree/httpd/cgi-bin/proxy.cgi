@@ -31,6 +31,8 @@ $proxysettings{'ACTION'} = '';
 $proxysettings{'VALID'} = '';
 
 $proxysettings{'UPSTREAM_PROXY'} = '';
+$proxysettings{'PEER_USERNAME'} = '';
+$proxysettings{'PEER_PASSWORD'} = '';
 $proxysettings{'ENABLE'} = 'off';
 $proxysettings{'CACHE_SIZE'} = '500';
 $proxysettings{'TRANSPARENT'} = 'off';

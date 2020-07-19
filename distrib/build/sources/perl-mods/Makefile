@@ -57,7 +57,8 @@ export PERL_MODS = \
 	    XML-Simple \
 	    LWP-Protocol-https \
 	    Archive-Zip \
-	    Net-DNS
+	    Net-DNS \
+	    Encode-Locale
 
 DOWNLOAD = yes
 download:

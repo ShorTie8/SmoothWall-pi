@@ -17,6 +17,8 @@ PCI_URL = http://pci-ids.ucw.cz/v2.2/
 PCI_FILE = pci.ids.bz2
 USB_URL = http://www.linux-usb.org/
 USB_FILE = usb.ids.bz2
+OUI_URL = http://standards-oui.ieee.org/oui/
+OUI_FILE = oui.txt
 
 # Force fetching from upstream origin every time.
 export MIRROR_UNO =
@@ -26,9 +28,10 @@ DOWNLOAD = yes
 
 # For a download every time.
 download:
-	@rm -f ../../downloads/pci.ids* ../../downloads/usb.ids*
+	@rm -f ../../downloads/oui.txt* ../../downloads/pci.ids* ../../downloads/usb.ids*
 	@$(DL_CMD) $(PCI_URL)$(PCI_FILE)
 	@$(DL_CMD) $(USB_URL)$(USB_FILE)
+	@$(DL_CMD) $(OUI_URL)$(OUI_FILE)
 
 
 PREPARE = yes
@@ -36,12 +39,14 @@ $(DIR)/: download
 	mkdir $(DIR) && \
 	  cd $(DIR) && \
 	  bunzip2 < ../../../downloads/$(PCI_FILE) > pci.ids && \
-	  bunzip2 < ../../../downloads/$(USB_FILE) > usb.ids
+	  bunzip2 < ../../../downloads/$(USB_FILE) > usb.ids && \
+	  ../../../toolcrib/filter-oui -v
 
 INSTALL = yes
 install: $(DIR)/
-	mkdir -p $(PKG_ROOT)/usr/share
+	mkdir -p $(PKG_ROOT)/usr/share $(PKG_ROOT)/usr/lib/smoothwall
 	cd $(DIR) &&  \
-	  cp *.ids $(PKG_ROOT)/usr/share
+	  cp *.ids oui.txt $(PKG_ROOT)/usr/share && \
+	  cp oui_vendor.pm $(PKG_ROOT)/usr/lib/smoothwall
 
 include ../Makefile.rules

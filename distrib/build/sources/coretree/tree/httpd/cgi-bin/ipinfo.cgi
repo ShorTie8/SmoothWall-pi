@@ -12,7 +12,7 @@ use header qw( :standard );
 use Socket;
 
 my %cgiparams;
-my (@addrs, my @vars);
+my (@addrs, @vars);
 my $addr;
 my $var;
 my $hostname;

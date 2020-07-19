@@ -1,17 +1,47 @@
 <P><FONT SIZE='3'><B><U>Remote Access</U></B></FONT></P>
 
-<P>This page enables the user to enable the SSH (Secure Shell) service.
-This enables remote console access to the Smoothwall machine.  For various
-reasons, the SSH service listens on a non-standard port 222.</P>
+<p>
+  This page enables the user to control access, from the GREEN and PURPLE
+  zones to SSH and to the web UI. This enables remote command line access to
+  the Smoothwall machine. For various reasons, the SSH service listens on a
+  non-standard port 222.
+</p>
 
-<P>Enable or disable this service using the checkbox, and then click
-<B>Save</B>.</P>
+<p style="padding:1em; margin:2em 5em; border:2pt dashed black">
+  <i>
+    <b><span style="color:#b00000">CAUTION:</span></b>
+    If you disable access to SSH, HTTP and HTTPS on both GREEN and PURPLE, you
+    will no longer be able to administer your firewall until you access the
+    system console and edit the remote settings file to re-enable access, or
+    if you had already enabled external internet access to one or more of
+    these services.
+  </i>
+</p>
 
-<P>In order to be certain that the request for an admin function is from the
-Smoothwall server and not some third party web page, a referral check is
-done. Enabling this feature means it is only possible to administer the
-Smoothwall if the URL you visit contains either the local GREEN IP, the
-local hostname, or the RED IP address. It will not be possible to administer
-the Smoothwall if you connect via a DNS or Dynamic DNS name. The checkbox
-labeled <STRONG>Allow admin access only from valid referral URLs</STRONG>
-activates this feature.  By default it is switched off.</P>
+<p>
+  Enable or disable this service on GREEN or PURPLE using the respective
+  checkboxes, and then click <b>Save</b>. This allows you finer control over
+  access to the system via SSH. If neither zone is selected, the SSH daemon
+  will not be started.
+</p>
+
+<p>
+  Enable or disable access to the web UI via HTTP and/or HTTPS. The apache web
+  server is not affected.
+</p>
+
+<p>
+  Remote access via the external access admin page and via VPN is not affected
+  by these controls.
+</p>
+
+<p>
+  In order to be certain that the request for an admin function is from the
+  Smoothwall server and not some third party web page, a referral check is
+  done. Enabling this feature means it is only possible to administer the
+  Smoothwall if the URL you visit contains either the local GREEN IP, the
+  local hostname, or the RED IP address. It will not be possible to administer
+  the Smoothwall if you connect via a DNS or Dynamic DNS name. The checkbox
+  labeled <i>Allow admin access only from valid referral URLs</i> activates
+  this feature. By default it is switched off.
+  </p>

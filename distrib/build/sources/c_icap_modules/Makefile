@@ -7,6 +7,8 @@ PACKAGE_ALT = c-icap
 
 BASE_URL = http://downloads.sourceforge.net/project/c-icap/c-icap-modules/0.5.x
 
+PATCH_FILE1 = clamav_version.patch
+
 CONFIGURE = yes
 configure: patch
 	(if [ ! -e $(COMPILE_DIR) ]; then mkdir $(COMPILE_DIR); fi)

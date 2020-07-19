@@ -1,0 +1,18 @@
+--- ./src/if.c-ORIG	2020-06-09 18:12:34.679557074 -0400
++++ ./src/if.c	2020-06-09 18:10:47.135169579 -0400
+@@ -31,6 +31,7 @@
+ #include <sys/ioctl.h>
+ #include <sys/socket.h>
+ #include <syslog.h>
++#include <fcntl.h>
+ 
+ #include "config.h"
+ 
+@@ -55,7 +56,6 @@
+ #include <errno.h>
+ #include <ifaddrs.h>
+ #include <inttypes.h>
+-#include <fcntl.h>
+ #include <fnmatch.h>
+ #include <stddef.h>
+ #include <stdio.h>

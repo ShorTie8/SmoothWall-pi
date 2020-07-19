@@ -35,7 +35,7 @@ function killMon () {
         Done) continue;; # do nothing else
         *) continue;; # also do nothing else
       esac
-      [ -f sources/$pkg/$stage.out ] || touch sources/$pkg/$stage.out
+      [ -f sources/$pkg/$stage.out ] || touch sources/$pkg/$stage.out 2>/dev/null
       tail -f -s .1 sources/$pkg/$stage.out&
       MONPID=$!
     fi

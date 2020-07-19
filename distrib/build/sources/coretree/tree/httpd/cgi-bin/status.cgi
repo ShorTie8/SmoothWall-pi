@@ -210,20 +210,27 @@ sub running_since
 sub isrunning
 {
 	my $cmd = $_[0];
-	my $status = status_line( "stopped" );
+	my $procstatus = status_line( "stopped" );
 	my $pid = '';
 	my $testcmd = '';
 	my $exename;
 	my $qosPidFile = "/var/run/qos.pid";
+	my $pidfile;
 
 	$cmd =~ /(^[a-z]+)/;
 	$exename = $1;
+
+	($pidfile) = glob("/var/run/${cmd}/*.pid");
+	$pidfile = "" unless defined $pidfile;
+	if ($pidfile eq "") {
+		$pidfile = "/var/run/${cmd}.pid";
+	}
 
 	my $howlong = "";
 	# qos is a special case
 	if ($cmd eq 'qos') {
 		if (-f $qosPidFile) {
-			$status = &status_line( "running" );
+			$procstatus = &status_line( "running" );
 			$howlong = &running_since($qosPidFile);
 		}
 	}
@@ -232,9 +239,9 @@ sub isrunning
 		#   'special case' status check
 		require $specialcases{$cmd};
 		my $speccase = \&{$cmd . "_isrunning"};
-		($status, $howlong) = &$speccase();
+		($procstatus, $howlong) = &$speccase();
 	}
-	elsif (open(FILE, "/var/run/${cmd}.pid")) {
+	elsif (open(FILE, $pidfile)) {
 		$pid = <FILE>; chomp $pid;
 		close FILE;
 		if (open(FILE, "/proc/${pid}/status")) {
@@ -243,15 +250,15 @@ sub isrunning
 			}
 			close FILE;
 			if ($testcmd =~ /$exename/) {
-				$status = &status_line( "running" );
-				$howlong = &running_since("/var/run/${cmd}.pid");
+				$procstatus = &status_line( "running" );
+				$howlong = &running_since($pidfile);
 
 				if (open(FILE, "/proc/${pid}/cmdline")) {
 					my $cmdline = <FILE>;
-					$status = status_line( "swapped" ) if (!$cmdline);
+					$procstatus = status_line( "swapped" ) if (!$cmdline);
 				}
 			}
 		}
 	}
-	return ( $status, $howlong );
+	return ( $procstatus, $howlong );
 }

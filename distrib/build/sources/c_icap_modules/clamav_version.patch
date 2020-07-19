@@ -1,0 +1,30 @@
+--- a/services/virus_scan/clamav_mod.c.orig	2019-11-25 19:36:11 UTC
++++ a/services/virus_scan/clamav_mod.c
+@@ -104,8 +104,8 @@ extern ci_off_t CLAMAV_MAXFILESIZE;
+ extern ci_off_t CLAMAV_MAXSCANSIZE;
+ extern char *CLAMAV_TMP;
+ 
+-#define CLAMAVLIB_VERSION_SIZE 64
+-static char CLAMAVLIB_VERSION[CLAMAVLIB_VERSION_SIZE];
++#define _CLAMAVLIB_VERSION_SIZE 64
++static char _CLAMAVLIB_VERSION[_CLAMAVLIB_VERSION_SIZE];
+ #define CLAMAV_SIGNATURE_SIZE SERVICE_ISTAG_SIZE + 1
+ static char CLAMAV_SIGNATURE[CLAMAV_SIGNATURE_SIZE];
+ 
+@@ -641,13 +641,13 @@ void clamav_set_versions()
+     CLAMAV_SIGNATURE[CLAMAV_SIGNATURE_SIZE - 1] = '\0';
+ 
+      /*set the clamav version*/
+-     snprintf(CLAMAVLIB_VERSION, CLAMAVLIB_VERSION_SIZE - 1, "%s/%d", str_version, version);
+-     CLAMAVLIB_VERSION[CLAMAVLIB_VERSION_SIZE - 1] = '\0';
++     snprintf(_CLAMAVLIB_VERSION, _CLAMAVLIB_VERSION_SIZE - 1, "%s/%d", str_version, version);
++     _CLAMAVLIB_VERSION[_CLAMAVLIB_VERSION_SIZE - 1] = '\0';
+ }
+ 
+ const char *clamav_version()
+ {
+-    return CLAMAVLIB_VERSION;
++    return _CLAMAVLIB_VERSION;
+ }
+ 
+ const char *clamav_signature()

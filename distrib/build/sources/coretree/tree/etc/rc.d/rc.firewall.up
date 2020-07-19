@@ -134,12 +134,6 @@ if [ "$RED_DEV" != "" ]; then
 	/sbin/iptables -A INPUT -i $RED_DEV -j spoof
 fi
 
-# Ethernet
-/sbin/iptables -A INPUT -i $GREEN_DEV -j ACCEPT
-if [ "$PURPLE_DEV" != "" ]; then
-	/sbin/iptables -A INPUT -i $PURPLE_DEV -j ACCEPT
-fi
-
 # IPSEC
 /sbin/iptables -N secin
 /sbin/iptables -A secin -i ipsec0 -j ACCEPT
@@ -159,14 +153,23 @@ fi
 # Check IPSEC packets
 /sbin/iptables -A block -j secin
 
+# External access.  Rule set with setxtaccess setuid.
+/sbin/iptables -N xtaccess
+/sbin/iptables -A block -j xtaccess
+
+# Verify remote access via GN/PU. Will VPNs be blocked?
+/sbin/iptables -N restrict_remote
+/sbin/iptables -A restrict_remote -j LOG --log-prefix "Denied-by-filter:rstr_rem "
+/sbin/iptables -A restrict_remote -j REJECT
+/sbin/iptables -A block -p tcp -m state --state NEW -m tcp --dport 222 -j restrict_remote
+/sbin/iptables -A block -p tcp -m state --state NEW -m tcp --dport 81 -j restrict_remote
+/sbin/iptables -A block -p tcp -m state --state NEW -m tcp --dport 441 -j restrict_remote
+
+# Otherwise, allow all access to smoothie from GN and PU
 /sbin/iptables -A block -i $GREEN_DEV -j ACCEPT
 if [ "$PURPLE_DEV" != "" ]; then
 	/sbin/iptables -A block -i $PURPLE_DEV -j ACCEPT
 fi
-
-# External access.  Rule set with setxtaccess setuid
-/sbin/iptables -N xtaccess
-/sbin/iptables -A block -j xtaccess
 
 # IPSEC
 /sbin/iptables -N ipsec
@@ -190,13 +193,7 @@ fi
 
 # DHCP
 if [ "$RED_DEV" != "" -a "$RED_TYPE" = "DHCP" ]; then
-	/sbin/iptables -A block -p tcp --source-port 67 --destination-port 68 \
-		-i $RED_DEV -j ACCEPT
-	/sbin/iptables -A block -p tcp --source-port 68 --destination-port 67 \
-		-i $RED_DEV -j ACCEPT
 	/sbin/iptables -A block -p udp --source-port 67 --destination-port 68 \
-		-i $RED_DEV -j ACCEPT
-	/sbin/iptables -A block -p udp --source-port 68 --destination-port 67 \
 		-i $RED_DEV -j ACCEPT
 fi
 

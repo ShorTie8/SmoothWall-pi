@@ -18,7 +18,12 @@ my $infomessage='';
 
 &showhttpheaders();
 
-$remotesettings{'ENABLE_SSH'} = 'off';
+$remotesettings{'ENABLE_SSH_GREEN'} = 'off';
+$remotesettings{'ENABLE_HTTP_GREEN'} = 'off';
+$remotesettings{'ENABLE_HTTPS_GREEN'} = 'off';
+$remotesettings{'ENABLE_SSH_PURPLE'} = 'off';
+$remotesettings{'ENABLE_HTTP_PURPLE'} = 'off';
+$remotesettings{'ENABLE_HTTPS_PURPLE'} = 'off';
 $remotesettings{'ENABLE_SECURE_ADMIN'} = 'off';
 $remotesettings{'ACTION'} = '';
 
@@ -30,24 +35,53 @@ my $success = '';
 if ($remotesettings{'ACTION'} eq $tr{'save'}) {
 	&writehash("${swroot}/remote/settings", \%remotesettings);
 
-	if ($remotesettings{'ENABLE_SSH'} eq 'on') {
+	if ($remotesettings{'ENABLE_SSH_GREEN'} eq 'on'
+	 || $remotesettings{'ENABLE_SSH_PURPLE'} eq 'on') {
 		&log($tr{'ssh is enabled'});
-		$success = message('sshdrestart');
 	}
 	else {
 		&log($tr{'ssh is disabled'});
-		$success = message('sshdstop');
 	}
+	if ($remotesettings{'ENABLE_HTTP_GREEN'} eq 'on'
+	 || $remotesettings{'ENABLE_HTTP_PURPLE'} eq 'on') {
+		&log($tr{'http access is allowed'});
+	}
+	else {
+		&log($tr{'http access is disabled'});
+	}
+	if ($remotesettings{'ENABLE_HTTPS_GREEN'} eq 'on'
+	 || $remotesettings{'ENABLE_HTTPS_PURPLE'} eq 'on') {
+		&log($tr{'https access is enabled'});
+	}
+	else {
+		&log($tr{'https access is disabled'});
+	}
+	$success = message('sshdrestart');
 	$infomessage .= $success ."<br />\n" if ($success);
-	$errormessage .= "sshd ".$tr{'smoothd failure'} ."<br />\n" unless ($success);
+	$errormessage .= "Remote Access restart failed." unless ($success);
 }
 
 $remotesettings{'ENABLE_SECURE_ADMIN'} = 'off';
 &readhash("${swroot}/remote/settings", \%remotesettings);
 
-$checked{'ENABLE_SSH'}{'off'} = '';
-$checked{'ENABLE_SSH'}{'on'} = '';
-$checked{'ENABLE_SSH'}{$remotesettings{'ENABLE_SSH'}} = 'CHECKED';
+$checked{'ENABLE_SSH_GREEN'}{'off'} = '';
+$checked{'ENABLE_SSH_GREEN'}{'on'} = '';
+$checked{'ENABLE_SSH_GREEN'}{$remotesettings{'ENABLE_SSH_GREEN'}} = 'CHECKED';
+$checked{'ENABLE_HTTP_GREEN'}{'off'} = '';
+$checked{'ENABLE_HTTP_GREEN'}{'on'} = '';
+$checked{'ENABLE_HTTP_GREEN'}{$remotesettings{'ENABLE_HTTP_GREEN'}} = 'CHECKED';
+$checked{'ENABLE_HTTPS_GREEN'}{'off'} = '';
+$checked{'ENABLE_HTTPS_GREEN'}{'on'} = '';
+$checked{'ENABLE_HTTPS_GREEN'}{$remotesettings{'ENABLE_HTTPS_GREEN'}} = 'CHECKED';
+$checked{'ENABLE_SSH_PURPLE'}{'off'} = '';
+$checked{'ENABLE_SSH_PURPLE'}{'on'} = '';
+$checked{'ENABLE_SSH_PURPLE'}{$remotesettings{'ENABLE_SSH_PURPLE'}} = 'CHECKED';
+$checked{'ENABLE_HTTP_PURPLE'}{'off'} = '';
+$checked{'ENABLE_HTTP_PURPLE'}{'on'} = '';
+$checked{'ENABLE_HTTP_PURPLE'}{$remotesettings{'ENABLE_HTTP_PURPLE'}} = 'CHECKED';
+$checked{'ENABLE_HTTPS_PURPLE'}{'off'} = '';
+$checked{'ENABLE_HTTPS_PURPLE'}{'on'} = '';
+$checked{'ENABLE_HTTPS_PURPLE'}{$remotesettings{'ENABLE_HTTPS_PURPLE'}} = 'CHECKED';
 
 $checked{'ENABLE_SECURE_ADMIN'}{'off'} = '';
 $checked{'ENABLE_SECURE_ADMIN'}{'on'} = '';
@@ -65,10 +99,23 @@ print "<form method='POST' action='?'><div>\n";
 print <<END
 <table style='width: 100%; border: none; margin-left:auto; margin-right:auto'>
 <tr>
-	<td style='width:25%;' class='base'>SSH:</td>
-	<td style='width:25%;'><input type='checkbox' name='ENABLE_SSH' $checked{'ENABLE_SSH'}{'on'}></td>
-	<td style='width:25%;' class='base'><img src='/ui/img/blob.gif' alt='*' style='vertical-align: text-top;'>&nbsp;$tr{'secure admin'}</td>
-	<td style='width:25%;'><input type='checkbox' name='ENABLE_SECURE_ADMIN' $checked{'ENABLE_SECURE_ADMIN'}{'on'}></td>
+	<td style='width:25%;' class='base'>$tr{'ssh enable green'}:</td>
+	<td style='width:35%;'>
+          SSH: <input type='checkbox' name='ENABLE_SSH_GREEN' $checked{'ENABLE_SSH_GREEN'}{'on'}>
+          HTTP: <input type='checkbox' name='ENABLE_HTTP_GREEN' $checked{'ENABLE_HTTP_GREEN'}{'on'}>
+          HTTPS: <input type='checkbox' name='ENABLE_HTTPS_GREEN' $checked{'ENABLE_HTTPS_GREEN'}{'on'}>
+        </td>
+	<td rowspan=2 style='width:25%;' class='base'><img src='/ui/img/blob.gif' alt='*' style='vertical-align: text-top;'>&nbsp;$tr{'secure admin'}</td>
+	<td rowspan=2 style='width:15%;'><input type='checkbox' name='ENABLE_SECURE_ADMIN' $checked{'ENABLE_SECURE_ADMIN'}{'on'}></td>
+</tr>
+<tr>
+	<td style='width:25%;' class='base'>$tr{'ssh enable purple'}:</td>
+	<td style='width:35%;'>
+          SSH: <input type='checkbox' name='ENABLE_SSH_PURPLE' $checked{'ENABLE_SSH_PURPLE'}{'on'}>
+          HTTP: <input type='checkbox' name='ENABLE_HTTP_PURPLE' $checked{'ENABLE_HTTP_PURPLE'}{'on'}>
+          HTTPS: <input type='checkbox' name='ENABLE_HTTPS_PURPLE' $checked{'ENABLE_HTTPS_PURPLE'}{'on'}>
+        </td>
+	
 </tr>
 </table>
 <br />

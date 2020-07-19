@@ -391,7 +391,7 @@ fi
       build gdb
       build lynx
       build rsync
-      build samba
+      #build samba
 
       build siproxd
 
@@ -430,7 +430,7 @@ fi
       build squidguard
       build subversion
       build qemu
-      build ntop
+      #build ntop
       build iperf
       build fping
       build apcupsd

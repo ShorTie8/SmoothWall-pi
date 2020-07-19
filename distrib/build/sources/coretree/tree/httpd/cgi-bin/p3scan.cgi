@@ -98,7 +98,6 @@ $checked{'ENABLE'}{$p3scansettings{'ENABLE'}} = 'CHECKED';
 
 &openbigbox('100%', 'LEFT');
 
-print STDERR  "emsg=$errormessage; imsg=$infomessage\n";
 &alertbox($errormessage, "", $infomessage);
 
 print "<form method='post' action='?'><div>\n";
@@ -115,7 +114,7 @@ print <<END;
 			<code>
 END
 
-system("cd /var/clamav; /bin/ls -lstr *.c*d | sed -e 's/.*clam clam *[0-9]* //' -e 's=\$=<br />='");
+system("cd /var/clamav; /bin/ls -lstr *.c*d 2>/dev/null | sed -e 's/.*clam clam *[0-9]* //' -e 's=\$=<br />='");
 
 print <<END;
 			</code>

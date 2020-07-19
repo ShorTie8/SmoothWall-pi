@@ -775,11 +775,17 @@ sub closebigbox
 
 sub openbox
 {
-	my ( $caption ) = @_;
+	my ( $caption, $border ) = @_;
+	$border = "" unless defined $border;
+	if ($border eq '') {
+		$border = " style='border-style: solid; border-width: 3pt; border-color: rgba(255,255,255,0)'";
+	} else {
+		$border = " style='border-style: solid; border-width: 3pt; border-color: $border'";
+	}
 
 	print <<END
 <br />
-<table class='box'>
+<table class='box'$border>
 <tr>
 	<td>
 END
@@ -806,6 +812,7 @@ sub alertbox
 	my $thiserror = $_[0];
 	my $additional = $_[1];
 	my $thisinfo = $_[2];
+	$thisinfo = "" unless defined $thisinfo;
 
 	if ( $thiserror eq 'add' && $additional eq 'add' && $abouttext{$thisscript . "-additional"} ne '' ) {
 		&pageinfo( $alertbox{"textadd"}, $abouttext{$thisscript . "-additional"});
@@ -829,6 +836,7 @@ sub pageinfo
 {
 	my $thisalerttype = $_[0];
 	my $thisboxmessage = $_[1];
+	$thisalerttype = "" unless defined $thisalerttype;
 
 	print <<END
 <br />
@@ -897,6 +905,7 @@ sub writehash
 	foreach $var (keys %$hash) {
 		$val = $hash->{$var};
 		if ($val =~ / / || $val =~ /\n/) {
+			$val =~ s/'/\\'/g;
 			$val = "\'$val\'";
 		}
 		if (!($var =~ /^ACTION/)) {
@@ -920,8 +929,9 @@ sub readhash
 		next if ($_ eq "");
 		($var, $val) = split /=/, $_, 2;
 		if ($var) {
-			$val =~ s/^\'//g if ($val);
-			$val =~ s/\'$//g if ($val);
+			$val =~ s/^\'// if ($val);
+			$val =~ s/\'$// if ($val);
+			$val =~ s/\\'/'/g if ($val);
 			$hash->{$var} = $val;
 		}
 	}

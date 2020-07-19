@@ -43,6 +43,7 @@ my $maxwidth = 20;	# em (EM - width of an M in the current font)
 $snortsettings{'ENABLE_SNORT'} = 'off';
 $snortsettings{'DOWNLOAD'} = 'off';
 $snortsettings{'ACTION'} = '';
+$snortsettings{'OINK'} = '';
 
 my $errormessage = '';
 my $infomessage = '';
@@ -51,11 +52,12 @@ my $success = '';
 
 &getcgihash(\%snortsettings);
 
-my ($oink_display, $oink_display_not, $idslastdownload, $ids_status, $enable_disabled, $idslastDLdays);
+my ($oink_display, $oink_display_not, $idslastdownload, $ids_status, $idslastDLdays);
 my $formdownload = $snortsettings{'DOWNLOAD'} || '';
 my $formdebug = $snortsettings{'DEBUG'} || '';
 my $formoink = $snortsettings{'OINK'} || '';
 my $days = 0;
+my $enable_disabled = '';
 
 delete $snortsettings{'DOWNLOAD'};
 delete $snortsettings{'DEBUG'};
@@ -207,10 +209,10 @@ print "
 		<div class='base' style='text-align:right; margin-right:.2em; display:inline-block; width:20%'>
 			$tr{'oink code'}</div>
 		<div id='OINK-input' style='margin:0 .2em 0 0; display:$oink_display; width:50%'>
-			<input type='text' name='OINK' size='45' maxlength='40' value='$snortsettings{OINK}'
+			<input type='text' name='OINK' size='45' maxlength='40' value='$snortsettings{'OINK'}'
 			id='OINK' @{[jsvalidregex('OINK','^([0-9a-fA-F]){40}$')]}></div>
 		<div id='OINK-text' style='margin:0 .2em 0 0; display:$oink_display_not; width:50%'>
-			<span>$snortsettings{OINK}</span></div>
+			<span>$snortsettings{'OINK'}</span></div>
 	</div>
 </div>
 ";

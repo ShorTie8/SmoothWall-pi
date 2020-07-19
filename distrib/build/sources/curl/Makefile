@@ -7,17 +7,19 @@
 include ../Makefile.conf
 
 PACKAGE = curl
-VERSION = 7.67.0
+VERSION = 7.68.0
 
 BASE_URL = https://curl.haxx.se/download
 EXTENSION = .tar.xz
 
 PKG_DIR = 
 
-CONFIG_OPTS += --prefix= --exec-prefix=/usr \
+CONFIG_OPTS += --prefix=/usr --exec-prefix=/usr \
 	       --datarootdir=/usr/share \
 	       --libexecdir=/usr/libexec \
 	       --includedir=/usr/include \
+	       --libdir=/usr/lib \
+	       --with-ssl=/usr \
 	       --with-ca-path=/usr/lib/ssl/certs
 
 include ../Makefile.rules

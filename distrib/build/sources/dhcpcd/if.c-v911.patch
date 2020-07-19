@@ -1,0 +1,18 @@
+--- dhcpcd-9.1.1/src/if.c-ORIG	2020-06-10 01:57:23.614338483 -0400
++++ dhcpcd-9.1.1/src/if.c	2020-06-10 01:57:48.042143365 -0400
+@@ -30,6 +30,7 @@
+ #include <sys/types.h>
+ #include <sys/ioctl.h>
+ #include <sys/socket.h>
++#include <fcntl.h>
+ 
+ #include "config.h"
+ 
+@@ -54,7 +55,6 @@
+ #include <errno.h>
+ #include <ifaddrs.h>
+ #include <inttypes.h>
+-#include <fcntl.h>
+ #include <fnmatch.h>
+ #include <stddef.h>
+ #include <stdio.h>

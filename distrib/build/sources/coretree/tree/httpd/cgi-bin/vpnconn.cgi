@@ -34,7 +34,7 @@ my $infomessage = '';
 my $errormessage = '';
 
 if ($cgiparams{'ACTION'} eq $tr{'add'}) {
-	unless ($cgiparams{'NAME'} =~ /^[a-zA-Z]+$/) {
+	unless ($cgiparams{'NAME'} =~ /^[-._0-9a-zA-Z]+$/) {
 		$errormessage .= $tr{'name must only contain characters'} ."<br />";
 	}
 	unless (&validip($cgiparams{'LEFT'}) or &validhostname($cgiparams{'LEFT'})) { 
@@ -241,7 +241,7 @@ print <<END
 <tr>
 	<td style='width:25%;' class='base'>$tr{'namec'}</td>
 	<td style='width:25%;'><input type='TEXT' name='NAME' value='$cgiparams{'NAME'}' id='name' 
-		@{[jsvalidregex('name','^[a-zA-Z]+$')]}></td>
+		@{[jsvalidregex('name','^[-._0-9a-zA-Z]+$')]}></td>
 	<td style='width:25%;' class='base'>Compression:</tD>
 	<td style='width:25%;'><input type='CHECKBOX' name='COMPRESSION' $checked{'COMPRESSION'}{'on'}></td>
 <tr>

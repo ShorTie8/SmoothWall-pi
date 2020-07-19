@@ -1,0 +1,5 @@
+#! /bin/sh
+
+echo "Going from `uname -m` to i586."
+linux32
+echo "Back to `uname -m`."

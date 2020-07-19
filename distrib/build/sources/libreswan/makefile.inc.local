@@ -1,2 +1,3 @@
 #KERNELSRC = /build/sources/linux/linux
 KERNELSRC = ../../linux/linux
+USE_NSS_IPSEC_PROFILE = false

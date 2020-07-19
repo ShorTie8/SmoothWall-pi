@@ -1635,9 +1635,13 @@ sub isrunning
 	my $testcmd = '';
 	my $exename;
 	my $qosPidFile = "/var/run/qos.pid";
+	my $pidfile;
 
 	$cmd =~ /(^[a-z]+)/;
 	$exename = $1;
+
+	($pidfile) = glob("/var/run/${cmd}/*.pid");
+	$pidfile = "/var/run/${cmd}.pid" unless defined $pidfile;
 
 	my $howlong = "";
 	# qos is a special case
@@ -1654,7 +1658,7 @@ sub isrunning
 		my $speccase = \&{$cmd . "_isrunning"};
 		($status, $howlong) = &$speccase();
 	}
-	elsif (open(MODFILE, "/var/run/${cmd}.pid")) {
+	elsif (open(MODFILE, $pidfile)) {
 		$pid = <MODFILE>;
 		chomp $pid;
 		close MODFILE;
@@ -1665,7 +1669,7 @@ sub isrunning
 			close MODFILE;
 			if ($testcmd =~ /$exename/) {
 				$status = "running";
-				$howlong = &running_since("/var/run/${cmd}.pid");
+				$howlong = &running_since($pidfile);
 
 				if (open(MODFILE, "/proc/${pid}/cmdline")) {
 					my $cmdline = <MODFILE>;

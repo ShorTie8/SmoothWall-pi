@@ -12,6 +12,8 @@ echolog "" "" "$DEBUG_DHCPCD" "entering rc.netaddress.up [`date`]"
 
 echolog "e" "s" "" "  firewall"
 . /etc/rc.d/rc.firewall.up
+echolog "e" "s" "" "  remote access"
+/usr/bin/smoothcom sshdrestart
 echolog "e" "s" "" "  traffic stats collector"
 /usr/sbin/trafficlogger
 echolog "e" "s" "" "  DMZ pinholes"

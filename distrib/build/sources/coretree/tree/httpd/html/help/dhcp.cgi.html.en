@@ -1,79 +1,211 @@
-<P><FONT SIZE='3'><STRONG><U>DHCP</U></STRONG></FONT></P>
+<p style='font-size:14pt; font-weight:bold;'>
+  <u>DHCP</u>
+<p>
 
-<P>Smoothwall may optionally run a DHCP server, and this is where it is
-configured.</P>
+<P>Smoothwall may optionally run a DHCP server; this is where it is
+configured. The features are presented in the order they are displayed.</P>
 
-<P>Both the GREEN and PURPLE interfaces can have DHCP service.  Select
-the <B>Interface</B> you wish to configure and then press <B>Select</B>.
+<p style='margin-bottom:0;'><b>Preferences</b></p>
+<p style='margin-top:0;'>
+  There are several global settings that control the display of certain
+  optional data.
+</p>
+  <ul>
+    <li>
+      <b>Show connections</b> - view the system's current active IP
+      connections
+    </li>
+    <li>
+      <b>Show dynamic leases</b> - view the current unexpired DHCP leases.
+    </li>
+    <li>
+      <b>Show stale leases</b> - view expired leases that haven't been 
+      deleted as yet.
+    </li>
+    <li>
+      <b>Show static assignments state</b> - show the state of hosts that
+      receive static assignments. If a host is not detected (is 'off'), the
+      state button can be clicked to send it a Wake-on-LAN message.
+    </li>
+  </ul>
+<p>
+  Click the Save button to make your selections take effect. This is a global
+  Save button for the page.
+</p>
 
-<P>A feature that is applied globally is network booting.  This requires
-a compatible target PC or other device.  Configure the <B>Boot server</B> to
-the IP address of the server running TFTP.  Next, choose the <B>Boot filename</B>
-and <B>Root path</B> of the file that the PC or other device should boot.  This
-feature is intended to be used by diskless workstations, and similar.</P>
+<p style='margin-bottom:0;'><b>Global Settings</b></p>
+<p style='margin-top:0;'>
+  Click the Network Boot Enabled checkbox to activate this feature.
+</p>
+<p>
+  <i>Network Booting</i> is a feature that is applied globally. This requires
+  a compatible target PC or other device. Configure the <B>Boot server</B> to
+  the IP address of the server running TFTP. Next, choose the <B>Boot
+  filename</B> and <B>Root path</B> of the file that the PC or other device
+  should boot. This feature is intended to be used by diskless workstations
+  and other devices that have no local storage.
+</p>
 
-<P><STRONG>Start Address</STRONG> and <STRONG>End Address</STRONG> set the range over which you wish the DHCP
-server to supply dynamic addresses. This address range should not contain
-the IPs of other machines on your LAN with static IP assignments. Suppose
-you had a network in the 192.168.0.0 range. Assuming all your statically
-assigned IP address were all lower then 192.168.0.100, you could use the
-upper portion of the address range for the dynamic addresses. In this case,
-your start address would be 192.168.0.100 and the end address could be
-192.168.0.254.</P>
+<p style='margin-bottom:0;'><b>Connections</b></p>
+<p style='margin-top:0;'>
+  Display of this box is controlled via the preferences (above). In it, all
+  current IP connections that are known to the system are displayed.
+</p>
 
-<P>The two DNS servers' addresses specify what the DHCP server should tell
-its clients to use for their DNS server. Because Smoothwall runs a DNS
-proxy, you will probably want to leave the default alone and set the Primary
-DNS server to the Smoothwall box's IP address. If you run a local DNS server
-and want your desktops to use it, set the Secondary DNS to its address.</P>
+<p style='margin-bottom:0;'><b>Interface</b></p>
+<p style='margin-top:0;'>
+  Both the GREEN and PURPLE interfaces can have DHCP service. Select
+  the <B>Interface</B> you wish to configure. The 'interface' box has a colored
+  border around it as a subtle reminder of which interface you are working
+  with.
+</p>
+<p>
+  The ORANGE interface can also have DHCP service enabled. Because this is
+  considered an attack vector, it is normally contra-indicated. To activate
+  DHCP on ORANGE enter the following three commands on the console or via an
+  SSH session.
+</p>
+<code style='margin-top:0;'>
+  cd /var/smoothwall/dhcp<br />
+  touch settings-orange staticconfig-orange orange<br />
+  chown nobody:nobody settings-orange staticconfig-orange orange<br />
+<code style='margin-top:0;'>
+<p>
+  To deactivate DHCP on ORANGE, enter the following two commands and reload the
+  DHCP UI page.
+</p>
+<code style='margin-top:0;'>
+  cd /var/smoothwall/dhcp<br />
+  rm -f settings-orange staticconfig-orange orange<br />
+</code>
 
-<P>The two NTP servers' addresses specify which NTP servers the
-Smoothwall DHCP server should tell its clients to use. This can be used
-to configure the network hosts to time-sync with the Smoothwall's (or other
-server's) system time.</P>
+<p style='margin-bottom:0;'><b>DHCP</b></p>
+<p>
+  In this sub-box, enter the parameters that will be sent to client systems
+  requesting configuration via DHCP.
+</p>
 
-<P>The two WINS servers' addresses, likewise, specify what WINS servers the
-Smoothwall DHCP server should tell its clients to use. This is often not
-required on very small Windows networks. You can assign primary and
-secondary servers.</P>
+<p>
+  Check the Enable checkbox to enable DHCP service for the zone.
+  This will enable DHCP service for the selected interface.
+</p>
 
-<P>The <STRONG>Default</STRONG> and <STRONG>Maximum lease times</STRONG> can be left at their
-default values unless you have specific needs.</P>
+<p>
+  If you wish to allow only systems that have static assignments to use your
+  network, check the <i>Deny unknown clients</i> checkbox.
 
-<P>The <STRONG>Domain name suffix</STRONG> sets the domain name that the DHCP server
-will give to the client.  There should not be a leading period in this
-box.</P>
+<p>
+  <i>Start Address</i> and <i>End Address</i> set the range over which you
+  wish the DHCP server to supply dynamic addresses. This address range should
+  not contain the IPs of other machines on your LAN with static DHCP IP
+  assignments or that are statically configured. Suppose you had a network in
+  the 192.168.0.0 range. If all of your statically assigned IP address are all
+  lower than 192.168.0.100, you could use the upper portion of the address
+  range for the dynamic addresses. In this case, your start address would be
+  192.168.0.100 and the end address could be as high as 192.168.0.254.
+</p>
 
-<P>The <STRONG>NIS domain</STRONG> sets the NIS domain that the server will
-give to the clients. This should not be confused with the <STRONG>
-Domain name suffix</STRONG>, described above.</P>
+<p>
+  The two DNS servers' addresses specify what clients are to use for their
+  DNS server. Smoothwall runs a DNS proxy, you will probably want to set the
+  Primary DNS server to the Smoothwall box's IP address. If you run a local
+  DNS server (such as Microsoft's Active Directory), you will most likely
+  want to have your desktop systems use it, and configure AD to forward
+  unknown requests to your Smoothwall's IP address. Be careful setting the
+  secondary address; if the primary DNS server is unavailable, it usually
+  takes the client some seconds to decide it isn't there and to then try the
+  secondary server. In most cases, you probably only want to specify a single
+  upstream DNS server.
+</p>
 
-<P>The two NIS servers' addresses, likewise, specify what NIS servers the
-Smoothwall DHCP server should tell its clients to use. This is useful
-in UNIX environments which are utilising NIS.</P>
+<p>
+  If you run one or two local time servers, put their IP addresses in the
+  primary and secondary NTP boxes. If you instead want your local systems to
+  use your Smoothwall's time server, enter only that IP address in the
+  primary NTP box, and enable the time service. (See the Time UI help for more
+  information on Smoothwall's time service.)
+</p>
 
-<P>The <STRONG>Add a new static assignment</STRONG> section is used to allocate a
-fixed IP addresses for nominated clients.  It does this by reference to the
-client NIC's (LAN Card) MAC (Media Access Control) address.  Use this
-facility if you want a certain PC or Apple Macintosh to always get the same
-IP address, as if it was configured with a static IP address.  The contents
-of the <STRONG>Description</STRONG> text box are not used by the system, they are
-there to help you identify the IP assignments with a human intelligible
-string, such as Reception PC, Mark's MAC etc.</P>
+<p>
+  Similarly, the two WINS servers' addresses specify what WINS servers the
+  Smoothwall DHCP server should tell its clients to use. This is often not
+  required on very small Windows networks. You can assign primary and
+  secondary servers. Only network with systems running ancient versions of
+  Windows (or even DOS) may need one or both of these addresses. Modern
+  versions of Windows use DNS for name resolution.
+</p>
 
-<P>Note the MAC address must be entered as six pairs of hexadecimal numbers,
-with a space, colon or other separator character between each pair, e.g. 
-<code>12 34 56 78 9A BC</code> or 
-<code>12:34:56:78:9A:BC</code>.  Click the <STRONG>Add</STRONG> button and the MAC
-and IP Address pair will be displayed in the Current static assignments
-section below.  In order to edit an existing static IP address assignment,
-click or select the Mark checkbox alongside the required MAC and IP Address
-pair, then press Remove to delete the assignment or <STRONG>Edit</STRONG> to move the
-MAC and IP Address pairing back to the new static assignment section above. 
-In the case of pressing Edit, change the MAC or IP address as required then
-press the Add button again to return the revised assignment to the Current
-static assignments section below.</P>
+<p>
+  The Default and Maximum lease times can be left at their default values
+  unless you have specific needs. Typically, if you don't have much
+  contention for addresses, you can set the default least time to one day
+  (1440 minutes) and the max least time to two days (2880 minutes). If there
+  is a lot of contention for addresses (such as a busy wireless network with
+  a lot of people coming and going), you might want to reduce these times to
+  one and two hours (or possibly even less).
+</p>
 
-<P>Enable the DHCP server by checking the <STRONG>Enable</STRONG> checkbox. 
-This will enable DHCP service for the selected interface. When you
-press <STRONG>Save</STRONG>, the change is acted upon.</P>
+<p>
+  The Domain name suffix sets the domain name that the DHCP server will give
+  to the client. Do not add a leading period in this box.
+</p>
+
+<p>
+  The NIS domain sets the NIS domain that the server will give to the
+  clients. This should not be confused with the Domain name suffix described
+  above. If you do not use NIS on your network, leave this field empty.
+</p>
+
+<p>
+  The two NIS servers' addresses, likewise, specify what NIS servers the
+  Smoothwall DHCP server should tell its clients to use. This is useful in
+  UNIX environments which are utilising NIS. Again, if you do not use NIS on
+  your network, leave these fields empty.
+</p>
+
+<p>
+  Click Save to save the changes. This is a global Save button for the page.
+</p>
+
+<p style='margin-bottom:0;'><b>Current dynamic leases</b></p>
+<p style='margin-top:0;'>
+  This box display the current unexpired leases that the DHCP daemon has saved.
+  Display of this box is controlled via the preferences, above.
+</p>
+
+<p style='margin-bottom:0;'><b>Add a new static assignment</b></p>
+<p style='margin-top:0;'>
+  This section is used to allocate a fixed IP addresses for nominated
+  clients. It does this by reference to the client NIC's (LAN Card) MAC
+  (Media Access Control) address. Use this facility if you want a certain
+  system to always get the same IP address, as if it was configured with a
+  static IP address. The Description is not used by the DHCP daemon; it is
+  just a comment to help you identify the IP assignments with a human
+  intelligible string, such as Reception PC, Mark's MAC, Jenny's hair dryer,
+  etc.
+</p>
+
+<p>
+  The MAC address must be entered as six pairs of hexadecimal numbers, with
+  a colon (':') separator character between each pair, e.g. 
+  <code>12:34:56:78:9A:BC</code>. Click the Add button to save these
+  settings and reload the page.
+</p>
+
+<p style='margin-bottom:0;'><b>Current static assignments</b></p>
+<p style='margin-top:0;'>
+  This table displays the static assignments you have saved.
+</p>
+<p>
+  In order to delete or edit an existing static IP address assignment, click
+  or select the Mark checkbox alongside the desired MAC and IP Address pair.
+  Then click Remove to delete the assignment or Edit to move the MAC and IP
+  Address pairing back to the new static assignment section above.  If
+  editing, change the data as desired, then click the Add button again to
+  return the revised assignment to the Current static assignments section
+  below.
+</p>
+<p>
+  Note that editing a static assignment removes the entry from the table; do
+  not forget to click Add when done editing.
+</p>

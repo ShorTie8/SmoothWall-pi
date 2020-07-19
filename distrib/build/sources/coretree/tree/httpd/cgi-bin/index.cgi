@@ -13,7 +13,8 @@ use strict;
 use warnings;
 
 my (%pppsettings, %modemsettings, %netsettings, %alertbox, %cgiparams, %ownership);
-my ($timestr, $connstate);
+my (%teammsgsettings, %fetchedmsg);
+my ($timestr, $connstate, $age, $now);
 
 my $locks = scalar(glob("/var/run/ppp-*.pid"));
 my $errormessage = '';
@@ -30,6 +31,32 @@ $pppsettings{'PROFILENAME'} = 'None';
 &readhash("${swroot}/modem/settings", \%modemsettings);
 &readhash("${swroot}/ethernet/settings", \%netsettings);
 &readhash("${swroot}/main/ownership", \%ownership);
+
+
+$now = time();
+
+# Read the .conf.
+&readhash("${swroot}/main/teammsg.conf", \%teammsgsettings);
+$teammsgsettings{'LAST_CHANGED'} = 0 unless defined $teammsgsettings{'LAST_CHANGED'};
+$teammsgsettings{'LAST_FETCHED'} = 0 unless defined $teammsgsettings{'LAST_FETCHED'};
+$teammsgsettings{'MSG_TEXT'} = '' unless defined $teammsgsettings{'MSG_TEXT'};
+
+# If the team MSG hasn't been fetched in six hours, fetch it and set LAST_FETCHED.
+if ($now - $teammsgsettings{'LAST_FETCHED'} > 21600) {
+	$teammsgsettings{'LAST_FETCHED'} = $now;
+	system("/usr/bin/wget -O ${swroot}/main/.teammsg.conf http://downloads.smoothwall.org/updates/3.1-notices/teammsg.conf 2>/dev/null");
+	&readhash("${swroot}/main/.teammsg.conf", \%fetchedmsg);
+	system("rm -f ${swroot}/main/.teammsg.conf");
+
+	# If the MSG changed, save it and set LAST_CHANGED.
+	if ($fetchedmsg{'MSG_TEXT'} ne $teammsgsettings{'MSG_TEXT'}) {
+		$teammsgsettings{'MSG_TEXT'} = $fetchedmsg{'MSG_TEXT'};
+		$teammsgsettings{'MSG_LINK'} = $fetchedmsg{'MSG_LINK'};
+		$teammsgsettings{'LAST_CHANGED'} = $teammsgsettings{'LAST_FETCHED'};
+	}
+	# Save fetch time each time. Save change time and text only when changed.
+	&writehash("${swroot}/main/teammsg.conf", \%teammsgsettings);
+}
 
 if ($pppsettings{'COMPORT'} =~ /^tty/) {
 	if ($locks) {
@@ -156,7 +183,7 @@ else {
 	&closebox();
 }
 
-&openbox('');
+&openbox('RED (Internet) Connection Status:<br />');
 
 my $currentconnection = &connectedstate();
 print <<END
@@ -169,35 +196,35 @@ END
 
 if (($pppsettings{'COMPORT'} ne '') && (($netsettings{'RED_DEV'} eq "") || ($netsettings{'RED_TYPE'} eq 'PPPOE'))) {
 	if ($pppsettings{'VALID'} eq 'yes') {
-		my $control = qq {
+		my $control = "
 	<table style='width: 100%;'>
 	<tr>
 		<td style='text-align: center;'><form method='post' action='/cgi-bin/dial.cgi'>
-			<div><input type='submit' name='ACTION' value="$tr{'dial'}"></div></form></td>
+			<div><input type='submit' name='ACTION' value=\"$tr{'dial'}\"></div></form></td>
 		<td>&nbsp;&nbsp;</td>
 		<td style='text-align: center;'><form method='post' action='/cgi-bin/dial.cgi'>
-			<div><input type='submit' name='ACTION' value="$tr{'hangup'}"></div></form></td>
+			<div><input type='submit' name='ACTION' value=\"$tr{'hangup'}\"></div></form></td>
 		<td>&nbsp;&nbsp;</td>
 		<td style='text-align: center;'><form method='post' action='?'>
-			<div><input type='submit' name='ACTION' value="$tr{'refresh'}"></div></form></td>
+			<div><input type='submit' name='ACTION' value=\"$tr{'refresh'}\"></div></form></td>
 	</tr>
-</table>
+	</table>
 <br/>
 <strong>$tr{'current profile'} $pppsettings{'PROFILENAME'}</strong><br/>
 $connstate
-		};
+		";
 		&showstats( $control );
 	}
 	elsif (-e "${swroot}/red/active" ) {
-		my $control = qq {
+		my $control = "
 	<table style='width: 100%;'>
 	<tr>
 		<td style='text-align: right;'><form method='post' action='/cgi-bin/dial.cgi'>
-			<div><input type='submit' name='ACTION' value="$tr{'hangup'}"></div></form></td>
+			<div><input type='submit' name='ACTION' value=\"$tr{'hangup'}\"></div></form></td>
 	</tr>
 	</table>
 <td><strong>$tr{'current profile'} $pppsettings{'PROFILENAME'}</strong><br/>
-		};
+		";
 		&showstats( $control );
 	}
 	elsif ($modemsettings{'VALID'} eq 'no') {
@@ -206,30 +233,25 @@ $connstate
 	else {
 		print "$tr{'profile has errors'}\n"; 
 	}
-	print "</td>";
 }
 else {
-	my $control = qq {
-	<table style='width: 100%;'>
-	<tr>
-		<td></td>
-	</tr>
-	<tr>
-		<td style='text-align: left;'><form method='POST' action='?'>
-			<div><input type='submit' name='ACTION' value='$tr{'refresh'}'></div></form></td>
-	</tr>
-	</table>
-	};
-	&showstats( $control );
+	&showstats( "" );
 }
-	print <<END
+
+print <<END;
 	</tr>
 </table>
+<form method='POST' action='?'>
+<div style='margin-top:1em; margin-bottom:.5em; text-align:center; width: 100%;'>
+	<input type='submit' name='ACTION' value='$tr{'refresh'}'>
+</div>
+</form>
 END
-;
 
 &closebox();
 
+&openbox("Updates/Uptime:");
+print "<div style='margin:.5em;'>\n";
 open(AV, "${swroot}/patches/available") or die "Could not open available patches database ($!)";
 my @av = <AV>;
 close(AV);
@@ -243,7 +265,7 @@ while(<PF>) {
 close(PF);
 
 &pageinfo($alertbox{"texterror"}, "$tr{'there are updates'}") if ($#av != -1);
-my $age = &age("/${swroot}/patches/available");
+$age = &age("/${swroot}/patches/available");
 
 if ($age =~ m/(\d{1,3})d/) {
 	&pageinfo($alertbox{"texterror"}, "$tr{'updates is old1'} $age $tr{'updates is old2'}") if ($1 >= 7);
@@ -251,9 +273,24 @@ if ($age =~ m/(\d{1,3})d/) {
 
 print "<br/><table class='blank'><tr><td class='note'>";
 
+print "System uptime: ";
 system('/usr/bin/uptime');
 
-print "</td></tr></table>\n";
+print "</td></tr></table></div>\n";
+
+&closebox;
+
+&openbox("Team Message:");
+
+# Print the msg only if something's there and it's less than 21 days stale.
+if (($teammsgsettings{'MSG_TEXT'} ne "") && ($now - $teammsgsettings{'LAST_CHANGED'}) < 3600*24*21) {
+	print "<p style='margin-left:4em; margin-right:4em;'>$teammsgsettings{'MSG_TEXT'}</p>\n";
+}
+
+# Always print the link.
+print "<p style='text-align: center;'><i>See all announcements at the <a href='$teammsgsettings{'MSG_LINK'}'>Smoothwall Express forum</a>.<i></p>\n";
+
+&closebox;
 
 &closebigbox();
 
@@ -322,6 +359,7 @@ sub showstats
 		# convert the text into kbps / mbps etc
 		sub rerange {
 			my $number = $_[0];
+			$number = 0 unless defined $number;
 			my $ret;
 			
 			if ( $number > (1000*1000*1000) ){
@@ -334,13 +372,14 @@ sub showstats
 				$ret = sprintf( "%0.1f MB", $number/(1000) );	
 			}
 			else {
-				$ret = sprintf( "%0.1f KB", $number );	
+				$ret = sprintf( "%0.1f kB", $number );	
 			}
 			return $ret;
 		}
 
 		sub rerangeb {
 			my $number = $_[0];
+			$number = 0 unless defined $number;
 			my $ret;
 			
 			if ( $number > (1000*1000*1000) ){
@@ -350,7 +389,7 @@ sub showstats
 				$ret = sprintf( "%0.1f Mbit/s", $number/(1000*1000) );	
 			}
 			elsif ( $number > (1000) ){
-				$ret = sprintf( "%0.1f Kbit/s", $number/(1000) );	
+				$ret = sprintf( "%0.1f bbit/s", $number/(1000) );	
 			}
 			else {
 				$ret = sprintf( "%0.1f bit/s", $number );	

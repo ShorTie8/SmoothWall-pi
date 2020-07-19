@@ -181,8 +181,11 @@ if ($cgitimesettings{'ACTION'} eq $tr{'save'}) {
 # Set defaults as needed
 $timesettings{'TIMEZONE'} = 'Europe/London' if ($timesettings{'TIMEZONE'} eq "");
 $timesettings{'ENABLED'} = 'off' if ($timesettings{'ENABLED'} eq "");
+$timesettings{'NTP_INTERVAL'} = "" unless defined $timesettings{'NTP_INTERVAL'};
 $timesettings{'NTP_INTERVAL'} = 6 if ($timesettings{'NTP_INTERVAL'} eq "");
+$timesettings{'NTP_METHOD'} = "" unless defined $timesettings{'NTP_METHOD'};
 $timesettings{'NTP_METHOD'} = $tr{'time method automatic'} if ($timesettings{'NTP_METHOD'} eq "");
+$timesettings{'NTP_SERVER'} = "" unless defined $timesettings{'NTP_SERVER'};
 $timesettings{'YEAR'} = '';
 $timesettings{'MONTH'} = '';
 $timesettings{'DAY'} = '';

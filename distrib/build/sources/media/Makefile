@@ -28,13 +28,14 @@ export UDEVunused = udev
 # Some of these are retirees.
 TOOLCHAIN_PKGS = expect
 OTHER_PKGS = updates jam $(UDEVunused) udev-config cnxadsl \
-	     libart_lgpl procps procinfo dev86 openswan eciadsl-synch_bin eciadsl-usermode
+	     libart_lgpl procps procinfo dev86 openswan ntop \
+	     samba eciadsl-synch_bin eciadsl-usermode
 
 TARGET_DIR = /build/target
 
 ADV_PKGS = gdbm GeoIP Python libmnl openldap gperf attr \
 	   subversion ntop iperf
-KVM_PKGS = samba
+KVM_PKGS =
 
 INST_PKGS = glibc libsmooth+setup libgcc freetype libpng libdnet \
 	    daq libnet libnetfilter_queue libnfnetlink attr libcap-ng LuaJIT \
@@ -164,7 +165,7 @@ endif
 	@echo "        move docs to distrib-doc" >>$(MEDIA_BUILD_OUT)
 	@echo "Moving docs to distrib-doc:"
 	for I in man info share/man share/info share/doc share/gtk-doc \
-	      share/ntop/html share/slsh/help examples; do \
+	      share/slsh/help examples; do \
 	  if [ -d distrib/usr/$$I ]; then \
 	    mkdir -p distrib-doc/usr/$$I; \
 	    mv distrib/usr/$$I/* distrib-doc/usr/$$I/; fi; \
@@ -199,7 +200,7 @@ endif
 	  echo "ARCH='$(mTUPLE)'" ; \
 	) > distrib/var/smoothwall/main/productdata
 	
-	@chown nobody:nobody distrib/var/smoothwall/main/productdata
+	@chown nobody:nobody distrib/var/smoothwall/main/{,productdata,teammsg.conf}
 	
 	@echo "        secure tree ..." >>$(MEDIA_BUILD_OUT)
 	@echo -e "\nSecuring tree ..."
@@ -237,7 +238,6 @@ endif
 	@ln -s /var/smoothwall/vpn/ipsec.conf distrib/etc/ipsec.conf
 	@ln -s /var/smoothwall/vpn/ipsec.secrets distrib/etc/ipsec.secrets
 	@ln -sf /usr/bin/hostname distrib/bin/hostname
-	@cd distrib; chown -R root:root usr/share/ntop usr/etc/ntop
 	@cd distrib/etc; mkdir -p apcupsd/scripts && chown root:root apcupsd/scripts && chmod 755 apcupsd/scripts
 	@cd distrib/etc; chmod 644 logrotate.{base,conf,d/*}
 	@cd distrib-doc; chown -R root:root .

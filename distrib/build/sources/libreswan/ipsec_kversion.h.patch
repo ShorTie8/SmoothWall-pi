@@ -1,0 +1,13 @@
+--- libreswan-3.27/linux/include/libreswan/ipsec_kversion.h	2019-11-19 20:33:48.839852973 -0500
++++ libreswan-3.27/linux/include/libreswan/ipsec_kversion.h+	2019-11-19 20:33:38.727840434 -0500
+@@ -65,7 +65,9 @@
+ #endif
+ 
+ /* these seem debian/ubuntu specific and do not match fedora/rhel kernels */
+-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,10)
++#if LINUX_VERSION_CODE <= KERNEL_VERSION(3,16,71) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,16,0)
++# define IP_SELECT_IDENT_NEW
++#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3,15,10)
+ # define IP_SELECT_IDENT_NEW
+ #elif LINUX_VERSION_CODE < KERNEL_VERSION(3,15,0) && LINUX_VERSION_CODE >= KERNEL_VERSION(3,14,17)
+ # define IP_SELECT_IDENT_NEW
