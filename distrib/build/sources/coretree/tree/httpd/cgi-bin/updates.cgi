@@ -167,6 +167,8 @@ if (open(AV, "${swroot}/patches/available")) {
 		chomp $_;
 		my @temp = split(/\|/,$_);
 		my ($summary) = ( $temp[3] =~ /^(.{0,80})/ );
+		# Remove any closing paragraph and trailing 'junk'; the close will be added when displayed.
+		$summary =~ s=</p>.*==;
 		$updates{ $temp[ 0 ] } = { name => $temp[2], summary => $summary, description => $temp[3], date => $temp[4], info => $temp[5], size => $temp[6], md5 => $temp[1] };
 	}
 	close (AV);
@@ -212,7 +214,7 @@ foreach my $update ( sort keys %updates ) {
 	print <<END
 <tr>
 	<td style='width: 15%;' ><a href='$updates{$update}{'info'}' onclick='window.open(this.href); return false'>$updates{$update}{'name'}</a></td>
-	<td onClick="toggle('update-$update');" class='expand' title='Click to expand/hide'>$updates{$update}{'summary'}...</td>
+	<td onClick="toggle('update-$update');" class='expand' title='Click to expand/hide'>$updates{$update}{'summary'}...</p></td>
 	<td style='width: 10%; text-align:right'>$updates{$update}{'date'}</td>
 </tr>
 <tr>

@@ -406,6 +406,23 @@ echolog "e" "s" "" "  Remove policing barricades"
 echolog "e" "s" "" "  Bring the links up"
 . /etc/rc.d/inc.links-up
 
+# When rebooting a VM, the 8021q module (VLAN support) can dilate network
+#   setup time. This can cause syntax errors in trafficloader because
+#   /var/smoothwall/red/iface is empty. So spin-wait up to 10s until
+#   .../red/active exists.
+# If 10s isn't long enough, 'smoothcom cyclenetworking' doesn't have
+#   this problem.
+declare -i i counter; counter=0
+while [ "$counter" -le 1000 ]; do
+  if [ -e /var/smoothwall/red/active ]; then
+    i=counter*10
+    echolog "e" "s" "" "    RED is active after ${i}ms; proceeding"
+    break
+  fi
+  counter=counter+1
+  sleep .01
+done
+
 # Restart TC in case it uses ingress policers
 echolog "e" "s" "" "  Start traffic control (QoS)"
 /usr/bin/smoothcom trafficrestart&

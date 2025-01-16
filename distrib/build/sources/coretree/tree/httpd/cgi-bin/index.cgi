@@ -35,11 +35,14 @@ $pppsettings{'PROFILENAME'} = 'None';
 
 $now = time();
 
-# Read the .conf.
+# Read teammsg.conf; create it if necessary
+if (! -e "${swroot}/main/teammsg.conf") { system("touch \"${swroot}/main/teammsg.conf\""); }
 &readhash("${swroot}/main/teammsg.conf", \%teammsgsettings);
 $teammsgsettings{'LAST_CHANGED'} = 0 unless defined $teammsgsettings{'LAST_CHANGED'};
 $teammsgsettings{'LAST_FETCHED'} = 0 unless defined $teammsgsettings{'LAST_FETCHED'};
 $teammsgsettings{'MSG_TEXT'} = '' unless defined $teammsgsettings{'MSG_TEXT'};
+$teammsgsettings{'MSG_LINK'} = '' unless defined $teammsgsettings{'MSG_LINK'};
+$teammsgsettings{'MSG_ID'} = 0 unless defined $teammsgsettings{'MSG_ID'};
 
 # If the team MSG hasn't been fetched in six hours, fetch it and set LAST_FETCHED.
 if ($now - $teammsgsettings{'LAST_FETCHED'} > 21600) {
@@ -48,13 +51,15 @@ if ($now - $teammsgsettings{'LAST_FETCHED'} > 21600) {
 	&readhash("${swroot}/main/.teammsg.conf", \%fetchedmsg);
 	system("rm -f ${swroot}/main/.teammsg.conf");
 
-	# If the MSG changed, save it and set LAST_CHANGED.
-	if ($fetchedmsg{'MSG_TEXT'} ne $teammsgsettings{'MSG_TEXT'}) {
+	# If the TEXT or ID changed, save it and set LAST_CHANGED.
+	if (($fetchedmsg{'MSG_TEXT'} ne $teammsgsettings{'MSG_TEXT'}) ||
+	    ($fetchedmsg{'MSG_ID'} ne $teammsgsettings{'MSG_ID'})){
+		$teammsgsettings{'MSG_ID'} = $fetchedmsg{'MSG_ID'};
 		$teammsgsettings{'MSG_TEXT'} = $fetchedmsg{'MSG_TEXT'};
 		$teammsgsettings{'MSG_LINK'} = $fetchedmsg{'MSG_LINK'};
 		$teammsgsettings{'LAST_CHANGED'} = $teammsgsettings{'LAST_FETCHED'};
 	}
-	# Save fetch time each time. Save change time and text only when changed.
+	# Save fetch time each time. Save change time, ID and text only when changed.
 	&writehash("${swroot}/main/teammsg.conf", \%teammsgsettings);
 }
 
@@ -284,11 +289,15 @@ print "</td></tr></table></div>\n";
 
 # Print the msg only if something's there and it's less than 21 days stale.
 if (($teammsgsettings{'MSG_TEXT'} ne "") && ($now - $teammsgsettings{'LAST_CHANGED'}) < 3600*24*21) {
-	print "<p style='margin-left:4em; margin-right:4em;'>$teammsgsettings{'MSG_TEXT'}</p>\n";
+	print "<p style='margin-left:4em; margin-right:4em;'>$teammsgsettings{'MSG_TEXT'}";
+	if ($teammsgsettings{'MSG_LINK'} ne "") {
+		print " See the <a href='$teammsgsettings{'MSG_LINK'}'>announcement.";
+	}
+	print "</a></p>\n";
 }
 
 # Always print the link.
-print "<p style='text-align: center;'><i>See all announcements at the <a href='$teammsgsettings{'MSG_LINK'}'>Smoothwall Express forum</a>.<i></p>\n";
+print "<p style='text-align: center;'><i>See all announcements at the <a href='https://community.smoothwall.org/forum/viewforum.php?f=9'>Smoothwall Express</a> forum.<i></p>\n";
 
 &closebox;
 

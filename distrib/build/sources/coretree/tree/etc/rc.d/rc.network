@@ -81,7 +81,7 @@ echolog "" "s" "" "  Load iptables/SPI modules"
 
 echo -e "${STEP}  Load conntrack helper modules${NO}"
 echolog "" "s" "" "  Load conntrack helper modules"
-for i in ftp h323 irc pptp proto_gre proto_udplite sip; do
+for i in ftp h323 irc proto_gre proto_udplite sip; do
   for j in conntrack nat; do
     /sbin/modprobe nf_${j}_$i
   done
