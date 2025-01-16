@@ -24,6 +24,8 @@ OUI_FILE = oui.txt
 export MIRROR_UNO =
 export MIRROR_DOS =
 
+export NO_CHECK_CERT = 1
+
 DOWNLOAD = yes
 
 # For a download every time.

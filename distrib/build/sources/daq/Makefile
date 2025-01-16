@@ -9,6 +9,8 @@ include ../Makefile.conf
 PACKAGE = daq
 ReConfigure = yes
 
+export NO_CHECK_CERT = 1
+
 # Deal with snort: get the latest version number dynamically. :)
 #
 VERSION := $(shell ../../toolcrib/get-snort-ver.sh -v $(PACKAGE))

@@ -20,6 +20,8 @@ DATA_PKG_URL = $(shell perl xml2txt.pl target $(DATA_PACKAGE))
 
 EXTENSION = .tar.bz2
 
+export NO_CHECK_CERT = 1
+
 DOWNLOAD = yes
 download:
 	@$(PRE_DL) $(DL_CMD) $(PKG_URL) $(MD5)

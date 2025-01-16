@@ -22,6 +22,7 @@ patch.tar.gz: ../../../crumbs/Final.built
 		$(UPDATE_PACKAGES) \
 	; do \
  		echo "Unpacking $$I ..."; \
+ 		echo "    Unpacking $$I ..." >&3; \
 		if [ -f "$$I.list" ]; then \
 			Toption=" -T $$I.list -T $$I.dirs"; \
 			while read path; do \
@@ -59,21 +60,26 @@ patch.tar.gz: ../../../crumbs/Final.built
 	fi;
 	# Move files as needed; delete files that shouldn't be clobbered
 	@echo "Special file handling, if needed ..."
+	@echo "    Special file handling, if needed ..." >&3
 	@if [ -e pre-tar-setup ]; then . ./pre-tar-setup; fi
 	# Strip most binaries
 	@echo "Cleaning tree ..."
+	@echo "    Cleaning tree ..." >&3
 	../../../toolcrib/striptree distrib/$(UPDATE_DIR)
 	# Build the patchball
 	@echo "Building patch.tar.gz, stand by ..."
+	@echo "    Building patch.tar.gz, stand by ..." >&3
 	tar cfz patch.tar.gz -C distrib .
 
 updateinfo:
-	@echo "Building update information file ..."	
+	@echo "Building update information file ..."
+	@echo "    Building update information file ..." >&3
 	@echo "$(UPDATE_ID)|$(UPDATE_NAME)-$(mARCH)" >information
 	# ----
 
 $(OUTPUT_FILENAME): patch.tar.gz updateinfo
 	@echo "Making update and inspection tarballs ..."
+	@echo "    Making update and inspection tarballs ..." >&3
 ifdef KERNEL
 	cp ../update-grub-kernel.pl .
 	tar cfz $(OUTPUT_FILENAME) patch.tar.gz setup information update-grub-kernel.pl $(EXTRA_UPDATE_FILES)
@@ -82,6 +88,10 @@ else
 	tar cfz $(OUTPUT_FILENAME) patch.tar.gz setup information $(EXTRA_UPDATE_FILES)
 	tar cfz inspection-$(mARCH).tar.gz patch.tar.gz setup information review $(EXTRA_UPDATE_FILES)
 endif
+	# Display the MD5sum and patch size for the info file.
+	@( echo -n "    Update sum: "; md5sum $(OUTPUT_FILENAME) ) >&3
+	@( echo -n "    Patch size: "; ls -ls patch.tar.gz | awk '{print $$6}' ) >&3
+
 
 clean:
 	@rm -rf distrib review Update.out *.dirs tzdata*.tar.gz

@@ -7,29 +7,23 @@
 include ../Makefile.conf
 
 PACKAGE = ppp
-VERSION = 2.4.7
+VERSION = 2.4.9
 
 BASE_URL = http://samba.org/ftp/ppp/
 
-PATCH_FILE1 = pppstats-Makefile.patch
-
+CONFIGURE = yes
 COMPILE = yes
 INSTALL = yes
 
-COMPILE_FLAGS = -DHAVE_PATHS_H -DIPX_CHANGE -DHAVE_MMAP -D_PATH_VARRUN=\\\"/var/run\\\"
+
+configure: patch
+	(if [ ! -e $(COMPILE_DIR) ]; then mkdir $(COMPILE_DIR); fi)
+	(cd $(DIR); CXXFLAGS="$(CFLAGS)" CFLAGS="$(CFLAGS)" $(PRE_CONFIGURE) ./configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
+	(cd $(DIR); sed -i -e '/^HAVE_INET6=/s/^/#/' pppd/Makefile)
 
 
 compile: configure
-	cd $(DIR); \
-	  sed -i -e 's/^\(COPT.*\)/\1 $(CFLAGS)/' chat/Makefile; \
-	  sed -i -e 's/^\(COPT.*\)/\1 $(CFLAGS)/' pppd/Makefile; \
-	  sed -i -e 's/^\(COPT.*\)/\1 $(CFLAGS)/' pppd/plugins/Makefile; \
-	  sed -i -e 's/^\(CFLAGS\s*=.*\)/\1 $(CFLAGS)/' pppd/plugins/rp-pppoe/Makefile; \
-	  sed -i -e 's/^\(CFLAGS\s*=.*\)/\1 $(CFLAGS)/' pppd/plugins/pppoatm/Makefile; \
-	  sed -i -e 's/^\(CFLAGS\s*=.*\)/\1 $(CFLAGS)/' pppd/plugins/radius/Makefile; \
-	  sed -i -e 's/^\(CFLAGS.*\)/export \1 $(CFLAGS)/' pppstats/Makefile; \
-	  sed -i -e 's/^\(CFLAGS.*\)/export \1 $(CFLAGS)/' pppdump/Makefile
-	@make $(JOBS) -C $(DIR) COMPILE_FLAGS="$(COMPILE_FLAGS)"
+	@make $(JOBS) -C $(DIR)
 
 install: compile
 	@mkdir -p $(PKG_ROOT)

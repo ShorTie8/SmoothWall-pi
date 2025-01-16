@@ -1,0 +1,27 @@
+--- miniupnpd-2.3.7/configure-ORIG	2024-07-11 01:06:47.338080614 -0400
++++ miniupnpd-2.3.7/configure	2024-07-11 01:08:21.451400280 -0400
+@@ -132,6 +132,12 @@
+ 	fi
+ fi
+ 
++# Smoothwall Express special case
++if [ -f ../os.smoothwallexpress ]; then
++	OS_NAME=SmoothwallExpress
++	OS_VERSION=3.1
++fi
++
+ # OpenWrt special case
+ if [ -f ./os.openwrt ]; then
+ 	OS_NAME=OpenWrt
+@@ -452,6 +458,11 @@
+ 			fi
+ 		fi
+ 		;;
++	SmoothwallExpress)
++		OS_URL=https://community.smoothwall.org/
++		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
++		FW=iptables
++		;;
+ 	OpenWrt)
+ 		OS_URL=https://www.openwrt.org/
+ 		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}

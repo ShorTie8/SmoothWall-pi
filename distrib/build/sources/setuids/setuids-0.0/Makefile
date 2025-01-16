@@ -8,10 +8,12 @@ CC=gcc
 
 COMPILE = $(CC) $(CFLAGS)
 
-PROGS = setdmzholes setportfw setoutbound setxtaccess restartdhcp restartsnort \
+DEFUNCT_PROGS = setdmzholes setportfw setoutbound setxtaccess restartdhcp restartsnort \
 	restartsquid smoothiedeath smoothierebirth alcateladslfw \
-	installpackage ipsecctrl  restartdnsproxy restartssh \
+	ipsecctrl  restartdnsproxy restartssh \
 	setadvnet setipblock restartupnp restartntpd updown
+
+PROGS = installpackage
 
 all : $(PROGS)
 

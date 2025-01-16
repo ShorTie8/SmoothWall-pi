@@ -23,6 +23,15 @@ CONFIG_OPTS += --with-shared \
 				--with-termlib \
 				--with-pkg-config \
 				--enable-pc-files
+
+##	Added update 12
+INSTALL = yes
+install: compile
+	mkdir -p $(PKG_ROOT)
+	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
+	rm $(PKG_ROOT)/usr/lib/libncurses.so
+	echo "INPUT(libncurses.so.5 -ltinfo)" > $(PKG_ROOT)/usr/lib/libncurses.so
+
 endif
 
 include ../Makefile.rules

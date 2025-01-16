@@ -13,22 +13,16 @@
 include ../Makefile.conf
 
 PACKAGE = dhcpcd
-VERSION = 9.1.4
+VERSION = 9.5.2
 
 TARBALL = $(PACKAGE)-$(VERSION)
 EXTENSION = .tar.xz
-#EXTENSION = .tar.gz
 
-BASE_URL = http://roy.marples.name/downloads/dhcpcd/
-
-#export pkgName = $(PACKAGE)
-#export gitURL = git://roy.marples.name/dhcpcd.git
-#export gitCommitID = 8998244b8
-#export gitBranch = $(VERSION)
+BASE_URL = https://github.com/NetworkConfiguration/dhcpcd/releases/download/v$(VERSION)/
 
 DIR =  $(PACKAGE)-$(VERSION)
 
-CONFIG_OPTS += --mandir=$(PKG_DIR)/man
+CONFIG_OPTS += --mandir=$(PKG_DIR)/man --disable-privsep
 
 
 INSTALL = yes

@@ -1,9 +1,9 @@
 include ../Makefile.conf
 
 PACKAGE = squidclamav
-VERSION = 6.16
+VERSION = 7.3
 
-BASE_URL = https://sourceforge.net/projects/squidclamav/files/squidclamav/$(VERSION)
+BASE_URL = https://phoenixnap.dl.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/$(VERSION)/
 
 PRE_CONFIGURE = LIBS=-ltinfo
 

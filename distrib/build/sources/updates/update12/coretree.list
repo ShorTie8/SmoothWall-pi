@@ -1,0 +1,8 @@
+./httpd/cgi-bin/index.cgi
+./httpd/cgi-bin/updates.cgi
+./var/smoothwall/patches/installed
+./etc/passwd
+./etc/rc.d/rc.sysinit
+./etc/rc.d/rc.network
+./etc/rc.d/rc.firewall.up
+./var/smoothwall/patches/installed

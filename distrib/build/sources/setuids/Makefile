@@ -9,10 +9,12 @@ include ../Makefile.conf
 PACKAGE = setuids
 VERSION = 0.0
 
-PROGS = setdmzholes setportfw setoutbound setxtaccess restartdhcp restartsnort \
+DEFUNCT_PROGS = setdmzholes setportfw setoutbound setxtaccess restartdhcp restartsnort \
 	restartsquid smoothiedeath smoothierebirth alcateladslfw \
-	installpackage ipsecctrl restartdnsproxy restartssh \
+	ipsecctrl restartdnsproxy restartssh \
 	setadvnet setipblock restartupnp restartntpd updown
+
+PROGS = installpackage
 
 compile:
 	@make -C $(COMPILE_DIR)
@@ -21,7 +23,6 @@ install: compile
 	@(for PROG in $(PROGS); do \
 		install -D $(COMPILE_DIR)/$$PROG $(PKG_ROOT)/usr/bin/setuids/$$PROG; \
 	done;)
-	install -D /bin/date $(PKG_ROOT)/usr/bin/setuids/date
 
 all: install
 	@mkdir -p $(PKG_ROOT)

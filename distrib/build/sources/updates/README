@@ -22,8 +22,8 @@ Update Development Tools
 
 Update info file format
 -----------------------
-  MD5:      The md5sum of the complete update tarball.
-  Size:     The size in bytes of the patch tarball inside the update archive.
+  MD5:      The md5sum of the >>complete update<< tarball.
+  Size:     The size in bytes of the >>patch<< tarball inside the update archive.
   Info URL: Typically an URL to the forum describing the update.
 
 
@@ -33,7 +33,12 @@ Update build steps
     .../coretree/tree/var/smoothwall/patches/installed. And don't
     forget to update it if the update takes a long time to complete.
   - Add pkgs to build for the update to the update's makefile.
-  - Add coretree files to coretree.list, one file per line, if any.
+  - Note that if linux is updated, ipbatch, ipset, iptables, kernel-drivers,
+    xtables-addons and libreswan must be included in the Makefile list of
+    pkgs. Libreswan provides ipsec.ko which must match the kernel, and the others
+    must match changes in the kernel.
+  - Add coretree files to coretree.list, one file per line, if any. Do NOT
+    include .../patches/available.
   - NOTE: !!! If dhcpcd is included, be sure to include usr/etc/dhcpcd.conf. !!!
   - Create 'pkg'.list file to constrain which of an updated pkg's files
     are added to the update
@@ -52,8 +57,8 @@ Update preparation steps
 
 Update release steps
 --------------------
-  - Edit info.* to include the current update's description, MD5sum, date,
-    patch size, and forum URL
+  - Edit info.* to include the current update's description, MD5sum of
+    update tarball, date, patch size (in bytes), and forum URL.
   - Run:
       scp Express-3.1-Update1-*.tar.gz \
         "username@web.sourceforge.net:/home/frs/project/smoothwall/SmoothWall\ Updates/3.1"

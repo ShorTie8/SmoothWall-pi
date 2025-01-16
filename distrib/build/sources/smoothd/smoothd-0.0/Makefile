@@ -11,8 +11,8 @@ export IPT_LIB_DIR = $(IPT_LIBEXEC)
 
 OBJS=
 LIB_OBJS = module.o UDSocket.o pid.o setuid.o config.o ipbatch.o \
-        $(IPTABLES_SRC_DIR)/iptables/xtables_multi-iptables.o \
-        $(IPTABLES_SRC_DIR)/iptables/xshared.o
+        $(IPTABLES_SRC_DIR)/iptables/xtables_legacy_multi-iptables.o \
+        $(IPTABLES_SRC_DIR)/iptables/xtables_legacy_multi-xshared.o
 
 
 MAIN = main.cpp
@@ -38,7 +38,7 @@ smoothd: libsmoothd.so $(OBJS)
 	$(CXX) -o $(BIN) $(CXXFLAGS) $(DFLAGS) $(MAIN) $(OBJS) $(LIBS)
 
 smoothcom: libsmoothd.so
-	$(CXX) -o smoothcom $(CXXFLAGS) smoothcom.cpp -ldl -lxtables -liptc -lsmoothd
+	$(CXX) -o smoothcom $(CXXFLAGS) smoothcom.cpp -ldl -lxtables -lip4tc -lip6tc -lsmoothd
 
 clean:
 	rm -f $(OBJS) $(BIN) *.o *.so modules smoothcom

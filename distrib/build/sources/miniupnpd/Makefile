@@ -8,26 +8,28 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = miniupnpd
-VERSION = 2.1
+VERSION = 2.3.0
 
 BASE_URL = http://miniupnp.free.fr/files/
 
 PATCH_FILE1 = umask.patch
-PATCH_FILE2 = genconfig.patch
+PATCH_FILE2 = configure.patch
 
 CONFIGURE = yes
 COMPILE = yes
 INSTALL = yes
 
-PRECONFIGURE = CONFIG_OPTIONS="--portinuse --vendorcfg --leasefile --pcp-peer --uda-version=1.1"
+PRECONFIGURE =
+CONFIG_OPTIONS = --portinuse --firewall=iptables --vendorcfg --leasefile --pcp-peer --uda-version=1.1
 
 configure: patch
-	cd $(DIR); $(PRECONFIGURE) make -f Makefile.linux config.h
+	cd $(DIR); $(PRECONFIGURE) ./configure $(CONFIG_OPTIONS)
 
 compile: configure
-	@make $(JOBS) -C $(DIR) -f Makefile.linux \
+	make $(JOBS) -C $(DIR) -f Makefile.linux \
 	  CFLAGS="$(CFLAGS) \
-	    -DIPTABLES_143 -DUSE_NETFILTER \
+	    -DSO_REUSEPORT=15 \
+	    -DUSE_NETFILTER \
 	    -I../../iptables/iptables-$(IPTABLES_VER)/include" \
 	  LDFLAGS="-L$(IPT_LIBEXEC) -lip4tc -lip6tc"
 

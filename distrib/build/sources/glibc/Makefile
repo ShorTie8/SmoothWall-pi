@@ -19,7 +19,7 @@ EXTENSION = .tar.bz2
 #      collect2: error: ld returned 1 exit status
 #VERSION = 2.26
 BASE_URL =  https://ftp.gnu.org/gnu/glibc
-TZ_VERSION = 2020a
+TZ_VERSION = 2025a
 TZ_TARBALL = tzdata$(TZ_VERSION).tar.gz
 TZ_URL =  http://www.iana.org/time-zones/repository/releases/$(TZ_TARBALL)
 

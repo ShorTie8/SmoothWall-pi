@@ -12,12 +12,9 @@ BASE_URL = http://www.netfilter.org/projects/iptables/files
 CONFIG_OPTS += --prefix=/usr --mandir=/usr/man --docdir=/usr/doc \
 	        --enable-devel --enable-libipq
 
-
 CONFIGURE = yes
 COMPILE = yes
 INSTALL = yes
-
-#CONFIG_OPTS = --enable-libipq
 
 configure: $(DIR)/ patch
 	(if [ ! -e $(COMPILE_DIR) ]; then mkdir $(COMPILE_DIR); fi)

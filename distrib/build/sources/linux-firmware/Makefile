@@ -9,10 +9,11 @@
 include ../Makefile.conf
 
 PACKAGE = linux-firmware
-VERSION = 20200619
+VERSION = 20241210
 EXTENSION = .tar.gz
 BASE_URL =  https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/snapshot
 
+# kernel.org started making tarballs in 2019
 #export pkgName = $(PACKAGE)
 #export gitURL = git://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
 #export gitCommitID = 1baa34868b2c

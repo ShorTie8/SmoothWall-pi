@@ -43,6 +43,7 @@ ifeq ($(BUILD_PHASE), Stage_1)
 endif
 
 ifeq ($(BUILD_PHASE), Final)
+	sed -i -e '/SO_REUSEPORT/c #define SO_REUSEPORT	15' linux-${KERNELHEADERVER}/include/asm-generic/socket.h
 	+mkdir -vp $(PKG_ROOT); \
 	cd linux-$(KERNEL_VER); \
 	  make mrproper
