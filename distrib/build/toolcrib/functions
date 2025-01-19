@@ -294,7 +294,7 @@ other_cmd()
 ##	https://www.linuxfromscratch.org/lfs/view/stable/chapter07/kernfs.html
 ##	
 ##	Function Mount chroot
-function mso () {
+function mount_chroot () {
 #Current_Dir=$PWD
 echo $Current_Dir
 
@@ -328,7 +328,7 @@ export PS1="(Gentoo) ${PS1}"
 
 ##	https://www.linuxfromscratch.org/lfs/view/stable/chapter11/reboot.html
 
-function mso () {
+function unmount_chroot () {
 #Current_Dir=$PWD
 echo $Current_Dir
 
