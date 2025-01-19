@@ -7,19 +7,12 @@
 include ../Makefile.conf
 
 PACKAGE = attr
-VERSION = 2.4.47
+VERSION = 2.5.2
+BASE_URL = https://download.savannah.gnu.org/releases/attr
 
-BASE_URL = http://http.us.debian.org/debian/pool/main/a/attr/
-
-DIR = $(PACKAGE)-$(VERSION)
-TARBALL = $(PACKAGE)_$(VERSION).orig
-EXTENSION = .tar.bz2
-
-CONFIG_OPTS += --prefix=$(PKG_DIR)
-
-INSTALL = yes
-install: compile
-	@mkdir -p $(PKG_ROOT)
-	@DIST_ROOT=${PKG_ROOT} make -C $(COMPILE_DIR) install install-lib install-dev
+CONFIG_OPTS += \
+	--disable-static  \
+	--sysconfdir=/etc \
+	--docdir=/usr/share/doc/attr-2.5.2
 
 include ../Makefile.rules

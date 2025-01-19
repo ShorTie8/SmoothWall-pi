@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = zlib
-VERSION = 1.2.11
+VERSION = 1.3.1
 
-BASE_URL = http://www.zlib.net/
+BASE_URL = https://zlib.net/fossils
 
 INSTALL = yes
 

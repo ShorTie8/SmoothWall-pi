@@ -193,6 +193,15 @@ ifeq ($(mARCH),arm64)
     export BITS_64 = yes
     export SWE_TGT = aarch64-tools-linux-gnu
     export FINAL_TGT = aarch64-swe-linux-gnu
+  else ifeq ($(shell cat /proc/cpuinfo | grep "CPU part" | head -1 | cut -d " " -f3 | awk '{print$1}'),0xd0b)
+    export ARCH = arm64
+    export mTUPLE = "rpi5"
+    export ARCH_OK = yes
+    export BITS_64 = yes
+    export ARCHset = linux64
+    export SWE_TGT = aarch64-tools-linux-gnu
+    export FINAL_TGT = aarch64-swe-linux-gnu
+    export CFLAGS = $(OPT_FLAGS) -fPIC
   else
     $(info So, So, Sorry, Unknown arm64 board)
     $(error FAIL)

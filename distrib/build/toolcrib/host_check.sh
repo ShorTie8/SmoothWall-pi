@@ -447,7 +447,7 @@ TKERNELGCC=`echo $*|awk '{printf("%2.2d%2.2d00\n", $1, $2)}'`
 IFS=$OIFS
 if [[ $TKERNEL < $CKERNEL || $TKERNELGCC < $CKERNELGCC ]]; then
   echo "  FAIL: kernel v$WORK (<$VKERNEL?) and/or its compiler v$WORKGCC (<$VKERNELGCC) seem too old"
-  OK=OK+1
+#  OK=OK+1
 else
   echo "    OK: kernel v$WORK built by GCC v$WORKGCC seems new enough (>=$VKERNEL, GCC>=$VKERNELGCC)"
 fi

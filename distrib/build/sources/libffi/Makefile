@@ -7,8 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = libffi
-VER_MM = 3.2
-VERSION = $(VER_MM).1
+VER_MM = 3.4
+VERSION = $(VER_MM).3
 
 BASE_URL =  https://sourceware.org/pub/libffi/
 

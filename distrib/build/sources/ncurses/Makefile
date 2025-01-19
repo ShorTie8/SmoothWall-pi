@@ -23,6 +23,7 @@ CONFIG_OPTS += --with-shared \
 				--with-termlib \
 				--with-pkg-config \
 				--enable-pc-files
+#				--enable-widec
 
 ##	Added update 12
 INSTALL = yes

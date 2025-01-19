@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = less
-VERSION = 436
+VERSION = 661
 
 BASE_URL = http://www.greenwoodsoftware.com/less/
 

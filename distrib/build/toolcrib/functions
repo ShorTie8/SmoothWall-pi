@@ -172,7 +172,7 @@ function build_tc_stage_3() {
   buildenv util-linux 1
   buildenv wget 1
   buildenv git 1
-  #buildenv bc
+  buildenv rsync
   startTIME=`date +%s`-beginTIME
   displayTIME=`perl -e "printf('%6d', $startTIME);"`
   echo "    $displayTIME $BUILD_PHASE build complete"
@@ -288,3 +288,57 @@ other_cmd()
     fi
   fi
 }
+
+
+
+##	https://www.linuxfromscratch.org/lfs/view/stable/chapter07/kernfs.html
+##	
+##	Function Mount chroot
+function mso () {
+#Current_Dir=$PWD
+echo $Current_Dir
+
+#mount -v /dev/sda3 Gentoo
+
+mount -v --types proc /proc $Current_Dir/Gentoo/proc
+mount -v --rbind /sys $Current_Dir/Gentoo/sys
+mount -v --make-rslave $Current_Dir/Gentoo/sys
+mount -v --rbind /dev $Current_Dir/Gentoo/dev
+mount -v --make-rslave $Current_Dir/Gentoo/dev
+mount -v --bind /run $Current_Dir/Gentoo/run
+mount -v --make-slave $Current_Dir/Gentoo/run
+echo; echo
+mount -v --types tmpfs --options nosuid,nodev,noexec shm $Current_Dir/Gentoo/dev/shm
+chmod -v 1777 $Current_Dir/Gentoo/dev/shm Gentoo/run/shm
+echo
+
+if [ ! -d "$Current_Dir/boot/EFI" ]; then
+	mkdir -vp $Current_Dir/boot/EFI
+fi
+mount -v /dev/sda1 $Current_Dir/Gentoo/boot/EFI
+
+exit 0
+
+chroot $Current_Dir/Gentoo /bin/bash
+
+source /etc/profile
+export PS1="(Gentoo) ${PS1}"
+
+}
+
+##	https://www.linuxfromscratch.org/lfs/view/stable/chapter11/reboot.html
+
+function mso () {
+#Current_Dir=$PWD
+echo $Current_Dir
+
+##	 -l, --lazy              detach the filesystem now, clean up things later
+echo; echo "Lazy UnMount"
+umount -vl $Current_Dir/Gentoo/dev{/shm,/pts,}
+echo "Sleepy 4"; sleep 4
+umount -vR $Current_Dir/Gentoo
+
+}
+
+
+

@@ -33,12 +33,12 @@ download:
 # Phase 1 compile
 #
 ifeq ($(BUILD_PHASE), Stage_1)
-#--build=$(shell bash $(SOURCES_DIR)/gcc/gcc-$(GCC_VER)/config.guess) \
+##	--build=$(shell bash $(SOURCES_DIR)/gcc/gcc-$(GCC_VER)/config.guess) \
 
 CONFIG_OPTS = \
 		--prefix=$(TOOLS_DIR) \
 		--host=$(SWE_TGT) \
-		--build=$(shell bash $(SOURCES_DIR)/gcc/gcc-$(GCC_VER)/config.guess) \
+#		--build=$(shell bash $(SOURCES_DIR)/gcc/gcc-$(GCC_VER)/config.guess) \
 		--enable-kernel=3.2  \
 		--with-headers=$(TOOLS_DIR)/include \
 		libc_cv_forced_unwind=yes \

@@ -7,22 +7,23 @@
 include ../Makefile.conf
 
 PACKAGE = libdnet
-VERSION = 1.12
-EXTENSION = .tgz
+VERSION = 1.18.0
+BASE_URL = https://github.com/ofalk/libdnet/archive/refs/tags
 
-DIR = $(PACKAGE)-$(VERSION)
+#EXTENSION = .tgz
 
-BASE_URL = http://ftp.psu.ac.th/pub/snort
+DIR = $(PACKAGE)-$(PACKAGE)-$(VERSION)
 
-PREPARE = yes
-$(DIR)/: download
-	@echo; echo "prepare"
-	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
-ifeq ($(mARCH), arm64)
-	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
-		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
-	done
-endif
+
+#PREPARE = yes
+#$(DIR)/: download
+#	@echo; echo "prepare"
+#	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
+#ifeq ($(mARCH), arm64)
+#	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
+#		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
+#	done
+#endif
 
 include ../Makefile.rules
 

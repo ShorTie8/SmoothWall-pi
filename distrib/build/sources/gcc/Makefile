@@ -49,6 +49,8 @@ else ifeq ($(mTUPLE), rpi3)
 else ifeq ($(mTUPLE), rpi4)
   # +crypto https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845
   GCC_flags = --with-cpu=cortex-a72 --with-fpu=vfp --with-float=hard --enable-linker-build-id
+else ifeq ($(mTUPLE), rpi5)
+  GCC_flags =
 else ifeq ($(mTUPLE), xu4)
   GCC_flags = --with-cpu=cortex-a15 --with-cpu=cortex-a7 --with-fpu=vfpv3-d16 --with-float=hard 
 else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))

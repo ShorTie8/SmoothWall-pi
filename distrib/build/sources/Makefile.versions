@@ -5,9 +5,9 @@
 # This code is distributed under the terms of the GPL v2.
 
 # The system's kernel.
-KERNEL_MAJOR = 4
-KERNEL_MMR = $(KERNEL_MAJOR).19
-KERNEL_VER = $(KERNEL_MMR).127
+KERNEL_MAJOR = 6
+KERNEL_MMR = $(KERNEL_MAJOR).6
+KERNEL_VER = $(KERNEL_MMR).70
 
 # The kernel version headers needed to build glibc
 # Unrelated to the system's kernel
@@ -24,12 +24,9 @@ K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
 KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K_RAW_VERSION).tar.xz
 KERNELHEADER_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNELHEADER_MAJOR).x/linux-$(KERNELHEADERVER).tar.xz
 
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64))
-    KERNEL_VER = $(KERNEL_MMR).127+
-    KERNEL_COM = fe915debc1925397f78db8bbfc9f488b0ce4e009
+ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64 rpi5))
+    KERNEL_COM = a452251cc286f2799969f047698c76fe3d7862b9
     KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-rpi-$(KERNEL_VER).tar.gz
-    K_RAW_VERSION = $(KERNEL_VER)
-    K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
 
 else ifeq ($(mTUPLE), xu4)
     KERNEL_MAJOR = 4
