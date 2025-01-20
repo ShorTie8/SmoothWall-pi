@@ -9,7 +9,10 @@ include ../Makefile.conf
 PACKAGE = LuaJIT
 VERSION = 2.1.0-beta3
 
-BASE_URL = http://luajit.org/download
+BASE_URL = https://github.com/openeuler-mirror/luajit/blob/master
+
+##	https://github.com/openeuler-mirror/luajit/blob/master/0002-luajit-add-secure-compile-option-fstack.patch
+##	https://github.com/openeuler-mirror/luajit/blob/master/luajit-2.1-update.patch
 
 CONFIGURE = yes
 configure: patch

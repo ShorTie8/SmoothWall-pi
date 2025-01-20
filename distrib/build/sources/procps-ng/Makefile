@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = procps-ng
-VERSION = 3.3.6
+VERSION = 4.0.5
 EXTENSION = .tar.xz
 
 BASE_URL = http://sourceforge.net/projects/procps-ng/files/Production/

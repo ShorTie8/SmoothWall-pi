@@ -7,8 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = M2Crypto
-VERSION = 0.35.2
+VERSION = 0.43.0
 BASE_URL = https://files.pythonhosted.org/packages/74/18/3beedd4ac48b52d1a4d12f2a8c5cf0ae342ce974859fba838cbbc1580249
+# https://github.com/mcepl/M2Crypto/archive/refs/tags/0.42.0.tar.gz
 
 COMPILE = yes
 compile: patch

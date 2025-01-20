@@ -9,7 +9,7 @@ VERSION =  $(XTABLES_ADDONS_VER)
 
 EXTENSION = .tar.xz
 
-BASE_URL = http://downloads.sourceforge.net/project/xtables-addons/Xtables-addons
+BASE_URL = https://inai.de/files/xtables-addons
 
 CONFIG_OPTS += --with-gnu-ld \
 	       --with-kbuild=/build/sources/linux$(KERNEL_TYPE)/linux/

@@ -15,8 +15,30 @@ BASE_URL = https://ftp.gnu.org/gnu/ncurses/
 #PATCH_URL1 = http://www.linuxfromscratch.org/patches/downloads/ncurses/$(PATCH_FILE1)
 
 ifeq ($(BUILD_PHASE), Stage_3)
-CONFIG_OPTS += --with-shared \
-    --without-debug --without-ada --enable-overwrite
+#CONFIG_OPTS += --with-shared \
+#    --without-debug --without-ada --enable-overwrite
+CONFIG_OPTS = --prefix=/usr                \
+            --host=$LFS_TGT              \
+            --build=$(./config.guess)    \
+            --mandir=/usr/share/man      \
+            --with-manpage-format=normal \
+            --with-shared                \
+            --without-normal             \
+            --with-cxx-shared            \
+            --without-debug              \
+            --without-ada                \
+            --disable-stripping
+
+CONFIGURE = yes
+configure: patch
+	@echo; echo; echo "configure"; echo
+	cd $(DIR)/build; ../configure
+	@echo; echo; echo "include"; echo
+	cd $(DIR)/build; make -C include
+	@echo; echo; echo "progs tic"; echo
+	cd $(DIR)/build; make -C progs tic
+	(cd $(DIR); CXXFLAGS="$(CFLAGS)" CFLAGS="$(CFLAGS)" $(PRE_CONFIGURE) ./configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
+
 else
 CONFIG_OPTS += --with-shared \
 				--without-debug \

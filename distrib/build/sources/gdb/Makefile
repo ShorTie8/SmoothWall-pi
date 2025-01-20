@@ -8,6 +8,7 @@ include ../Makefile.conf
 
 PACKAGE = gdb
 VERSION = 8.0
+#VERSION = 16.1
 
 BASE_URL = https://ftp.gnu.org/gnu/gdb
 

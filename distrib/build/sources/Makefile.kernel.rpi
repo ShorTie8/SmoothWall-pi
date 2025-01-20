@@ -104,6 +104,8 @@ ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4))
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) zImage
 else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
 	make $(JOBS) V=1 -C linux CC=$(COMPILER)
+else ifeq ($(mTUPLE), rpi5)
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) Image.gz
 else
 	$(info Unsupported kernel compile)
 	$(error FAIL)
@@ -165,6 +167,9 @@ else
 	$(info Un-supported $(mTUPLE) Some copies dtb's !!)
 	$(error FAIL)
 endif
+
+else ifeq ($(mTUPLE), rpi5)
+	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
 
 else
 	$(info Unsupported package-kernel)

@@ -141,9 +141,23 @@ fi
       build gettext
       build libtool
       build inetutils
+      build check
 #  exit 22
       touch crumbs/Final.grp1.compiled
     fi
+
+
+    if [ -e crumbs/chroot_mounted ]; then
+      echo -e "  chroot already mounted"
+    else
+      echo
+      echo -e "  Mounting File System"
+      mount_chroot
+    ##	read status
+
+      touch crumbs/chroot_mounted
+    fi
+
 
     if [ -e crumbs/Final.grp2.compiled ]; then
       echo -e "  Final group 2 packages (libs) already built"
@@ -381,7 +395,6 @@ fi
       build ez-ipupdate
 
       build imspector
-      build check
       build clamav
       build p3scan
 
@@ -428,7 +441,7 @@ fi
       build suricata
       build smartmontools
       build squidguard
-      build subversion
+#      build subversion
       build qemu
       #build ntop
       build iperf
