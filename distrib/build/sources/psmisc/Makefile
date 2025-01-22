@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = psmisc
-VERSION = 23.7
+VERSION = 23.6
 EXTENSION = .tar.xz
 
 BASE_URL = http://downloads.sourceforge.net/project/psmisc/psmisc

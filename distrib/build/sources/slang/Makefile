@@ -8,7 +8,7 @@ include ../Makefile.conf
 
 PACKAGE = slang
 VER_MM = 2.3
-VERSION = $(VER_MM).2
+VERSION = $(VER_MM).3
 
 EXTENSION = .tar.bz2
 BASE_URL = https://www.jedsoft.org/releases/slang

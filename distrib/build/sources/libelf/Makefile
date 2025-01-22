@@ -8,7 +8,7 @@
 include ../Makefile.conf
 
 PACKAGE = libelf
-VERSION = 0.174
+VERSION = 0.192
 EXTENSION = .tar.bz2
 
 TARBALL = elfutils-$(VERSION)

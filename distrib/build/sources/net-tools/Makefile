@@ -4,37 +4,18 @@
 #
 # This code is distributed under the terms of the GPL v2.
 
+##	https://www.linuxfromscratch.org/blfs/view/stable/basicnet/net-tools.html
+
 include ../Makefile.conf
 
 PACKAGE = net-tools
-VERSION = 1.60
-
-EXTENSION = .tar.bz2
-
-BASE_URL = http://www.tazenda.demon.co.uk/phil/net-tools/
-
-PATCH_URL1 = http://www.linuxfromscratch.org/patches/blfs/6.3/net-tools-1.60-gcc34-3.patch
-PATCH_URL2 = http://www.linuxfromscratch.org/patches/blfs/6.3/net-tools-1.60-kernel_headers-2.patch
-PATCH_URL3 = http://www.linuxfromscratch.org/patches/blfs/6.3/net-tools-1.60-mii_ioctl-1.patch
-
-PATCH_FILE1 = net-tools-1.60-gcc34-3.patch
-PATCH_FILE2 = net-tools-1.60-kernel_headers-2.patch
-PATCH_FILE3 = net-tools-1.60-mii_ioctl-1.patch
-
-PKG_DIR = 
+VERSION = 2.10
+EXTENSION = .tar.xz
+BASE_URL = https://sourceforge.net/projects/net-tools/files
 
 CONFIGURE = yes
-
 configure: patch
-	sed -i -e 's/\(^COPTS = \)/\1$(CFLAGS) /' $(DIR)/Makefile
-	cd $(DIR); sed -i 's@<net/if_arp.h>@<net/if_arp.h>\n#include <stdlib.h>@' \
-	    lib/ec_hw.c
-	cp -f config.h $(DIR)
-	cp -f config.make $(DIR)
+	cp -v config.h $(DIR)
 
-INSTALL = yes
-install: compile
-	@mkdir -p $(PKG_ROOT)
-	@make -C $(DIR) BASEDIR=$(PKG_ROOT)$(PKG_DIR) install
 
 include ../Makefile.rules

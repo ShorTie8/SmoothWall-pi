@@ -7,7 +7,7 @@
 include ../../../Makefile.conf
 
 PACKAGE = GD
-VERSION = 2.70
+VERSION = 2.80
 
 BASE_URL = https://www.cpan.org/modules/by-module/GD
 

@@ -7,7 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = daq
-ReConfigure = yes
+#ReConfigure = yes
+PATCH_FILE1 = pcap_version_check
 
 export NO_CHECK_CERT = 1
 

@@ -24,8 +24,8 @@ prepare: unpack
 	@echo; echo; echo "make mrproper"
 	make $(JOBS) -C linux mrproper
 
-	@echo; echo "Setting scmversion to plus"
-	echo + > linux/.scmversion
+#	@echo; echo "Setting scmversion to plus"
+#	echo + > linux/.scmversion
 
 	@echo; echo; echo "Creating $(mTUPLE) .config"
 ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0 pi0w rpi))
@@ -51,47 +51,47 @@ else
 	$(error FAIL)
 endif
 
-	@echo; echo "  Set hostname"
-	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
+#	@echo; echo "  Set hostname"
+#	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
 
 	@echo; echo "  Reset CONFIG_LOCALVERSION"
 	# CONFIG_LOCALVERSION needs reset for libreswan
 	sed -e 's/CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=""/' -i linux/.config
 
-	@echo; echo "  disable multi media support"
-	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
+#	@echo; echo "  disable multi media support"
+#	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
 
-	@# turn off wifi power save
-	@#sed -e 's/CONFIG_CFG80211_DEFAULT_PS=y/# CONFIG_CFG80211_DEFAULT_PS is not set/' -i linux/.config
+#	@# turn off wifi power save
+#	@#sed -e 's/CONFIG_CFG80211_DEFAULT_PS=y/# CONFIG_CFG80211_DEFAULT_PS is not set/' -i linux/.config
 
-	@echo; echo "  return nic's to modules"
-	@# pi0 pi0w rpi
-	sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
-	@# pi3
-	sed -e 's/CONFIG_USB_LAN78XX=y/CONFIG_USB_LAN78XX=m/' -i linux/.config
-	@# pi4
-	sed -e 's/CONFIG_BROADCOM_PHY=y/CONFIG_BROADCOM_PHY=m/' -i linux/.config
-	sed -e 's/CONFIG_BCMGENET=y/CONFIG_BCMGENET=m/' -i linux/.config
-	sed -e 's/CONFIG_USB_RTL8152=y/CONFIG_USB_RTL8152=m/' -i linux/.config
-	#sed -e 's/CONFIG_GENERIC_PHY=y/CONFIG_GENERIC_PHY=m/' -i linux/.config
-	#sed -e 's/CONFIG_NET_VENDOR_BROADCOM=y/CONFIG_NET_VENDOR_BROADCOM=m/' -i linux/.config
-
-
-	@echo; echo "  Adjust Ciphers"
-	sed -e 's/# CONFIG_CRYPTO_AES_TI is not set/CONFIG_CRYPTO_AES_TI=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_ANUBIS is not set/CONFIG_CRYPTO_ANUBIS=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_BLOWFISH is not set/CONFIG_CRYPTO_BLOWFISH=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_CAMELLIA is not set/CONFIG_CRYPTO_CAMELLIA=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_CAST6 is not set/CONFIG_CRYPTO_CAST6=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_FCRYPT is not set/CONFIG_CRYPTO_FCRYPT=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_KHAZAD is not set/CONFIG_CRYPTO_KHAZAD=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_SALSA20 is not set/CONFIG_CRYPTO_SALSA20=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_CHACHA20 is not set/CONFIG_CRYPTO_CHACHA20=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_SEED is not set/CONFIG_CRYPTO_SEED=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_SERPENT is not set/CONFIG_CRYPTO_SERPENT=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_SM4 is not set/CONFIG_CRYPTO_SM4=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_TEA is not set/CONFIG_CRYPTO_TEA=m/' -i linux/.config
-	sed -e 's/# CONFIG_CRYPTO_TWOFISH is not set/CONFIG_CRYPTO_TWOFISH=m/' -i linux/.config
+#	@echo; echo "  return nic's to modules"
+#	@# pi0 pi0w rpi
+#	sed -e 's/CONFIG_USB_NET_SMSC95XX=y/CONFIG_USB_NET_SMSC95XX=m/' -i linux/.config
+#	@# pi3
+#	sed -e 's/CONFIG_USB_LAN78XX=y/CONFIG_USB_LAN78XX=m/' -i linux/.config
+#	@# pi4
+#	sed -e 's/CONFIG_BROADCOM_PHY=y/CONFIG_BROADCOM_PHY=m/' -i linux/.config
+#	sed -e 's/CONFIG_BCMGENET=y/CONFIG_BCMGENET=m/' -i linux/.config
+#	sed -e 's/CONFIG_USB_RTL8152=y/CONFIG_USB_RTL8152=m/' -i linux/.config
+#	#sed -e 's/CONFIG_GENERIC_PHY=y/CONFIG_GENERIC_PHY=m/' -i linux/.config
+#	#sed -e 's/CONFIG_NET_VENDOR_BROADCOM=y/CONFIG_NET_VENDOR_BROADCOM=m/' -i linux/.config
+#
+#
+#	@echo; echo "  Adjust Ciphers"
+#	sed -e 's/# CONFIG_CRYPTO_AES_TI is not set/CONFIG_CRYPTO_AES_TI=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_ANUBIS is not set/CONFIG_CRYPTO_ANUBIS=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_BLOWFISH is not set/CONFIG_CRYPTO_BLOWFISH=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_CAMELLIA is not set/CONFIG_CRYPTO_CAMELLIA=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_CAST6 is not set/CONFIG_CRYPTO_CAST6=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_FCRYPT is not set/CONFIG_CRYPTO_FCRYPT=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_KHAZAD is not set/CONFIG_CRYPTO_KHAZAD=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_SALSA20 is not set/CONFIG_CRYPTO_SALSA20=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_CHACHA20 is not set/CONFIG_CRYPTO_CHACHA20=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_SEED is not set/CONFIG_CRYPTO_SEED=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_SERPENT is not set/CONFIG_CRYPTO_SERPENT=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_SM4 is not set/CONFIG_CRYPTO_SM4=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_TEA is not set/CONFIG_CRYPTO_TEA=m/' -i linux/.config
+#	sed -e 's/# CONFIG_CRYPTO_TWOFISH is not set/CONFIG_CRYPTO_TWOFISH=m/' -i linux/.config
 
 	@echo; echo; echo "make oldconfig"; echo
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig

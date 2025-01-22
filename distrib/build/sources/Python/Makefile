@@ -7,7 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = Python
-VERSION = 2.7.18
+##	distutils not in 3.12.x
+VERSION = 3.11.9
 EXTENSION = .tar.xz
 
 BASE_URL = http://www.python.org/ftp/python/$(VERSION)

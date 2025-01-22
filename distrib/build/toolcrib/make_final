@@ -206,6 +206,8 @@ fi
       build nss
       build curl
       build neon
+      build libbpf
+      build libelf
       build libosip2
       build libmnl
       build libnl
@@ -219,9 +221,9 @@ fi
       build libnetfilter_queue
       build libnftnl
       build LuaJIT
-      JOBS=$JOBS_UP
+   #   JOBS=$JOBS_UP
       build slang
-      JOBS=$JOBS_MP
+   #   JOBS=$JOBS_MP
       build popt
       build dialog
       build newt
@@ -260,6 +262,7 @@ fi
       build acpica
       JOBS=$JOBS_MP
       build nasm
+      build net-tools
       touch crumbs/Final.grp3.compiled
     fi
 
@@ -278,7 +281,6 @@ fi
       build openldap
       build wget
       build sudo
-      build libelf
       build linux
       #build linux-backports
       build linux-firmware

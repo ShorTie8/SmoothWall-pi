@@ -19,7 +19,7 @@
  * internationalization on your system.
  * 
  */
-#define I18N 1
+#define I18N 0
 
 /* 
  * 
@@ -35,9 +35,10 @@
 #define HAVE_AFNETROM 1
 #define HAVE_AFROSE 1
 #define HAVE_AFX25 1
-#define HAVE_AFECONET 1
+#define HAVE_AFECONET 0
 #define HAVE_AFDECnet 0
 #define HAVE_AFASH 1
+#define HAVE_AFBLUETOOTH 0
 
 /* 
  * 
@@ -49,8 +50,8 @@
 #define HAVE_HWSLIP 1
 #define HAVE_HWPPP 1
 #define HAVE_HWTUNNEL 1
-#define HAVE_HWSTRIP 1
-#define HAVE_HWTR 1
+#define HAVE_HWSTRIP 0
+#define HAVE_HWTR 0
 #define HAVE_HWAX25 1
 #define HAVE_HWROSE 1
 #define HAVE_HWNETROM 1
@@ -62,7 +63,9 @@
 #define HAVE_HWASH 1
 #define HAVE_HWHDLCLAPB 1
 #define HAVE_HWIRDA 1
-#define HAVE_HWEC 1
+#define HAVE_HWEC 0
+#define HAVE_HWEUI64 1
+#define HAVE_HWIB 1
 
 /* 
  * 
@@ -70,5 +73,11 @@
  * 
  */
 #define HAVE_FW_MASQUERADE 1
+#define HAVE_ARP_TOOLS 1
+#define HAVE_HOSTNAME_TOOLS 1
+#define HAVE_HOSTNAME_SYMLINKS 1
 #define HAVE_IP_TOOLS 1
 #define HAVE_MII 1
+#define HAVE_PLIP_TOOLS 1
+#define HAVE_SERIAL_TOOLS 1
+#define HAVE_SELINUX 0

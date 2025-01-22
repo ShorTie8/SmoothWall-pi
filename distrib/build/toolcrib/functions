@@ -123,7 +123,7 @@ function build_tc_stage_2() {
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
   buildenv libstdc++
-  buildenv m4 1
+#  buildenv m4 1
   buildenv binutils 2
   buildenv gcc 2
   check 2 gcc
@@ -162,6 +162,7 @@ function build_tc_stage_3() {
   buildenv grep 1
   buildenv gzip 1
   buildenv joe 1
+  buildenv m4 1
   buildenv make 1
   buildenv patch 1
   buildenv perl 1
@@ -208,11 +209,10 @@ function check()
 function cpu_count() {
   typeset -i phy_max cor_max cores cpus
 
-  if egrep -i "^physical id" /proc/cpuinfo >/dev/null 2>&1; then
-    phy_max=`egrep -i "^physical id" /proc/cpuinfo|sed -e 's/.*: //'|sort|tail -1`+1
-    cor_max=`egrep -i "^core id" /proc/cpuinfo|sed -e 's/.*: //'|sort|tail -1`+1
-    cpus=`egrep -i "^processor" /proc/cpuinfo|sed -e 's/.*: //'|sort|tail -1`+1
-    cores=cor_max*phy_max
+  if grep siblings /proc/cpuinfo >/dev/null 2>&1; then
+    cores=`grep "siblings" /proc/cpuinfo | wc -l`
+  elif egrep -i "^physical id" /proc/cpuinfo >/dev/null 2>&1; then
+    cores=`egrep -i "^physical id" /proc/cpuinfo | wc -l`
   else
     cores=`grep processor /proc/cpuinfo|wc -l`
   fi

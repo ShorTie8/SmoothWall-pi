@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = popt
-VERSION = 1.16
+VERSION = 1.19
 
-BASE_URL = http://rpm5.org/files/popt/
+BASE_URL = https://ftp.osuosl.org/pub/rpm/popt/releases/popt-1.x
 
 PREPARE = yes
 $(DIR)/: download
