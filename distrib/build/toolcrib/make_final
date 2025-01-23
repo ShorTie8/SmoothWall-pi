@@ -206,8 +206,8 @@ fi
       build nss
       build curl
       build neon
-      build libbpf
       build libelf
+      build libbpf
       build libosip2
       build libmnl
       build libnl
