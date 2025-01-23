@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libxslt
-VERSION = 1.1.32
+VERSION = 1.1.34
 
 BASE_URL = http://xmlsoft.org/sources
 

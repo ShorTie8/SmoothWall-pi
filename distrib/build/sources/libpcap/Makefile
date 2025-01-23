@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libpcap
-VERSION = 1.9.0
+VERSION = 1.10.5
 
 BASE_URL = http://www.tcpdump.org/release/
 

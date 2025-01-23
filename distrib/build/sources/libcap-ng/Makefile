@@ -7,10 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = libcap-ng
-VERSION = 0.7.9
+VERSION = 0.8.5
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = http://people.redhat.com/sgrubb/$(PACKAGE)
+BASE_URL = http://people.redhat.com/sgrubb/libcap-ng
 
 include ../Makefile.rules

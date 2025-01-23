@@ -7,10 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = libnet
-VERSION = 1.2-rc3
+VERSION = 1.3
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = https://sourceforge.net/projects/libnet-dev/files
+BASE_URL = https://github.com/libnet/libnet/releases/download/v1.3
 
 include ../Makefile.rules

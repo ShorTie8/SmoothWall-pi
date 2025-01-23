@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libnetfilter_queue
-VERSION = 1.0.2
+VERSION = 1.0.5
 EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)-$(VERSION)

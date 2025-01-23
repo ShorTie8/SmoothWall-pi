@@ -220,7 +220,7 @@ fi
       build libnetfilter_log
       build libnetfilter_queue
       build libnftnl
- #     build LuaJIT
+#      build LuaJIT
    #   JOBS=$JOBS_UP
       build slang
    #   JOBS=$JOBS_MP

@@ -8,7 +8,7 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = glibc
-VERSION = 2.25
+VERSION = 2.26
 EXTENSION = .tar.bz2
 #     25989 trafficstats (0.0): PKG_ROOT:/build/buildroot/trafficstats
 #Failed:

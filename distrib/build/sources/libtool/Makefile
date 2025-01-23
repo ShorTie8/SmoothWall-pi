@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libtool
-VERSION = 2.4.6
+VERSION = 2.5.4
 
 BASE_URL = https://ftp.gnu.org/gnu/libtool
 

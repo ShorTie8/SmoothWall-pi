@@ -7,13 +7,13 @@
 include ../Makefile.conf
 
 PACKAGE = libcap
-VERSION = 2.22
+VERSION = 2.44
 
-BASE_URL = https://mirrors.mediatemple.net/debian-archive/debian/pool/main/libc/libcap2
+BASE_URL = http://ftp.de.debian.org/debian/pool/main/libc/libcap2
 
 DIR = $(PACKAGE)-$(VERSION)
 TARBALL = $(PACKAGE)2_$(VERSION).orig
-
+EXTENSION = .tar.xz
 CONFIG_OPTS += --prefix=$(PKG_DIR)
 
 CONFIGURE = yes

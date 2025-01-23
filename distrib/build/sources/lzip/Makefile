@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = lzip
-VERSION = 1.20
+VERSION = 1.25
 
 BASE_URL = http://download.savannah.gnu.org/releases/lzip
 

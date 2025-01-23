@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = libnetfilter_conntrack
-VERSION = 1.0.6
-EXTENSION = .tar.bz2
+VERSION = 1.1.0
+EXTENSION = .tar.xz
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = https://www.netfilter.org/projects/libnetfilter_conntrack/files
+BASE_URL = https://www.netfilter.org/pub/libnetfilter_conntrack
 
 include ../Makefile.rules

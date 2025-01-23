@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = lm_sensors
-VERSION = 3.3.3
+VERSION = 3.4.0
 
 EXTENSION = .tar.bz2
 

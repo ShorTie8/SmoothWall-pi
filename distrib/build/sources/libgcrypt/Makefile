@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libgcrypt
-VERSION = 1.8.4
+VERSION = 1.11.0
 EXTENSION = .tar.bz2
 BASE_URL = https://www.gnupg.org/ftp/gcrypt/libgcrypt
 

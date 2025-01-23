@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libpng
-VERSION = 1.5.18
+VERSION = 1.6.45
 
 BASE_URL = http://downloads.sourceforge.net/libpng
 

@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libgpg-error
-VERSION = 1.36
+VERSION = 1.51
 EXTENSION = .tar.bz2
 BASE_URL = https://www.gnupg.org/ftp/gcrypt/libgpg-error
 

@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libxml2
-VERSION = 2.9.9
+VERSION = 2.9.12
 
 BASE_URL = http://xmlsoft.org/sources
 

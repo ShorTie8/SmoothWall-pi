@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libnetfilter_cthelper
-VERSION = 1.0.0
+VERSION = 1.0.1
 EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)-$(VERSION)

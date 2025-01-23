@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = libnl
-VERSION = 3.4.0
+VERSION = 3.11.0
 
-BASE_URL =  https://github.com/thom311/libnl/releases/download/libnl3_4_0/
+BASE_URL =  https://github.com/thom311/libnl/releases/download/libnl3_11_0/
 
 CONFIG_OPTS = --prefix=$(PKG_DIR) \
 	      --sysconfdir=/etc \
