@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = texinfo
-VERSION = 6.6
+VERSION = 7.1
 
 BASE_URL = https://ftp.gnu.org/gnu/texinfo
 

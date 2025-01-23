@@ -184,7 +184,7 @@ fi
       build gperf
       build eudev
       build libusb
-      build libusb-compat
+ #     build libusb-compat
       build cgilib
       build freetype
       build fontconfig
@@ -220,7 +220,7 @@ fi
       build libnetfilter_log
       build libnetfilter_queue
       build libnftnl
-      build LuaJIT
+ #     build LuaJIT
    #   JOBS=$JOBS_UP
       build slang
    #   JOBS=$JOBS_MP

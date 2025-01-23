@@ -8,7 +8,7 @@ include ../Makefile.conf
 
 PACKAGE = libusb
 VER_MM = 1.0
-VERSION = $(VER_MM).22
+VERSION = $(VER_MM).27
 EXTENSION = .tar.bz2
 
 BASE_URL = http://downloads.sourceforge.net/sourceforge/$(PACKAGE)/$(PACKAGE)-$(VER_MM)/$(PACKAGE)-$(VERSION)

@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = xz
-VERSION = 5.2.3
+VERSION = 5.6.2
 EXTENSION = .tar.xz
 
 BASE_URL = http://tukaani.org/$(PACKAGE)/

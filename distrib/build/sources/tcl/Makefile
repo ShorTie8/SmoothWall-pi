@@ -8,7 +8,7 @@ include ../Makefile.conf
 
 PACKAGE = tcl
 TCL_MM = 8.6
-VERSION = $(TCL_MM).9
+VERSION = $(TCL_MM).14
 DIR = $(PACKAGE)$(VERSION)
 TARBALL = $(PACKAGE)$(VERSION)-src
 BASE_URL = http://downloads.sourceforge.net/tcl
