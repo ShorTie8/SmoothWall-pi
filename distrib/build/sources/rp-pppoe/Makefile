@@ -11,7 +11,7 @@ VERSION = 4.0
 
 DIR = $(PACKAGE)-$(VERSION)/src
 
-BASE_URL = https://dianne.skoll.ca/projects/rp-pppoe
+BASE_URL = https://downloads.uls.co.za/rp-pppoe
 
 INSTALL = yes
 CLEAN = yes

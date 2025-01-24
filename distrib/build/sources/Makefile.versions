@@ -43,9 +43,7 @@ endif
 FREESWAN_TYPE = libreswan
 FREESWAN_VER = 3.32
 
-IPTABLES_VER = 1.6.0
-# 1.6.1 & 2 don't give /iptables/xshared.o
-#IPTABLES_VER = 1.6.2
+IPTABLES_VER = 1.8.7
 
 #XTABLES_ADDONS_VER = 3.9
 #XTABLES_ADDONS_VER = 2.14

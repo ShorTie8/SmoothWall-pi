@@ -141,6 +141,7 @@ fi
       build gettext
       build libtool
       build inetutils
+      build rsync
       build check
 #  exit 22
       touch crumbs/Final.grp1.compiled
@@ -290,7 +291,7 @@ fi
       build xtables-addons
       build ipbatch
      build klibc
-      build linux-atm
+#      build linux-atm
       touch crumbs/Final.grp4.compiled
     fi
 
@@ -349,7 +350,7 @@ fi
       build ppp
       build isdn4k-utils
       build rp-pppoe
-      build ibod
+#      build ibod
       build dhcpcd
       #build eciadsl-synch_bin
       #build eciadsl-usermode
@@ -405,7 +406,6 @@ fi
       build screen
       build gdb
       build lynx
-      build rsync
       #build samba
 
       build siproxd

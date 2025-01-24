@@ -9,8 +9,9 @@ include ../Makefile.conf
 
 PACKAGE = audit
 VERSION = 4.0.3
-ReConfigure = yes
+#ReConfigure = yes
 DIR = audit-userspace-$(VERSION)
-BASE_URL = https://github.com/linux-audit/audit-userspace/archive/refs/tags
+TARBALL = v$(VERSION)
+BASE_URL = https://github.com/linux-audit/audit-userspace/archive/refs/tags/v4.0.3.tar.gz
 
 include ../Makefile.rules
