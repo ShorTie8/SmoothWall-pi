@@ -7,36 +7,20 @@
 include ../Makefile.conf
 
 PACKAGE = daq
-#ReConfigure = yes
-PATCH_FILE1 = pcap_version_check
-
+VERSION = 2.0.7
 export NO_CHECK_CERT = 1
 
-# Deal with snort: get the latest version number dynamically. :)
-#
-VERSION := $(shell ../../toolcrib/get-snort-ver.sh -v $(PACKAGE))
-ifeq ($(VERSION),)
-  $(shell echo "get-snort-ver.sh cannot get current $(PACKAGE) version" >&2)
-  $(error get-snort-ver.sh cannot get current $(PACKAGE) version)
-endif
-URL := $(shell ../../toolcrib/get-snort-ver.sh -u $(PACKAGE))
-ifeq ($(URL),)
-  $(shell echo "get-snort-ver.sh cannot get current $(PACKAGE) URL" >&2)
-  $(error get-snort-ver.sh cannot get current $(PACKAGE) URL)
-endif
-
 BASE_URL = https://www.snort.org/downloads/snort
-#BASE_URL = https://snort.org/downloads/snortplus
 
 DIR = $(PACKAGE)-$(VERSION)
 
 CONFIG_OPTS += --disable-bundled-modules --enable-nfq-module \
 	      --enable-pcap-module --enable-dump-module 
 
-# You're looking in here because the build system failed to find
-# the snort source package or it failed to build.
-#
-# This makefile should always get the latest version of snort, whatever it is.
-# However, the build might fail if the pidfile fix patch is no longer correct.
+PREPARE = yes
+$(DIR)/: download
+	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
+	echo "autoreconf"
+	cd $(DIR); autoreconf
 
 include ../Makefile.rules

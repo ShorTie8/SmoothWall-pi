@@ -7,36 +7,17 @@
 include ../Makefile.conf
 
 PACKAGE = snort
-
+VERSION = 2.9.20
 export NO_CHECK_CERT = 1
-
-# Deal with snort: get the latest version number dynamically. :)
-#
-VERSION := $(shell ../../toolcrib/get-snort-ver.sh -v $(PACKAGE))
-ifeq ($(VERSION),)
-  $(shell echo "get-snort-ver.sh cannot get current $(PACKAGE) version" >&2)
-  $(error get-snort-ver.sh cannot get current $(PACKAGE) version)
-endif
-URL := $(shell ../../toolcrib/get-snort-ver.sh -u $(PACKAGE))
-ifeq ($(URL),)
-  $(shell echo "get-snort-ver.sh cannot get current $(PACKAGE) URL" >&2)
-  $(error get-snort-ver.sh cannot get current $(PACKAGE) URL)
-endif
 
 BASE_URL = https://www.snort.org/downloads/snort
 
 CONFIG_OPTS += --enable-gre --enable-targetbased --enable-ppm --enable-sourcefire \
 	      --enable-perfprofiling --enable-zlib --enable-non-ether-decoders
 
-# You're looking in here because the build system failed to find
-# the snort source package or it failed to build.
-#
-# This makefile should always get the latest version of snort, whatever it is.
-# However, the build might fail if the pidfile fix patch is no longer correct.
-
 PREPARE = yes
 $(DIR)/: download
-	@tar -xvf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
+	@tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
 
 INSTALL = yes
 install: compile
