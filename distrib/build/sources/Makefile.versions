@@ -7,7 +7,7 @@
 # The system's kernel.
 KERNEL_MAJOR = 6
 KERNEL_MMR = $(KERNEL_MAJOR).6
-KERNEL_VER = $(KERNEL_MMR).70
+KERNEL_VER = $(KERNEL_MMR).74
 
 # The kernel version headers needed to build glibc
 # Unrelated to the system's kernel
@@ -32,7 +32,7 @@ else ifeq ($(mTUPLE), xu4)
     KERNEL_MAJOR = 4
     KERNEL_MMR = $(KERNEL_MAJOR).9
     KERNEL_VER = $(KERNEL_MMR).57+
-    KERNEL_COM = 4e456eabc3be85aa8c3fe55cae757cd3a6544611
+    KERNEL_COM = 6d16e47ca139ba64c5daedf06e72f2774adbdc48
     KERNEL_URL = https://github.com/hardkernel/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
     K_RAW_VERSION = $(KERNEL_VER)
     K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)

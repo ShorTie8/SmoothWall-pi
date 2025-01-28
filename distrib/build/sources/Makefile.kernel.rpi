@@ -44,7 +44,7 @@ else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi4 pi4-64))
 	cd linux; make bcm2711_defconfig
 
 else ifeq ($(mTUPLE), rpi5)
-	cd linux; make bcm2712_defconfig
+	make -C linux bcm2712_defconfig
 
 else
 	$(info Un-supported $(mTUPLE) kernel config!)
