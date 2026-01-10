@@ -111,7 +111,7 @@ else ifeq ($(mARCH),$(ARCH64))
   export ARCH_OK = yes
   export BITS_64 = yes
   export mTUPLE = $(ARCH64)
-  export SWE_TGT = $(mTUPLE)-tc-linux-gnu
+  export SWE_TGT = $(mTUPLE)-tools-linux-gnu
   export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
   export CFLAGS = $(OPT_FLAGS) -m64 -fPIC
   ifeq ($(CANx86_64), 0)
@@ -201,7 +201,7 @@ ifeq ($(mARCH),arm64)
     export ARCHset = linux64
     export SWE_TGT = aarch64-tools-linux-gnu
     export FINAL_TGT = aarch64-swe-linux-gnu
-    export CFLAGS = $(OPT_FLAGS) -fPIC
+    export CFLAGS = $(OPT_FLAGS) -pipe -fPIC
   else
     $(info So, So, Sorry, Unknown arm64 board)
     $(error FAIL)
