@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = gettext
-VERSION = 0.19.8.1
+VERSION = 0.26
 
 BASE_URL = https://ftp.gnu.org/gnu/gettext
 

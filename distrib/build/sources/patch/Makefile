@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = patch
-VERSION = 2.7.5
+VERSION = 2.8
 
 BASE_URL = https://ftp.gnu.org/gnu/patch
 

@@ -7,9 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = libffi
-VER_MM = 3.4
-VERSION = $(VER_MM).3
+VERSION = 3.5.2
 
-BASE_URL =  https://sourceware.org/pub/libffi/
+BASE_URL =  https://github.com/libffi/libffi/releases/download/v$(VERSION)
+
+CONFIG_OPTS += --disable-werror
 
 include ../Makefile.rules

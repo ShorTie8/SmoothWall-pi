@@ -7,34 +7,31 @@
 include ../Makefile.conf
 
 PACKAGE = util-linux
-VER_MM = 2.28
-VERSION = $(VER_MM).2
-
-#export NO_CHECK_CERT = 1
+VER_MM = 2.41
+VERSION = $(VER_MM).3
 
 BASE_URL = http://www.kernel.org/pub/linux/utils/util-linux/v$(VER_MM)/
 
-
 ifeq ($(BUILD_PHASE), Stage_3)
 
-CONFIGURE = yes
-COMPILE = yes
-INSTALL = yes
-
 CONFIG_OPTS = \
-            --prefix=/tools                \
-            --without-python               \
-            --disable-makeinstall-chown    \
-            --disable-silent-rules         \
-            --without-systemdsystemunitdir \
-            PKG_CONFIG=""
+		--prefix=/tools \
+		--disable-liblastlog2 \
+		--disable-silent-rules \
+		--disable-makeinstall-chown \
+		--without-python \
+		--without-systemdsystemunitdir \
+		PKG_CONFIG=""
 
+CONFIGURE = yes
 configure: $(DIR)/
 	cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=$(TOOLS_DIR) 
 
+COMPILE = yes
 compile: configure
 	$(MAKE) $(JOBS) -C $(COMPILE_DIR)
 
+INSTALL = yes
 install: compile
 	cd $(COMPILE_DIR); make install
 endif

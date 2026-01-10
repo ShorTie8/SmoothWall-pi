@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = readline
-VERSION = 8.0
+VERSION = 8.3
 BASE_URL = https://ftp.gnu.org/gnu/readline
 
 include ../Makefile.rules

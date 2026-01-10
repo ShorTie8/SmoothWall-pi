@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = dejagnu
-VERSION = 1.6
+VERSION = 1.6.3
 
 BASE_URL = https://ftp.gnu.org/gnu/dejagnu
 

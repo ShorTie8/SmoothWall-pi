@@ -3,7 +3,7 @@
 include ../Makefile.conf
 
 PACKAGE = e2fsprogs
-VERSION = 1.47.1
+VERSION = 1.47.3
 
 BASE_URL = http://downloads.sourceforge.net/project/$(PACKAGE)/$(PACKAGE)/v$(VERSION)/
 # https://www.kernel.org/pub/linux/kernel/people/tytso/e2fsprogs

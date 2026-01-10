@@ -7,13 +7,13 @@
 include ../Makefile.conf
 
 PACKAGE = ncurses
-VERSION = 6.1
-
-BASE_URL = https://ftp.gnu.org/gnu/ncurses/
+VERSION = 6.6-20260103
+EXTENSION = .tgz
+BASE_URL = https://invisible-mirror.net/archives/ncurses/current
+COMPILE_DIR = $(DIR)-compile
 
 #PATCH_FILE1 = ncurses-5.9-gcc5_buildfixes-1.patch
 #PATCH_URL1 = http://www.linuxfromscratch.org/patches/downloads/ncurses/$(PATCH_FILE1)
-COMPILE_DIR = $(DIR)-compile
 
 ifeq ($(BUILD_PHASE), Stage_3)
 #CONFIG_OPTS += --with-shared \

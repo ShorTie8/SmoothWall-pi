@@ -7,8 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = findutils
-VERSION = 4.6.0
-
+VERSION = 4.10.0
+EXTENSION = .tar.xz
 BASE_URL = https://ftp.gnu.org/gnu/findutils
 
 ifneq ($(BUILD_PHASE),Final)

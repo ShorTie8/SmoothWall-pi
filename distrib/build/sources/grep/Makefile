@@ -7,10 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = grep
-VERSION = 3.0
-
-BASE_URL = http://ftp.gnu.org/gnu/grep/
+VERSION = 3.12
 EXTENSION = .tar.xz
+BASE_URL = http://ftp.gnu.org/gnu/grep/
 
 ifeq ($(BUILD_PHASE), Final)
 PKG_DIR = 

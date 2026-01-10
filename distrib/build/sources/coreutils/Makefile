@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = coreutils
-VERSION = 8.28
+VERSION = 9.7
 
 BASE_URL = https://ftp.gnu.org/gnu/coreutils
 EXTENSION = .tar.xz
