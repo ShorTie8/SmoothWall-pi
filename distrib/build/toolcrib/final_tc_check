@@ -45,7 +45,7 @@ fi
 
 # compile an empty program
 #
-echo 'main(){}' > dummy.c
+echo 'int main() {}' > dummy.c
 cc dummy.c -v -Wl,--verbose &> dummy.log
 
 # Right program interpreter?

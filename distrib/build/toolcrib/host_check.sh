@@ -617,7 +617,7 @@ else
 fi
 
 # Check compiling
-echo 'main(){}' > dummy.c && gcc -o dummy dummy.c
+echo 'int main() {}' > dummy.c && gcc -o dummy dummy.c
 if [ $? -eq 0 ]; then
   echo "    OK: can compile"
 else
