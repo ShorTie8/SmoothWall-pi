@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = autoconf
-VERSION = 2.69
+VERSION = 2.72
 
 BASE_URL = https://ftp.gnu.org/gnu/autoconf
 
