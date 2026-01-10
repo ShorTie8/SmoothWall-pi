@@ -17,7 +17,7 @@ PATH=/tools/bin:$PATH
 exec <${BUILD_IN} >>${BUILD_OUT} 2>&1
 
 # Compile an empty program and see if it uses the right loader
-echo 'main(){}' > dummy.c && \
+echo 'int main() {}' > dummy.c && \
   # Must look for correct ld_linux....
   case $mARCH in
     arm)
