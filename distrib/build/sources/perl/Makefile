@@ -9,40 +9,37 @@
 include ../Makefile.conf
 
 PACKAGE = perl
-VERSION = 5.30.1
-
+VERSION = 5.36.0
 BASE_URL = https://www.cpan.org/src/5.0
 
-# Toolchain, Stage 3 build
+# Fix build with GCC 15
+CFLAGS += -std=gnu17
+
+# Toolchain, Stage 3 build perl
 #
 ifeq ($(BUILD_PHASE), Stage_3)
-# This patch adapts some hard-wired paths to the C library with ${prefix}.
-#PATCH_FILE1 = perl-5.14.2-libc-1.patch
 
-# Seems stage 3 perl won't build if it's for i486`
-CONFIG_OPTS = -des -Dprefix=/tools -Dcc=gcc -A ccflags="$${CFLAGS/486/586}"
+CONFIG_OPTS = -des -D prefix=$(TOOLS_DIR) -D vendorprefix=$(TOOLS_DIR)
 
 CONFIGURE = yes
 configure: patch
-	@echo; echo; echo "configure"
-	cd $(COMPILE_DIR); sed -i -e 's/gdbm dbm db/dbm/' Configure
-	cd $(COMPILE_DIR)/hints; sed -i -e '/$libswanted gdbm_compat/d' linux.sh
-	cd $(COMPILE_DIR); sh Configure $(CONFIG_OPTS)
+	@echo; echo; echo "Configure"
+	cd $(DIR) && ./configure.gnu --prefix=$(TOOLS_DIR) \
+		-des -Dlibs="-lpthread -lm" -Uloclibpth -Ulocincpth
 
 COMPILE = yes
 compile: configure
-	@echo; echo; echo "compile"
-	make $(JOBS) -C $(COMPILE_DIR) # perl utilities ext/Errno/pm_to_blib
+	@echo; echo; echo "Compile"
+	make $(JOBS) -C $(DIR) # perl utilities ext/Errno/pm_to_blib
 
 INSTALL = yes
 install: compile
-	@echo; echo; echo "install"
+	@echo; echo; echo "Install"
 	cd $(COMPILE_DIR); \
 	  cp -v perl cpan/podlators/pod2man $(TOOLS_DIR)/bin; \
 	  mkdir -pv $(TOOLS_DIR)/lib/perl5/$(VERSION); \
 	  cp -Rv lib/* $(TOOLS_DIR)/lib/perl5/$(VERSION)
 endif
-
 
 # Final build
 #
