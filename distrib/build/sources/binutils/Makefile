@@ -10,33 +10,42 @@ include ../Makefile.versions
 PACKAGE = binutils
 VERSION = $(BIN_VER)
 EXTENSION = .tar.bz2
-BASE_URL = http://ftp.gnu.org/gnu/binutils
 COMPILE_DIR = $(DIR)-compile
+BASE_URL = http://ftp.gnu.org/gnu/binutils
 
-# Tool Chain Build Stage_1
+# Tool Chain Build Stage 1 binutils
 #
 ifeq ($(BUILD_PHASE), Stage_1)
+
+PATCH = yes
+patch: $(DIR)/
+	# Prevent installing libiberty to lib64.
+	cd $(DIR) && sed -i 's%\(^MULTIOSDIR = \).*%\1 ../lib%' libiberty/Makefile.in
 
 CONFIG_OPTS = \
 		--prefix=$(TOOLS_DIR) \
 		--target=$(SWE_TGT) \
-		--with-sysroot=$(ROOT) \
+		--with-sysroot=$(SWE_ROOT) \
 		--with-lib-path=$(TOOLS_DIR)/lib \
 		--disable-nls \
-		--disable-werror
+		--disable-werror \
+		--enable-new-dtags \
+		--enable-gprofng=no \
+		--enable-64-bit-bfd \
+		--enable-default-hash-style=gnu
 
 INSTALL = yes
 install: compile
-	@echo; echo; echo "install"; echo
+	@echo; echo; echo "Install"; echo
 ifeq ($(BITS_64), yes)
 	mkdir -pv $(TOOLS_DIR)/lib
 	ln -sv lib $(TOOLS_DIR)/lib64
 endif
-	$(MAKE) -C $(COMPILE_DIR) install
+	@echo; echo; echo "Installing binutils "; echo
+	make -C $(COMPILE_DIR) DESTDIR=$(SWE_ROOT) install
 endif # Stage 1
 
-
-# Tool Chain Build Stage_2
+# Tool Chain Build Stage 2 binutils
 #
 ifeq ($(BUILD_PHASE), Stage_2)
 
@@ -45,17 +54,21 @@ PRE_CONFIGURE = CC=$(SWE_TGT)-gcc \
 
 CONFIG_OPTS = \
 		--prefix=$(TOOLS_DIR) \
+		--build=$(SWE_TGT) \
+		--host=$(SWE_TGT) \
+		--target=$(SWE_TGT) \
 		--disable-nls \
 		--with-lib-path=$(TOOLS_DIR)/lib \
 		--with-sysroot
 #		--disable-werror
+
 ifeq ($(mARCH), arm64)
 CONFIG_OPTS += --host=$(SWE_TGT)
 endif
 
 INSTALL = yes
 install: compile
-	@echo; echo; echo "install"; echo
+	@echo; echo; echo "Install"; echo
 	$(MAKE) -C $(COMPILE_DIR) install
 	
 	@ # Get ready for second adjusting
@@ -65,8 +78,7 @@ install: compile
 	cp -v  $(COMPILE_DIR)/ld/ld-new $(TOOLS_DIR)/bin
 endif # Stage 2
 
-
-# Final Build Stage
+# Final Build Stage binutils
 #
 ifeq ($(BUILD_PHASE), Final)
 
@@ -84,18 +96,18 @@ CONFIG_OPTS = \
 
 PATCH = yes
 patch: $(DIR)/
-	@echo; echo; echo "patch"; echo
-	cd $(DIR); tar -xvf ../../../downloads/gmp-$(GMP_VER).tar.xz; mv gmp-$(GMP_VER) gmp
-	cd $(DIR); tar -xvf ../../../downloads/mpfr-$(MPFR_VER).tar.bz2; mv mpfr-$(MPFR_VER) mpfr
+	@echo; echo; echo "Patch"; echo
+	cd $(DIR); tar -xf ../../../downloads/gmp-$(GMP_VER).tar.xz; mv gmp-$(GMP_VER) gmp
+	cd $(DIR); tar -xf ../../../downloads/mpfr-$(MPFR_VER).tar.bz2; mv mpfr-$(MPFR_VER) mpfr
 
 COMPILE = yes
 compile: configure
-	@echo; echo; echo "compile"; echo
+	@echo; echo; echo "Compile"; echo
 	$(MAKE) $(JOBS) -C $(COMPILE_DIR) tooldir=$(PKG_DIR)
 	
 INSTALL = yes
 install: compile
-	@echo; echo; echo "install"; echo
+	@echo; echo; echo "Install"; echo
 	mkdir -vp $(PKG_ROOT)$(PKG_DIR)/include
 	$(MAKE) $(JOBS) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) tooldir=$(PKG_DIR) install
 	cp -v $(DIR)/include/libiberty.h $(PKG_ROOT)$(PKG_DIR)/include
