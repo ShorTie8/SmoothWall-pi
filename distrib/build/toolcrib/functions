@@ -143,10 +143,13 @@ function build_tc_stage_3() {
 
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
+  buildenv autoconf 1
+  buildenv automake 1
   buildenv tcl 1
   buildenv expect 1
   buildenv dejagnu 1
   buildenv ncurses 1
+  buildenv bison 1
   buildenv flex 1
   buildenv bash 1
   buildenv xz 1
@@ -172,7 +175,7 @@ function build_tc_stage_3() {
   buildenv texinfo 1
   buildenv util-linux 1
   buildenv wget 1
-  buildenv git 1
+#  buildenv git 1
   buildenv rsync
   startTIME=`date +%s`-beginTIME
   displayTIME=`perl -e "printf('%6d', $startTIME);"`
