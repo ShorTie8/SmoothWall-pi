@@ -22,7 +22,7 @@ STATUS=0
 
 # compile an empty program
 #
-echo 'main(){}' > dummy.c || STATUS=1
+echo 'int main() {}' > dummy.c || STATUS=1
 cc dummy.c > dummy.log || STATUS=1
 
 # Right program interpreter?
