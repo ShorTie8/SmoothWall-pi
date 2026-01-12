@@ -21,7 +21,7 @@ STATUS=0
 
 # Get GCC version
 #
-set `egrep "^GCC_VER" sources/Makefile.versions`
+set `grep -E "^GCC_VER" sources/Makefile.versions`
 VERSION=$3
 #################
 
@@ -174,13 +174,13 @@ case $mARCH in
     ;;
   $ARCH32) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
     ;;
-  $ARCH64) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
+  $ARCH64) grep "attempt to open /lib64/libc.so.6" dummy.log >/dev/null 2>&1
     ;;
   *) false ;;
 esac
 if [ $? -ne 0 ]; then
   echo "Loader is using incorrect libc:"
-  egrep "attempt to open.*/libc\.so\." dummy.log | sed -e 's/^/    /'
+  grep -E "attempt to open.*/libc\.so\." dummy.log | sed -e 's/^/    /'
   STATUS=1
 fi
 

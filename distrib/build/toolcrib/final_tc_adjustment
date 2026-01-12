@@ -136,7 +136,7 @@ END
 
   # Using correct libc?
   #
-  if [ "$BITS_64" == "yes" ]; then mINST=64; fi
+#  if [ "$BITS_64" == "yes" ]; then mINST=64; fi
   grep "attempt to open /lib${mINST}/libc.so.6" dummy.log >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "Loader is using incorrect libc:"
