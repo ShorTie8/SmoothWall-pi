@@ -99,6 +99,9 @@ fi
       echo
       echo -e "  Final group 1 packages (basic)"
       build kernel-headers
+      build expat
+      build m4
+      build bison
       build glibc
       other_cmd "crumbs/$BUILD_PHASE.toolchain.adjusted" \
                 "final toolchain adjustment" \
