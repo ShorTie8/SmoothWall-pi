@@ -8,25 +8,9 @@
 include ../Makefile.conf
 
 PACKAGE = zstd
-VERSION = 1.3.4
-
-BASE_URL = http://github.com/facebook/zstd/archive
-
+VERSION = 1.5.7
 TARBALL = v$(VERSION)
-
-#DIR = $(PACKAGE)-$(VERSION)
-
-
-
-DOWNLOAD = yes
-download:
-	@echo; echo; echo "download"; echo
-	#$(DL_CMD) $(BASE_GMP)/$(TAR_GMP)
-	$(DL_CMD) https://github.com/facebook/zstd/archive/v$(VERSION).tar.gz
-
-COMPILE = yes
-compile: patch
-	$(MAKE) $(JOBS) -C $(COMPILE_DIR)
-
+ReConfigure = yes
+BASE_URL = http://github.com/facebook/zstd/archive
 
 include ../Makefile.rules
