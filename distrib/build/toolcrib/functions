@@ -177,6 +177,7 @@ function build_tc_stage_3() {
   buildenv wget 1
 #  buildenv git 1
   buildenv rsync
+  buildenv Python
   startTIME=`date +%s`-beginTIME
   displayTIME=`perl -e "printf('%6d', $startTIME);"`
   echo "    $displayTIME $BUILD_PHASE build complete"
