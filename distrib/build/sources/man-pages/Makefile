@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = man-pages
-VERSION = 6.9.1
+VERSION = 6.15
 
 EXTENSION = .tar.xz
 
