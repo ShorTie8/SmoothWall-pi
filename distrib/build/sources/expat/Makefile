@@ -7,7 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = expat
-VERSION = 2.6.4
-BASE_URL = https://github.com/libexpat/libexpat/releases/download/R_2_6_4
+Ver = 2
+Si = 7
+On = 3
+VERSION = $(Ver).$(Si).$(oN)
+BASE_URL = https://github.com/libexpat/libexpat/releases/download/R_$(Ver)_$(Si)_$(oN)
 
 include ../Makefile.rules
