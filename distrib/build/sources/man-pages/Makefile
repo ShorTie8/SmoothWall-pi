@@ -17,6 +17,6 @@ INSTALL = yes
 
 install: patch
 	@mkdir -p $(PKG_ROOT)$(PKG_DIR)
-	@$(MAKE) -C $(DIR) prefix=$(PKG_ROOT)$(PKG_DIR) install
+	@$(MAKE) -R GIT=false -C $(DIR) prefix=$(PKG_ROOT)$(PKG_DIR) install
 
 include ../Makefile.rules
