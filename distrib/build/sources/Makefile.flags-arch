@@ -40,6 +40,13 @@
 # that have just been built, thus polluting the final product with some of
 # the build host.
 
+# Make SWE_ROOT available; new LFS depends on it a lot.
+# SWE_ROOT is the 'root' of the build tree; it is the same for building
+#   the tool chain and for the final build.
+# Thus we make it a mount point binded together
+# 
+export SWE_ROOT := $(shell cd ..; echo $${PWD})
+
 # Handle I/O redirection sanely.
 export BUILD_IN := $(shell if test -t 0; then echo "/proc/self/fd/0"; else echo "/dev/null"; fi)
 export BUILD_OUT := $(shell if test -t 0; then echo "/proc/self/fd/0"; else echo "crumbs/build-progress.out"; fi)
@@ -90,6 +97,7 @@ export ARCHset =
 CANx86_64 = $(shell setarch x86_64 sh -c "exit" 2>/dev/null; echo $$?)
 #CANi686 = $(shell setarch i686 sh -c "exit" 2>/dev/null; echo $$?)
 CANi686 = $(shell setarch i386 sh -c "exit" 2>/dev/null; echo $$?)
+CANaarch64 = $(shell setarch aarch64 sh -c "exit" 2>/dev/null; echo $$?)
 
 # Only ARCH32 and ARCH64 targets are supported (see above), but only on hosts
 # that can build them.
