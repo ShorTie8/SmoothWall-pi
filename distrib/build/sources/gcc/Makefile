@@ -9,21 +9,8 @@ include ../Makefile.versions
 
 PACKAGE = gcc
 VERSION = $(GCC_VER)
-
-BASE_URL = https://ftp.gnu.org/gnu/gcc/gcc-$(VERSION)
 EXTENSION = $(GCC_EXT)
-
-BASE_MPC = https://ftp.gnu.org/gnu/mpc
-TAR_MPC = mpc-$(MPC_VER).tar.gz
-
-BASE_GMP = https://ftp.gnu.org/gnu/gmp
-TAR_GMP = gmp-$(GMP_VER).tar.xz
-
-BASE_MPFR = https://ftp.gnu.org/gnu/mpfr
-TAR_MPFR = mpfr-$(MPFR_VER).tar.bz2
-
-BASE_ISL = https://gcc.gnu.org/pub/gcc/infrastructure
-TAR_ISL = isl-$(ISL_VER).tar.bz2
+BASE_URL = https://ftp.gnu.org/gnu/gcc/gcc-$(VERSION)
 
 COMPILE_DIR = $(DIR)-compile
 

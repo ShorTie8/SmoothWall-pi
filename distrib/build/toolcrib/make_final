@@ -141,7 +141,6 @@ fi
       build gettext
       build libtool
       build inetutils
-      build rsync
       build check
 #  exit 22
       touch crumbs/Final.grp1.compiled
@@ -196,6 +195,7 @@ fi
       build freefont
       build cairo
       build openssl
+      build rsync
       build Python
       build libcap-ng
       build glib

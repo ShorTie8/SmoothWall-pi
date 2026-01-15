@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = gdbm
-VERSION = 1.18.1
+VERSION = 1.26
 
 BASE_URL = https://ftp.gnu.org/gnu/gdbm
 

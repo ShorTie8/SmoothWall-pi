@@ -16,6 +16,11 @@ BASE_URL = https://ftp.gnu.org/gnu/gmp
 #PRE_CONFIGURE = ABI=32
 #endif
 
+##	 Fix build with GCC 15
+##	GCC 15 (in development) defaults to -std=gnu23. This breaks one of
+##	gmp-6.3.0's configure tests:
+##	C23 removes unprototyped functions, which explains the error.
+CFLAGS += -std=gnu17
 
 CONFIG_OPTS += --enable-cxx
 

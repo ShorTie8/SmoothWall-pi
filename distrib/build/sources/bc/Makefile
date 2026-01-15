@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = bc
-VERSION = 2.1.3
+VERSION = 7.0.3
 #BASE_URL = http://ftp.gnu.org/gnu/bc
 BASE_URL = https://github.com/gavinhoward/bc/archive/$(VERSION)
 

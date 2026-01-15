@@ -54,7 +54,7 @@ INSTALL = yes
 install: compile
 	mkdir -p $(PKG_ROOT)
 	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
-	rm $(PKG_ROOT)/usr/lib/libncurses.so
+#	rm $(PKG_ROOT)/usr/lib/libncurses.so
 	echo "INPUT(libncurses.so.6 -ltinfo)" > $(PKG_ROOT)/usr/lib/libncurses.so
 
 endif
