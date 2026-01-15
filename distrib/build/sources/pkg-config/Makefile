@@ -9,12 +9,12 @@ include ../Makefile.versions
 
 PACKAGE = pkg-config
 VERSION =  0.29.2
-
-EXTENSION = .tar.gz
-
 BASE_URL = http://pkgconfig.freedesktop.org/releases
 
+# Fix build with GCC 15
+CFLAGS += -std=gnu17
+
 CONFIG_OPTS += --with-internal-glib --disable-host-tool \
-			--docdir=/usr/share/doc/pkg-config-0.29.2
+			--docdir=/usr/share/doc/pkg-config-$(VERSION)
 
 include ../Makefile.rules

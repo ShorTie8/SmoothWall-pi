@@ -17,6 +17,6 @@ BASE_URL = https://ftp.gnu.org/gnu/gmp
 #endif
 
 
-CONFIG_OPTS += --prefix=$(PKG_DIR) --enable-cxx --enable-mpbsd
+CONFIG_OPTS += --enable-cxx
 
 include ../Makefile.rules
