@@ -123,7 +123,6 @@ function build_tc_stage_2() {
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
   buildenv libstdc++
-#  buildenv m4 1
   buildenv binutils 2
   buildenv gcc 2
   check 2 gcc
@@ -148,7 +147,9 @@ function build_tc_stage_3() {
   buildenv tcl 1
   buildenv expect 1
   buildenv dejagnu 1
+  buildenv pkg-config 1
   buildenv ncurses 1
+  buildenv m4 1
   buildenv bison 1
   buildenv flex 1
   buildenv bash 1
@@ -165,7 +166,6 @@ function build_tc_stage_3() {
   buildenv grep 1
   buildenv gzip 1
   buildenv joe 1
-  buildenv m4 1
   buildenv make 1
   buildenv patch 1
   buildenv perl 1
@@ -331,16 +331,20 @@ pwd
 
 ##	Function un-Mount chroot
 function unmount_chroot () {
-#Current_Dir=$PWD
-echo $Current_Dir
-
-##	 -l, --lazy              detach the filesystem now, clean up things later
-echo; echo "Lazy UnMount"
-umount -vl $(DISTRIB_PATH)/dev{/shm,/pts,}
-echo "Sleepy 4"; sleep 4
-umount -vR $(DISTRIB_PATH)
-
-rm -v crumbs/chroot_mounted
+echo "Current_Dir $PWD"
+echo "DISTRIB_PATH = $DISTRIB_PATH"
+echo "ROOT = $ROOT"
+echo "SWE_ROOT = $SWE_ROOT"
+if [ `cat /etc/mtab | gtrp Smoo `]; then
+  ##	 -l, --lazy              detach the filesystem now, clean up things later
+  echo; echo "Lazy UnMount"
+#  umount -vl $(DISTRIB_PATH)/dev{/shm,/pts,}
+#  echo "Sleepy 2"; sleep 2
+#  umount -vR $(DISTRIB_PATH)
+  rm -vf crumbs/chroot_mounted
+else
+  echo "Nuffin mounted"
+fi
 }
 
 
