@@ -99,9 +99,7 @@ fi
       echo
       echo -e "  Final group 1 packages (basic)"
       build kernel-headers
-      build expat
-      build m4
-      build bison
+      build man-pages
       build glibc
       other_cmd "crumbs/$BUILD_PHASE.toolchain.adjusted" \
                 "final toolchain adjustment" \
@@ -135,7 +133,6 @@ fi
       build less
       build groff
       build man
-      build man-pages
       build sed
       build flex
       build dejagnu
@@ -156,7 +153,7 @@ fi
     else
       echo
       echo -e "  Mounting File System"
-      mount_chroot
+    #  mount_chroot
     ##	read status
 
       touch crumbs/chroot_mounted
