@@ -7,12 +7,12 @@
 include ../Makefile.conf
 
 PACKAGE = pango
-VER_MM = 1.29
-VERSION = $(VER_MM).4
+VER_MM = 1.57
+VERSION = $(VER_MM).0
 EXTENSION = .tar.xz
 #PRE_CONFIGURE = ENABLE_GTK_DOC_FALSE=''
 
-BASE_URL = http://ftp.gnome.org/pub/GNOME/sources/$(PACKAGE)/$(VER_MM)
+BASE_URL = https://download.gnome.org/sources/pango/$(VER_MM)
 
 PREPARE = yes
 $(DIR)/: download

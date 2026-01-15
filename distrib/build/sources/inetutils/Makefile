@@ -7,18 +7,26 @@
 include ../Makefile.conf
 
 PACKAGE = inetutils
-VERSION = 1.9.4
-
+#VERSION = 1.9.4
+VERSION = 2.7
+#ReConfigure = yes
 BASE_URL = https://ftp.gnu.org/gnu/inetutils
 
-CONFIG_OPTS += -sysconfdir=/etc --localstatedir=/var --disable-logger \
-	--disable-syslogd --disable-whois --disable-servers  --disable-talk \
-	--disable-rcp --disable-rlogin --disable-rsh --disable-ping \
-	--disable-ifconfig --disable-silent-rules LIBS=-ltinfo
+CONFIG_OPTS += \
+		--bindir=/usr/bin    \
+		--localstatedir=/var \
+		--disable-logger     \
+		--disable-whois      \
+		--disable-rcp        \
+		--disable-rexec      \
+		--disable-rlogin     \
+		--disable-rsh        \
+		--disable-servers
 
 PATCH = yes
 patch: $(DIR)/
-	cd $(DIR); sed -i 's@<sys/types.h>@<sys/types.h>\n#include <stdlib.h>@' \
-	    libicmp/icmp_timestamp.c
-
+	#cd $(DIR); sed -i 's@<sys/types.h>@<sys/types.h>\n#include <stdlib.h>@' \
+	#    libicmp/icmp_timestamp.c
+	##	First, make the package build with gcc-14.1 or later:
+	cd $(DIR); sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
 include ../Makefile.rules

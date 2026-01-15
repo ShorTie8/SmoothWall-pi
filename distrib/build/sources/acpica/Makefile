@@ -13,6 +13,8 @@ BASE_URL = https://acpica.org/sites/acpica/files/
 
 export NO_CHECK_CERT
 
+CFLAGS += -std=gnu17
+
 CONFIGURE = yes
 configure: $(DIR)/
 	true

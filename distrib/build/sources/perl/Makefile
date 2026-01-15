@@ -10,7 +10,9 @@ include ../Makefile.conf
 
 PACKAGE = perl
 VERSION = 5.36.0
+#VERSION = 5.42.0
 BASE_URL = https://www.cpan.org/src/5.0
+##	https://www.cpan.org/src/5.0/perl-5.42.0.tar.xz
 
 # Fix build with GCC 15
 CFLAGS += -std=gnu17

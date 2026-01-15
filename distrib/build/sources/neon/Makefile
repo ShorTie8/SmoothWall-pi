@@ -7,9 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = neon
-VERSION = 0.30.2
-
-#BASE_URL = http://www.webdav.org/neon/
+VERSION = 0.36.0
 BASE_URL = https://fossies.org/linux/www
 
 CONFIG_OPTS += --enable-shared --with-ssl=openssl --with-libs=/usr

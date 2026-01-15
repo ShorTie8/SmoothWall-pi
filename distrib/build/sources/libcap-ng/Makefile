@@ -11,6 +11,6 @@ VERSION = 0.8.5
 
 DIR = $(PACKAGE)-$(VERSION)
 
-BASE_URL = http://people.redhat.com/sgrubb/libcap-ng
+BASE_URL = https://people.redhat.com/sgrubb/libcap-ng
 
 include ../Makefile.rules

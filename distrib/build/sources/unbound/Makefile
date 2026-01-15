@@ -7,9 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = unbound
-VERSION = 1.9.4
+VERSION = 1.24.2
 
-BASE_URL = http://www.unbound.net/downloads
+BASE_URL = https://nlnetlabs.nl/downloads/unbound
 
 CONFIG_OPTS += --prefix=/usr \
 	       --sysconfdir=/etc \

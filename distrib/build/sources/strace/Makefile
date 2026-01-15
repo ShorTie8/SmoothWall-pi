@@ -7,11 +7,12 @@
 include ../Makefile.conf
 
 PACKAGE = strace
-VERSION = 4.21
-
+VERSION = 6.18
 EXTENSION = .tar.xz
 
-BASE_URL = https://sourceforge.net/projects/strace/files/strace/$(VERSION)
+BASE_URL = https://github.com/strace/strace/releases/download/v$(VERSION)
+
+CFLAGS += -std=gnu17
 
 ifeq ($(mARCH), arm64)
 # <ldv> try --enable-mpers=check if you don't need 32-bit personality support on aarch64

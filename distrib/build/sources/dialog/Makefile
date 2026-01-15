@@ -7,10 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = dialog
-VERSION = 1.2-20121230
+VERSION = 1.3-20260107
 EXTENSION = .tgz
 
-BASE_URL = http://invisible-mirror.net/archives/dialog/
+BASE_URL = https://invisible-mirror.net/archives/dialog
 
 PRECONFIGURE = LDFLAGS=-ltinfo
 CONFIG_OPTS += --with-ncurses=tinfo
