@@ -132,7 +132,8 @@ fi
       build bison
       build less
       build groff
-      build man
+      build libpipeline
+      build man-db
       build sed
       build flex
       build dejagnu

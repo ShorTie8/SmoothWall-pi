@@ -50,12 +50,7 @@ cc dummy.c -v -Wl,--verbose &> dummy.log
 
 # Right program interpreter?
 #
-#if [ "$BITS_64" == "yes" ]; then
-if [ "$mARCH" == "x86_64" ]; then
-  readelf -l a.out | grep ': /lib64' >/dev/null 2>&1
-else
-  readelf -l a.out | grep ': /lib' >/dev/null 2>&1
-fi
+readelf -l a.out | grep ': /lib' >/dev/null 2>&1
 
 if [ $? -ne 0 ]; then
   echo "gcc uses wrong program interpreter!"
@@ -174,7 +169,7 @@ case $mARCH in
     ;;
   $ARCH32) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
     ;;
-  $ARCH64) grep "attempt to open /lib64/libc.so.6" dummy.log >/dev/null 2>&1
+  $ARCH64) grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
     ;;
   *) false ;;
 esac
