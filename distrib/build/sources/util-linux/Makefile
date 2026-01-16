@@ -41,7 +41,31 @@ ifeq ($(BUILD_PHASE), Final)
 
 PRE_CONFIGURE = LDFLAGS=-ltinfo
 #CFG_OPTS := $(CONFIG_OPTS)
-CONFIG_OPTS += --enable-arch --enable-partx --enable-write --with-ncurses
+#--enable-arch --enable-partx --enable-write --with-ncurses
+CONFIG_OPTS = \
+		--bindir=/usr/bin \
+		--libdir=/usr/lib     \
+		--runstatedir=/run    \
+		--sbindir=/usr/sbin   \
+		--disable-chfn-chsh   \
+		--disable-login       \
+		--disable-nologin     \
+		--disable-su          \
+		--disable-setpriv     \
+		--disable-runuser     \
+		--disable-pylibmount  \
+		--disable-liblastlog2 \
+		--disable-static      \
+		--without-python      \
+		--without-systemd     \
+		--without-systemdsystemunitdir        \
+		ADJTIME_PATH=/var/lib/hwclock/adjtime \
+		--docdir=/usr/share/doc/util-linux-2.41.1
+
+CONFIGURE = yes
+configure: $(DIR)/
+	cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=$(TOOLS_DIR) 
+
 
 endif
 

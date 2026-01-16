@@ -7,14 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = kmod
-VERSION = 26
-
+VERSION = 34.2
+EXTENSION = .tar.xz
 BASE_URL = http://www.kernel.org/pub/linux/utils/kernel/kmod/
 
 CONFIG_OPTS +=  --bindir=/bin \
 				--sysconfdir=/etc \
 				--with-rootlibdir=/lib \
-				--with-zlib
+				--with-zlib \
+				--disable-manpages
 				#--with-xz \ # No package 'liblzma' found
 
 INSTALL = yes

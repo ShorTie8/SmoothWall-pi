@@ -42,11 +42,14 @@ configure: patch
 	(cd $(COMPILE_DIR); CXXFLAGS="$(CFLAGS)" CFLAGS="$(CFLAGS)" $(PRE_CONFIGURE) ../$(DIR)/configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
 
 else
-CONFIG_OPTS += --with-shared \
-				--without-debug \
-				--with-termlib \
-				--with-pkg-config \
-				--enable-pc-files
+CONFIG_OPTS += \
+		--mandir=/usr/share/man \
+		--with-shared           \
+		--without-debug         \
+		--without-normal        \
+		--with-cxx-shared       \
+		--enable-pc-files       \
+		--with-pkg-config-libdir=/usr/lib/pkgconfig
 #				--enable-widec
 
 ##	Added update 12
