@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = ed
-VERSION = 1.14.2
+VERSION = 1.22.4
 EXTENSION = .tar.lz
 BASE_URL = https://ftp.gnu.org/gnu/ed
 

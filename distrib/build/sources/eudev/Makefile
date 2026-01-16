@@ -7,12 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = eudev
-VERSION = 3.2.5
+VERSION = 3.2.14
 #VERSION = 3.2.6
 #VERSION = 3.2.7
 #VERSION = 3.2.8
 
-BASE_URL = http://dev.gentoo.org/~blueness/eudev
+##	BASE_URL = http://dev.gentoo.org/~blueness/eudev
+BASE_URL = https://github.com/eudev-project/eudev/releases/download/v$(VERSION)
+
+#CFLAGS += -std=gnu17
 
 #PATCH_FILE1 = udev-watch.c.patch
 #PATCH_FILE1 = fix-gperf-3.1.patch
@@ -55,7 +58,7 @@ COMPILE = yes
 INSTALL = yes
 
 configure: patch
-	@echo; echo; echo "configure"; echo
+	@echo; echo; echo "Configure"; echo
 	#exit 44
 	#cp -v 60-network-bridges.rules $(COMPILE_DIR)/rules
 	##chmod -v 0644 $(COMPILE_DIR)/rules/60-network-bridges.rules
@@ -67,7 +70,7 @@ configure: patch
 	cd $(DIR); ./configure $(CONFIG_OPTS)
 
 compile: configure
-	@echo; echo; echo "compile"; echo
+	@echo; echo; echo "Compile"; echo
 	# Udev insists on making the docs even though expressly told not to
 	# So brutally bypass it
 	#@cd $(DIR); sed -i -e 's=.*http://docbook.*=\ttrue=' Makefile
@@ -76,11 +79,11 @@ compile: configure
 	LIBRARY_PATH=/tools/lib make $(JOBS) -C $(DIR)
 
 install: compile
-	@echo; echo; echo "install"; echo
 	mkdir -vp $(PKG_ROOT)
-	@echo; echo; echo "check"; echo
+	@echo; echo; echo "Install"; echo
+	@echo; echo; echo "Check"; echo
 	#make LD_LIBRARY_PATH=/tools/lib check
-	@echo; echo; echo "install"; echo
+	@echo; echo; echo "Install"; echo
 	make -C $(DIR) DESTDIR=$(PKG_ROOT) install
 	cd $(PKG_ROOT); rm -rf usr/lib*;
 	cd $(PKG_ROOT); install -dv etc/udev/rules.d;
