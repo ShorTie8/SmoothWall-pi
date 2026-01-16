@@ -7,10 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = coreutils
-VERSION = 9.7
-
-BASE_URL = https://ftp.gnu.org/gnu/coreutils
+VERSION = 9.9
 EXTENSION = .tar.xz
+BASE_URL = https://ftp.gnu.org/gnu/coreutils
+
 
 CONFIG_OPTS += --disable-silent-rules
 
