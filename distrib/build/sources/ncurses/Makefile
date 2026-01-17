@@ -18,7 +18,7 @@ COMPILE_DIR = $(DIR)-compile
 ifeq ($(BUILD_PHASE), Stage_3)
 #CONFIG_OPTS += --with-shared \
 #    --without-debug --without-ada --enable-overwrite
-CONFIG_OPTS = --prefix=/usr                \
+CONFIG_OPTS = --prefix=$(TOOLS_DIR) \
             --host=$(SWE_TGT)              \
             --build=$(./config.guess)    \
             --mandir=/usr/share/man      \
