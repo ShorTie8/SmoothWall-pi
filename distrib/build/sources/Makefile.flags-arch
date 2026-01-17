@@ -40,6 +40,10 @@
 # that have just been built, thus polluting the final product with some of
 # the build host.
 
+# SWE_ROOT is the 'root' of the build tree; it is the same for building
+#   the tool chain and for the final build.
+export SWE_ROOT=`pwd | sed -e 's=/build.*=='`
+
 # Handle I/O redirection sanely.
 export BUILD_IN := $(shell if test -t 0; then echo "/proc/self/fd/0"; else echo "/dev/null"; fi)
 export BUILD_OUT := $(shell if test -t 0; then echo "/proc/self/fd/0"; else echo "crumbs/build-progress.out"; fi)

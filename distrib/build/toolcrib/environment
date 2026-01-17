@@ -40,10 +40,6 @@ function set_build_environment() {
     ;;
   esac
 
-  # DISTRIB_PATH is the 'root' of the build tree; it is the same for building
-  #   the tool chain and for the final build.
-  export DISTRIB_PATH=`pwd | sed -e 's=/build.*=='`
-
   # Now get the toolchain lib path
   case $BUILD_PHASE in
     Stage_1)
@@ -69,13 +65,13 @@ function set_build_environment() {
     PreDownload)
       # pre-fetching packages from internet
       # ROOT is equivalent to LFS' $LFS
-      export ROOT="$DISTRIB_PATH"
+      export ROOT="$SWE_ROOT"
       ;;
 
     Stage_*)
       # Not chrooted, so we are building the tool chain.
       # ROOT is equivalent to LFS' $LFS
-      export ROOT="$DISTRIB_PATH"
+      export ROOT="$SWE_ROOT"
       # We'll try using TOOLS_DIR for the tool dir path. It might need
       #   to be /tools/bin in the end.
       export PATH="${TOOLS_DIR}/bin:${TOOLS_DIR}/sbin"
@@ -88,10 +84,12 @@ function set_build_environment() {
       # Now report the environment
       #
       echo "    Environment:"
-      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
-      echo "      PKG_ROOT=$PKG_ROOT; PKG_DIR=$PKG_DIR; "
-      echo "      ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "
-      echo "      PATH=$PATH; "
+      echo "      Build Phase: $BUILD_PHASE"
+      echo "        mARCH=$mARCH mTUPLE=$mTUPLE"
+      echo "        SWE_ROOT=$SWE_ROOT"
+      echo "          PKG_ROOT=$PKG_ROOT; PKG_DIR=$PKG_DIR; "
+      echo "          ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "
+      echo "        PATH=$PATH; "
       echo "$LDLINUX"
       echo
       ;;
@@ -120,7 +118,9 @@ function set_build_environment() {
       # Now report the environment
       #
       echo "    Environment:"
-      echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
+      echo "      Build Phase: $BUILD_PHASE"
+      echo "        mARCH=$mARCH mTUPLE=$mTUPLE"
+      echo "        SWE_ROOT=$SWE_ROOT"
       echo "      (PKG_ROOT not yet set); PKG_DIR=$PKG_DIR; "
       echo "      ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "
       echo "      PATH=$PATH; "
@@ -131,7 +131,7 @@ function set_build_environment() {
     Media)
       # assembling/finishing install media
       # ROOT is equivalent to LFS' $LFS
-      export ROOT="$DISTRIB_PATH"
+      export ROOT="$SWE_ROOT"
       echo "    Environment:"
       echo "      Build Phase: $BUILD_PHASE; mARCH=$mARCH mTUPLE=$mTUPLE"
       echo "      ROOT=$ROOT; "

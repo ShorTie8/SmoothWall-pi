@@ -322,7 +322,7 @@ echo
 #fi
 #mount -v /dev/sda1 $Current_Dir/Gentoo/boot/EFI
 
-#echo "DISTRIB_PATH Tis $(DISTRIB_PATH)"
+#echo "SWE_ROOT Tis $(SWE_ROOT)"
 pwd
 
 }
@@ -332,15 +332,15 @@ pwd
 ##	Function un-Mount chroot
 function unmount_chroot () {
 echo "Current_Dir $PWD"
-echo "DISTRIB_PATH = $DISTRIB_PATH"
+echo "SWE_ROOT = $SWE_ROOT"
 echo "ROOT = $ROOT"
 echo "SWE_ROOT = $SWE_ROOT"
 if [ `cat /etc/mtab | gtrp Smoo `]; then
   ##	 -l, --lazy              detach the filesystem now, clean up things later
   echo; echo "Lazy UnMount"
-#  umount -vl $(DISTRIB_PATH)/dev{/shm,/pts,}
+#  umount -vl $(SWE_ROOT)/dev{/shm,/pts,}
 #  echo "Sleepy 2"; sleep 2
-#  umount -vR $(DISTRIB_PATH)
+#  umount -vR $(SWE_ROOT)
   rm -vf crumbs/chroot_mounted
 else
   echo "Nuffin mounted"
