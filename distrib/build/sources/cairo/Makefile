@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = cairo
 VERSION = 1.18.4
 EXTENSION = .tar.xz
-
+ReConfigure = yes
 BASE_URL = https://www.cairographics.org/releases
 
 CONFIG_OPTS += --enable-script --enable-tee --enable-xml

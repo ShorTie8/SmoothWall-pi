@@ -7,14 +7,13 @@
 include ../Makefile.conf
 
 PACKAGE = iftop
-VERSION = 0.17
-
-BASE_URL = http://www.ex-parrot.com/~pdw/iftop/download/
+VERSION = 1.0pre4
+BASE_URL = https://pdw.ex-parrot.com/iftop/download
 
 PRE_CONFIGURE = LIBS=-ltinfo
 
-ifeq ($(mARCH), arm64)
-ReConfigure = yes
-endif
+#ifeq ($(mARCH), arm64)
+#ReConfigure = yes
+#endif
 
 include ../Makefile.rules

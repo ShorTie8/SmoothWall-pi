@@ -1,3 +1,6 @@
+buildroot
+crumbs
+target
 *.diff
 sources/linux.*.new
 sources/bash/*.patch

@@ -7,22 +7,19 @@
 include ../Makefile.conf
 
 PACKAGE = sysvinit
-VERSION = 2.88dsf
-
-
-BASE_URL = http://download-mirror.savannah.gnu.org/releases/sysvinit/
-EXTENSION = .tar.bz2
+VERSION = 3.04
+EXTENSION = .tar.xz
+BASE_URL = http://download-mirror.savannah.gnu.org/releases/sysvinit
 
 CONFIGURE = yes
-COMPILE = yes
-INSTALL = yes
-
 configure: $(DIR)/
 	@true
 
+COMPILE = yes
 compile: configure
 	@make $(JOBS) -C $(DIR)/src CFLAGS="$(CFLAGS) -D_GNU_SOURCE"
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)/{sbin,/bin,/usr/bin,/usr/include}
 	@mkdir -p $(PKG_ROOT)/usr/share/man/man{1,5,8}

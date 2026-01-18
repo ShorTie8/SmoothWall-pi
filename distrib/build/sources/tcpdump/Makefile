@@ -7,12 +7,10 @@
 include ../Makefile.conf
 
 PACKAGE = tcpdump
-VERSION = 4.9.2
-
+VERSION = 4.99.6
 BASE_URL = http://www.tcpdump.org/release/
 
 INSTALL = yes
-
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	@install -D $(DIR)/tcpdump $(PKG_ROOT)$(PKG_DIR)/sbin/tcpdump

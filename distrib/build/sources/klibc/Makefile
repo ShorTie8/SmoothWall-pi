@@ -16,7 +16,7 @@ include ../Makefile.versions
 
 PACKAGE = klibc
 VER_MM = 2.0
-VERSION = $(VER_MM).7
+VERSION = $(VER_MM).14
 EXTENSION = .tar.xz
 BASE_URL = http://www.kernel.org/pub/linux/libs/klibc/$(VER_MM)/
 export NO_CHECK_CERT = 1

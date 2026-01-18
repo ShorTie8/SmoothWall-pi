@@ -7,10 +7,8 @@
 include ../Makefile.conf
 
 PACKAGE = sudo
-VERSION = 1.8.20
-
+VERSION = 1.9.17
 BASE_URL = https://www.sudo.ws/dist
-export NO_CHECK_CERT = 1
 
 CONFIG_OPTS += --without-pam
 

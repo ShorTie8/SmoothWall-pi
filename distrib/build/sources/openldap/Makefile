@@ -7,8 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = openldap
-VERSION = 2.4.48
-
+VERSION = 2.6.9
 EXTENSION = .tgz
 
 BASE_URL = https://www.openldap.org/software/download/OpenLDAP/openldap-release

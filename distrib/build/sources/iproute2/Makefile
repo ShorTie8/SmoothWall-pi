@@ -8,32 +8,28 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = iproute2
-VERSION = 4.9.0
-#VERSION = 4.15.0
-
-BASE_URL = https://www.kernel.org/pub/linux/utils/net/$(PACKAGE)/
-
+VERSION = 6.9.0
 EXTENSION=.tar.gz
-
-CONFIGURE = yes
-COMPILE = yes
-INSTALL = yes
-CLEAN = yes
+BASE_URL = https://www.kernel.org/pub/linux/utils/net/iproute2/
 
 PATHS = SBINDIR=/usr/sbin CONFDIR=/etc/iproute2 DOCDIR=/usr/share/doc/iproute2 MANDIR=/usr/share/man LIBDIR=/usr/lib/
 
+CONFIGURE = yes
 configure: patch
 	@sed -i '/^TARGETS/s@ arpd@@g' $(COMPILE_DIR)/misc/Makefile
 
+COMPILE = yes
 compile: configure
 	cd $(COMPILE_DIR); sed -i -e 's/^CCOPTS.*/CCOPTS = -O2 $(CFLAGS)/' Makefile
 	$(MAKE) $(JOBS) -C $(COMPILE_DIR) KERNEL_INCLUDE=/usr/include $(PATHS)
 	ln -s $(DIR) $(PACKAGE)
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)$(PKG_DIR)
 	@make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) MODDESTDIR=$(PKG_ROOT)/lib/tc $(PATHS) install
 
+CLEAN = yes
 clean:
 	@echo -n " $(PACKAGE)"
 	@rm -rf $(DIR)

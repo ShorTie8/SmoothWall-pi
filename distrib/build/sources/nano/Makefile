@@ -7,16 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = nano
-VER_MAG = 2.8
-VER_MIN = 6
+VER_MAG = 8
+VER_MIN = 7
 VERSION = $(VER_MAG).$(VER_MIN)
-
-BASE_URL = http://www.nano-editor.org/dist/v$(VER_MAG)
+EXTENSION = .tar.xz
+BASE_URL = https://www.nano-editor.org/dist/v$(VER_MAG)
 
 PRE_CONFIGURE = LIBS=-ltinfo
 
 INSTALL = yes
-
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	@make -C $(COMPILE_DIR) prefix=$(PKG_ROOT)$(PKG_DIR) install

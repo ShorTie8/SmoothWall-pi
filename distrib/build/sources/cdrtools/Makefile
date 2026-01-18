@@ -11,6 +11,10 @@ VERSION = 3.00
 
 BASE_URL = http://downloads.smoothwall.org/buildmirror
 
+VERSION = 3.02a9
+
+BASE_URL = https://sourceforge.net/projects/cdrtools/files/alpha
+
 CONFIGURE = yes
 COMPILE = yes
 INSTALL = yes

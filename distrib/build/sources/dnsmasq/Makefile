@@ -7,20 +7,18 @@
 include ../Makefile.conf
 
 PACKAGE = dnsmasq
-VERSION =  2.90
-
+VERSION =  2.92
 BASE_URL = http://www.thekelleys.org.uk/dnsmasq/
 
 CONFIGURE = yes
-COMPILE = yes
-INSTALL = yes
-
 configure: $(DIR)/
 	@true
 
+COMPILE = yes
 compile: configure
 	@$(MAKE) $(JOBS) -C $(DIR) CFLAGS="$(CFLAGS) -DHAVE_ISC_READER"
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	@cd $(DIR); \

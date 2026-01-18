@@ -7,22 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = whois
-VERSION = 5.5.2
-
-EXTENSION = .tar.xz
-
-BASE_URL = https://fossies.org/linux/privat
+VERSION = 5.6.5
+TARBALL = v$(VERSION)
+BASE_URL = https://github.com/rfc1036/whois/archive/refs/tags/v5.6.5.tar.gz
 
 CONFIGURE = yes
-COMPILE = yes
-INSTALL = yes
-
 configure: $(DIR)/
 	@true
 	
-compile: configure
-	@true
-	
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	@install -D $(DIR)/whois $(PKG_ROOT)/usr/bin/whois

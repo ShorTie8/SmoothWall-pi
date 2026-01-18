@@ -7,16 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = hdparm
-VERSION = 9.33
+VERSION = 9.56
 
 BASE_URL = http://sourceforge.net/projects/hdparm/files/hdparm/
 
 CONFIGURE = yes
-INSTALL = yes
-
 configure: patch
 	@true
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)/sbin
 	@make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install

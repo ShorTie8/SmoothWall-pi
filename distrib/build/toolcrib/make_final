@@ -148,16 +148,15 @@ fi
     fi
 
 
-    if [ -e crumbs/chroot_mounted ]; then
-      echo -e "  chroot already mounted"
-    else
-      echo
-      echo -e "  Mounting File System"
-    #  mount_chroot
-    ##	read status
-
-      touch crumbs/chroot_mounted
-    fi
+#    if [ -e crumbs/chroot_mounted ]; then
+#      echo -e "  chroot already mounted"
+#    else
+#      echo
+#      echo -e "  Mounting File System"
+#    #  mount_chroot
+#    ##	read status
+#      touch crumbs/chroot_mounted
+#    fi
 
 
     if [ -e crumbs/Final.grp2.compiled ]; then
@@ -222,7 +221,7 @@ fi
       build libnetfilter_log
       build libnetfilter_queue
       build libnftnl
-#      build LuaJIT
+      build LuaJIT
    #   JOBS=$JOBS_UP
       build slang
    #   JOBS=$JOBS_MP

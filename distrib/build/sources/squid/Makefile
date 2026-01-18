@@ -8,9 +8,10 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = squid
-VERSION = 4.9
-
-BASE_URL = http://www.squid-cache.org/Versions/v4
+VERSION = 7.3
+TARBALL = SQUID_7_3
+DIR = squid-SQUID_7_3
+BASE_URL = https://github.com/squid-cache/squid/archive/refs/tags
 
 CONFIG_OPTS += --disable-arch-native \
 	       --enable-async-io \
@@ -35,16 +36,15 @@ CONFIG_OPTS += --disable-arch-native \
 INSTALL_LANGUAGES = English
 
 CONFIGURE = yes
-
 configure: patch
-	@echo; echo; echo "configure"; echo
-	/bin/sh -c "ulimit -n 8192; cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=/$(PKG_DIR)"
+	cd $(DIR); ./bootstrap.sh
+	@echo; echo; echo "Configure"; echo
+	cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=$(PKG_DIR)/usr/local/squid
 
 
 INSTALL = yes
-
 install: compile
-	@echo; echo; echo "install"; echo
+	@echo; echo; echo "Install"; echo
 	mkdir -p $(PKG_ROOT)
 	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 	mkdir -p $(PKG_ROOT)/var/smoothwall/proxy

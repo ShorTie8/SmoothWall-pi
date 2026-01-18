@@ -7,23 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = sysklogd
-VERSION = 1.5.1
+VERSION = 2.7.2
 
-BASE_URL = http://www.infodrom.org/projects/sysklogd/download/
+BASE_URL = https://github.com/troglobit/sysklogd/releases/download/v2.7.2
 
-CONFIGURE = yes
 COMPILE = yes
-INSTALL = yes
-
-configure: patch
-	@true
-	# fix problems that causes a segmentation fault under some conditions in klogd and fix an obsolete program construct:
-	cd $(DIR); sed -i '/Error loading kernel symbols/{n;n;d}' ksym_mod.c
-	cd $(DIR); sed -i 's/union wait/int/' syslogd.c
-
 compile: configure
 	@make $(JOBS) -C $(DIR) V=1 SKFLAGS="$(CFLAGS) -DSYSV -D_GNU_SOURCE"
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)$(PKG_DIR)/man/man{5,8} $(PKG_ROOT)$(PKG_DIR)/sbin
 	@make -C $(COMPILE_DIR) MANDIR=$(PKG_ROOT)$(PKG_DIR)/man \

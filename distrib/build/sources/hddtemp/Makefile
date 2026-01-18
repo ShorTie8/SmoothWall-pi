@@ -17,6 +17,8 @@ HDTEMPDB = hddtemp.db
 
 PATCH_FILE1 = REG_EIP.patch
 
+CFLAGS += -std=gnu17
+
 ifeq ($(mARCH), arm64)
 ReConfigure = yes
 endif

@@ -7,13 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = acpica
-VERSION = unix2-20140325
+VERSION = unix2-20251212
 
-BASE_URL = https://acpica.org/sites/acpica/files/
+BASE_URL = https://github.com/acpica/acpica/releases/download/20251212
 
-export NO_CHECK_CERT
-
-CFLAGS += -std=gnu17
+#CFLAGS += -std=gnu17
 
 CONFIGURE = yes
 configure: $(DIR)/
