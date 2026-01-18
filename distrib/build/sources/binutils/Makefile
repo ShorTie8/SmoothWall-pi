@@ -39,7 +39,7 @@ install: compile
 	@echo; echo; echo "Install"; echo
 #ifeq ($(BITS_64), yes)
 #ifeq ($(mARCH), x86_64)
-ifeq ($(mARCH),$(mARCH $(mTUPLE),arm64 x86_64))
+ifeq ($(mARCH),$(filter $(mTUPLE),arm64 x86_64))
 	mkdir -pv $(TOOLS_DIR)/lib
 	ln -sv lib $(TOOLS_DIR)/lib64
 endif
