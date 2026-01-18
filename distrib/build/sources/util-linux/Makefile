@@ -12,6 +12,8 @@ VERSION = $(VER_MM).3
 
 BASE_URL = http://www.kernel.org/pub/linux/utils/util-linux/v$(VER_MM)/
 
+# Tool Chain Build Stage 3 util-linux
+#
 ifeq ($(BUILD_PHASE), Stage_3)
 
 CONFIG_OPTS = \
@@ -37,16 +39,20 @@ install: compile
 endif
 
 
+# Final compile util-linux
+#
 ifeq ($(BUILD_PHASE), Final)
 
 PRE_CONFIGURE = LDFLAGS=-ltinfo
 #CFG_OPTS := $(CONFIG_OPTS)
 #--enable-arch --enable-partx --enable-write --with-ncurses
 CONFIG_OPTS = \
+		--prefix=/usr \
 		--bindir=/usr/bin \
 		--libdir=/usr/lib     \
 		--runstatedir=/run    \
 		--sbindir=/usr/sbin   \
+		--enable-libblkid \
 		--disable-chfn-chsh   \
 		--disable-login       \
 		--disable-nologin     \
@@ -64,10 +70,8 @@ CONFIG_OPTS = \
 
 CONFIGURE = yes
 configure: $(DIR)/
-	cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=$(TOOLS_DIR) 
-
+	cd $(DIR); ./configure $(CONFIG_OPTS)
 
 endif
-
 
 include ../Makefile.rules
