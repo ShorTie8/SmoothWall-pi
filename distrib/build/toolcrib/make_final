@@ -193,12 +193,21 @@ fi
       build pixman
       build libffi
       build freefont
-      build cairo
       build openssl
       build rsync
+      build libpsl
+      build curl
+      build cacert-bundle
+      build perl
+      build perl-mods
+
       build Python
-      build libcap-ng
+      build setuptools
+      build meson
+      build ninja
       build glib
+      build cairo
+      build libcap-ng
       build pango
       build sqlite
       build unbound
