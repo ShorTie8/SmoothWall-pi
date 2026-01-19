@@ -201,7 +201,7 @@ fi
       build perl
       build perl-mods
 
-      build Python
+      build python3
       build setuptools
       build meson
       build ninja

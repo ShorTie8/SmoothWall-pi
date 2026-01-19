@@ -9,10 +9,25 @@ include ../Makefile.conf
 PACKAGE = cairo
 VERSION = 1.18.4
 EXTENSION = .tar.xz
-ReConfigure = yes
 BASE_URL = https://www.cairographics.org/releases
 
-CONFIG_OPTS += --enable-script --enable-tee --enable-xml
+CONFIG_OPTS = --enable-xml
+
+CONFIGURE = yes
+configure: patch
+	@echo; echo; echo "Configure"; echo
+	mkdir -vp $(PKG_ROOT)
+	cd $(DIR); meson setup --prefix=$(PKG_DIR) $(PKG_ROOT)
+
+COMPILE = yes
+compile: configure
+	@echo; echo; echo "Compile"; echo
+	cd $(DIR); ninja -C $(PKG_ROOT) --prefix=$(PKG_DIR)
+	
+INSTALL = yes
+install: compile
+	@echo; echo; echo "Install"; echo
+	cd $(DIR); ninja -C $(PKG_ROOT) install
 
 include ../Makefile.rules
 
