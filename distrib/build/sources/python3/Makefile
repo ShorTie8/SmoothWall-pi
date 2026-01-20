@@ -7,7 +7,6 @@
 include ../Makefile.conf
 
 PACKAGE = Python
-#VERSION = 3.10.19
 VERSION = 3.11.14
 EXTENSION = .tar.xz
 BASE_URL = http://www.python.org/ftp/python/$(VERSION)
@@ -22,17 +21,10 @@ patch: $(DIR)/
 
 CONFIG_OPTS = --prefix=$(TOOLS_DIR)
 
-INSTALL = yes
-install: compile
-	@make -C $(DIR) DESTDIR=$(PKG_ROOT) install
-	# Remove precompiled pycache at toolchain and tests
-	@(cd $(TOOLS_DIR)/lib/python3.10 && \
-		find . | grep -E "(/__pycache__|/test/)" | xargs rm -rf)
-
 endif
 
 # Final Build Python 3
-#	https://github.com/ipfire/ipfire-2.x/blob/master/lfs/python3
+#
 ifeq ($(BUILD_PHASE), Final)
 CONFIG_OPTS += \
 		--enable-shared \
