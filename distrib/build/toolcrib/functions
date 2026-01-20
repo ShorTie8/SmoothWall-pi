@@ -143,6 +143,7 @@ function build_tc_stage_3() {
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
   buildenv autoconf 1
+  buildenv autoconf-archive 1
   buildenv automake 1
   buildenv tcl 1
   buildenv expect 1
