@@ -7,9 +7,13 @@
 include ../Makefile.conf
 
 PACKAGE = Python
+<<<<<<< HEAD
 MAX_VERSION = 3
 MIN_VERSION = 11
 VERSION = $(MAX_VERSION).$(MIN_VERSION).14
+=======
+VERSION = 3.11.14
+>>>>>>> af3cfd7d4c327fc40902c0039f4504490d766118
 EXTENSION = .tar.xz
 BASE_URL = http://www.python.org/ftp/python/$(VERSION)
 
@@ -23,6 +27,7 @@ patch: $(DIR)/
 
 CONFIG_OPTS = --prefix=$(TOOLS_DIR)
 
+<<<<<<< HEAD
 INSTALL = yes
 install: compile
 	@make -C $(DIR) DESTDIR=$(PKG_ROOT) install
@@ -30,10 +35,12 @@ install: compile
 	@(cd $(TOOLS_DIR)/lib/python3.$(MIN_VERSION) && \
 		find . | grep -E "(/__pycache__|/test/)" | xargs rm -rf)
 
+=======
+>>>>>>> af3cfd7d4c327fc40902c0039f4504490d766118
 endif
 
 # Final Build Python 3
-#	https://github.com/ipfire/ipfire-2.x/blob/master/lfs/python3
+#
 ifeq ($(BUILD_PHASE), Final)
 CONFIG_OPTS += \
 		--enable-shared \
