@@ -7,8 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = Python
-#VERSION = 3.10.19
-VERSION = 3.11.14
+MAX_VERSION = 3
+MIN_VERSION = 11
+VERSION = $(MAX_VERSION).$(MIN_VERSION).14
 EXTENSION = .tar.xz
 BASE_URL = http://www.python.org/ftp/python/$(VERSION)
 
@@ -26,7 +27,7 @@ INSTALL = yes
 install: compile
 	@make -C $(DIR) DESTDIR=$(PKG_ROOT) install
 	# Remove precompiled pycache at toolchain and tests
-	@(cd $(TOOLS_DIR)/lib/python3.10 && \
+	@(cd $(TOOLS_DIR)/lib/python3.$(MIN_VERSION) && \
 		find . | grep -E "(/__pycache__|/test/)" | xargs rm -rf)
 
 endif
