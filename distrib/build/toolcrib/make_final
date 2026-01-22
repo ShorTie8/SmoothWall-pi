@@ -25,7 +25,7 @@ PATH=$PATH:${PWD}/toolcrib
 #   the exit status of the shell (only an explicit exit would do that).
 #   This is needed so the host OS doesn't complain when shutting down.
 #
-trap "echo; echo \"Unmounting /proc\"; /tools/bin/umount /proc" EXIT
+trap "unmount_chroot; /tools/bin/umount /proc" EXIT
 
 # If an argument specified, build only that item. Otherwise, build everything.
 #
@@ -44,7 +44,7 @@ fi
 #
 cd /build
 export BUILD_PHASE="Final"
-export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
+#export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
 
 # Permanent: ensure {,u}mount are not setuid in /tools.
 /tools/bin/chmod u-s /tools/bin/{,u}mount
@@ -52,7 +52,9 @@ export PKG_CONFIG_PATH="/usr/lib/pkgconfig"
 # Be sure /proc is mounted
 #
 if /tools/bin/grep proc /etc/mtab; then /tools/bin/umount /proc >/dev/null 2>&1; fi
-/tools/bin/mount -t proc proc /proc
+/tools/bin/mount -v -t proc proc /proc
+/tools/bin/cat /etc/mtab
+/tools/bin/grep proc /etc/mtab
 
 # Get our functions
 #

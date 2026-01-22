@@ -122,7 +122,9 @@ function build_tc_stage_2() {
 
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
-  buildenv libstdc++
+  buildenv libxcrypt 2
+  buildenv libstdc++ 2
+  buildenv zlib-ng 2
   buildenv binutils 2
   buildenv gcc 2
   check 2 gcc
@@ -145,31 +147,34 @@ function build_tc_stage_3() {
   buildenv autoconf 1
   buildenv autoconf-archive 1
   buildenv automake 1
+  buildenv zstd 1
   buildenv tcl 1
   buildenv expect 1
   buildenv dejagnu 1
   buildenv pkg-config 1
   buildenv ncurses 1
-  buildenv m4 1
-  buildenv bison 1
-  buildenv flex 1
   buildenv bash 1
-  buildenv xz 1
   buildenv bzip2 1
-  buildenv zlib 1
+  buildenv automake 1
   buildenv coreutils 1
   buildenv diffutils 1 
-  buildenv file
-  buildenv e2fsprogs 1 
   buildenv findutils 1
   buildenv gawk 1
   buildenv gettext 1
   buildenv grep 1
   buildenv gzip 1
   buildenv joe 1
+  buildenv m4 1
   buildenv make 1
   buildenv patch 1
+  buildenv flex 1
+  buildenv zlib 1
+  buildenv xz 1
+  buildenv bison 1
+  buildenv e2fsprogs 1 
+  buildenv file
   buildenv perl 1
+#  buildenv cacert-bundle 1
   buildenv openssl 1
   buildenv sed 1
   buildenv tar 1
@@ -332,13 +337,12 @@ pwd
 
 ##	Function un-Mount chroot
 function unmount_chroot () {
-echo "Current_Dir $PWD"
-echo "SWE_ROOT = $SWE_ROOT"
-echo "ROOT = $ROOT"
-echo "SWE_ROOT = $SWE_ROOT"
-if [ `cat /etc/mtab | gtrp Smoo `]; then
+if [ `cat /etc/mtab | grep Smoo`]; then
   ##	 -l, --lazy              detach the filesystem now, clean up things later
-  echo; echo "Lazy UnMount"
+
+  echo; echo "Lazy UnMount,	From functions"
+##	From functions
+  /tools/bin/umount -v /proc
 #  umount -vl $(SWE_ROOT)/dev{/shm,/pts,}
 #  echo "Sleepy 2"; sleep 2
 #  umount -vR $(SWE_ROOT)

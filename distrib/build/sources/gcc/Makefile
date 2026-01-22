@@ -23,29 +23,6 @@ download:
 	#$(DL_CMD) $(BASE_ISL)/$(TAR_ISL)
 	$(DL_CMD) $(BASE_URL)/$(TARBALL)$(EXTENSION) $(MD5)
 
-ifeq ($(mTUPLE), i586)
-  GCC_flags = --with-cpu=pentium
-else ifeq ($(mTUPLE), x86_64)
-  GCC_flags =
-else ifeq ($(mTUPLE), pi0w)
-  GCC_flags = --with-cpu=arm1176jzf-s --with-float=hard
-else ifeq ($(mTUPLE), rpi2 Opi-r1h2)
-  GCC_flags = --with-cpu=cortex-a7 --with-fpu=neon-vfpv4 --with-float=hard
-else ifeq ($(mTUPLE), rpi3)
-  GCC_flags = --with-cpu=cortex-a53 --with-fpu=neon-fp-armv8 --with-float=hard 
-else ifeq ($(mTUPLE), rpi4)
-  # +crypto https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845
-  GCC_flags = --with-cpu=cortex-a72 --with-fpu=vfp --with-float=hard --enable-linker-build-id
-else ifeq ($(mTUPLE), rpi5)
-  GCC_flags =
-else ifeq ($(mTUPLE), xu4)
-  GCC_flags = --with-cpu=cortex-a15 --with-cpu=cortex-a7 --with-fpu=vfpv3-d16 --with-float=hard 
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
-  GCC_flags =  --with-arch=armv8-a+crc --with-cpu=cortex-a72 --enable-linker-build-id
-else
-  GCC_flags = Un-known GCC_flags
-endif
- 
 # Tool Chain Build Stage 1 gcc
 #
 ifeq ($(BUILD_PHASE), Stage_1)
@@ -77,17 +54,10 @@ patch: $(DIR)/
 	  touch $$file.orig; \
 	done
 	
-ifeq ($(mARCH), x86_64)
-	@echo; echo 'setting the default directory name for 64-bit libraries to “lib”:'
-	cd $(DIR); \
-		sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
-endif
+#LDFLAGS = -Wl,-O1 -Wl,--as-needed -Wl,-z,pack-relative-relocs
 
-LDFLAGS = -Wl,-O1 -Wl,--as-needed -Wl,-z,pack-relative-relocs
-
-CONFIG_OPTS = $(GCC_flags) \
+CONFIG_OPTS = --prefix=$(TOOLS_DIR) \
 	      --target=$(SWE_TGT) \
-	      --prefix=$(TOOLS_DIR) \
 	      --with-glibc-version=2.42 \
 	      --with-sysroot=$(SWE_ROOT) \
 	      --with-newlib \
@@ -111,6 +81,10 @@ CONFIG_OPTS = $(GCC_flags) \
 		  --with-bugurl=https://smoothwall.org \
 		  --enable-gnu-unique-object \
 	      --enable-languages=c,c++
+
+ifeq ($(mARCH), arm64)
+CONFIG_OPTS += --enable-standard-branch-protection
+endif
 
 CONFIGURE = yes
 configure: patch
@@ -165,10 +139,8 @@ patch: $(DIR)/
 	  touch $$file.orig; \
 	done
 	
-ifeq ($(mARCH), x86_64)
-	@echo; echo 'change the default directory name for 64-bit libraries to “lib”:'
-	cd $(DIR); sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
-endif
+	##	Override the build rules of the libgcc and libstdc++ headers to
+	##		allow building these libraries with POSIX threads support:
 	@cd $(DIR); sed '/thread_header =/s/@.*@/gthr-posix.h/' \
 	  -i libgcc/Makefile.in libstdc++-v3/include/Makefile.in
 
@@ -177,8 +149,7 @@ PRE_CONFIGURE = \
 		AR=$(SWE_TGT)-ar \
 		RANLIB=$(SWE_TGT)-ranlib
 
-CONFIG_OPTS = $(GCC_flags) \
-		--prefix=$(TOOLS_DIR) \
+CONFIG_OPTS = --prefix=$(TOOLS_DIR) \
 		--build=$(SWE_TGT) \
 		--host=$(SWE_TGT) \
 		--target=$(SWE_TGT) \
@@ -189,6 +160,10 @@ CONFIG_OPTS = $(GCC_flags) \
 	    --disable-multilib \
 	    --disable-bootstrap \
 	    --disable-libgomp
+
+ifeq ($(mARCH), arm64)
+CONFIG_OPTS += --enable-standard-branch-protection
+endif
 
 INSTALL = yes
 install: compile
@@ -203,16 +178,10 @@ ifeq ($(BUILD_PHASE), Final)
 
 PATCH = yes
 patch: $(DIR)/
-	@echo; echo "patch"; echo
-ifeq ($(BITS_64), yes)
-	cd $(DIR); sed -e '/m64=/s/lib64/lib/' -i.orig gcc/config/i386/t-linux64
-endif
+	@echo; echo "Patch"; echo
 	rm -vf /usr/lib/gcc
 
-PRE_CONFIGURE = SED=sed
-
-CONFIG_OPTS = $(GCC_flags) \
-		--prefix=$(PKG_DIR) \
+CONFIG_OPTS = --prefix=$(PKG_DIR) \
 	    --host=$(FINAL_TGT) \
 	    --build=$(FINAL_TGT) \
 	    --target=$(FINAL_TGT) \
@@ -221,9 +190,13 @@ CONFIG_OPTS = $(GCC_flags) \
 		--disable-bootstrap      \
 		--with-system-zlib
  
+ifeq ($(mARCH), arm64)
+CONFIG_OPTS += --enable-standard-branch-protection
+endif
+
 INSTALL = yes
 install: compile
-	@echo; echo "install"; echo
+	@echo; echo "Install"; echo
 	mkdir -p $(PKG_ROOT)
 	make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 	cd $(PKG_ROOT)$(PKG_DIR)/bin; ln -svf gcc cc;
