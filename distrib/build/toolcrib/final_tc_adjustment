@@ -44,7 +44,7 @@ if [ $STATUS -eq 0 ]; then
     arm) expectInterp="/lib/ld-linux-armhf.so.3" ;;
     arm64) expectInterp="/lib/ld-linux-aarch64.so.1" ;;
     i*86) expectInterp="/lib/ld-linux.so.2" ;;
-    x86_64) expectInterp="/lib64/ld-linux-x86-64.so.2" ;;
+    x86_64) expectInterp="/lib/ld-linux-x86-64.so.2" ;;
   esac
 
   # Tweak gcc specs
@@ -74,7 +74,7 @@ if [ $STATUS -eq 0 ]; then
 
   # compile an empty program
   #
-  echo 'int main() {}' > dummy.c
+  echo 'int main() { }' > dummy.c
   cc dummy.c -v -Wl,--verbose &> dummy.log
 
   # Right program interpreter?
@@ -136,8 +136,7 @@ END
 
   # Using correct libc?
   #
-#  if [ "$BITS_64" == "yes" ]; then mINST=64; fi
-  grep "attempt to open /lib${mINST}/libc.so.6" dummy.log >/dev/null 2>&1
+  grep "attempt to open /lib/libc.so.6" dummy.log >/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "Loader is using incorrect libc:"
     egrep "attempt to open.*/libc\.so\." dummy.log | sed -e 's/^/    /'

@@ -16,6 +16,12 @@ TZ_VERSION = 2025a
 TZ_TARBALL = tzdata$(TZ_VERSION).tar.gz
 TZ_URL =  http://www.iana.org/time-zones/repository/releases/$(TZ_TARBALL)
 
+PATCH_FILE1 = glibc-$(VERSION)-fhs-1.patch
+PATCH_URL1 = https://www.linuxfromscratch.org/patches/lfs/12.4/glibc-2.42-fhs-1.patch
+
+PATCH_FILE2 = glibc-2.42-upstream_fixes-1.patch
+PATCH_URL2 = http://linuxfromscratch.org/patches/downloads/glibc/$(PATCH_FILE2)
+
 DOWNLOAD = yes
 download:
 	@echo; echo; echo "Downloading glibc "; echo
