@@ -10,7 +10,11 @@ include ../Makefile.conf
 PACKAGE = zstd
 VERSION = 1.5.7
 TARBALL = v$(VERSION)
-ReConfigure = yes
 BASE_URL = http://github.com/facebook/zstd/archive
+
+COMPILE = yes
+compile: $(DIR)/
+	@echo; echo; echo "Compile"; echo
+	+$(PRE_COMPILE) $(MAKE) ${JOBS} -C $(COMPILE_DIR)
 
 include ../Makefile.rules

@@ -18,7 +18,7 @@ CONFIGURE = yes
 configure: patch
 	@echo; echo; echo "Configure"; echo
 	mkdir -vp $(PKG_ROOT)
-	cd $(DIR); meson setup  $(PKG_ROOT)
+	cd $(DIR); meson $(PKG_ROOT)
 
 COMPILE = yes
 compile: configure

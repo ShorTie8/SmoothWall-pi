@@ -8,6 +8,7 @@ include ../Makefile.conf
 
 PACKAGE = pcre2
 VERSION = 10.47
+DIR = pcre2-pcre2-$(VERSION)
 BASE_URL = https://github.com/PCRE2Project/pcre2/archive/refs/tags
 
 include ../Makefile.rules
