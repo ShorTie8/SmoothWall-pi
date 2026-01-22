@@ -8,9 +8,9 @@
 include ../Makefile.conf
 
 PACKAGE = cmake
-VERSION = 3.16.2
+VERSION = 4.2.2
 
-BASE_URL = https://cmake.org/files/v3.16
+BASE_URL = https://cmake.org/files/v4.2
 
 CONFIGURE = yes
 configure: patch

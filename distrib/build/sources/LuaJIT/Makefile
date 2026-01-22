@@ -9,10 +9,11 @@
 include ../Makefile.conf
 
 PACKAGE = LuaJIT
-VERSION = 20240917
+VERSION = 20250816
 EXTENSION = .tar.xz
+DIR = luajit-$(VERSION)
 TARBALL = luajit-$(VERSION)
-BASE_URL =https://anduin.linuxfromscratch.org/BLFS/luajit
+BASE_URL = https://anduin.linuxfromscratch.org/BLFS/luajit
 
 #BASE_URL = https://github.com/openeuler-mirror/luajit/blob/master
 ##	https://github.com/openeuler-mirror/luajit/blob/master/0002-luajit-add-secure-compile-option-fstack.patch

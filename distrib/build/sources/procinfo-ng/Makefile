@@ -8,17 +8,15 @@ include ../Makefile.conf
 
 PACKAGE = procinfo-ng
 VERSION = 2.0.304
-
-BASE_URL = http://sourceforge.net/projects/$(PACKAGE)/files/$(PACKAGE)/$(VERSION)
+BASE_URL = http://sourceforge.net/projects/procinfo-ng/files/procinfo-ng/$(VERSION)
 EXTENSION = .tar.bz2
 
 COMPILE = yes
-INSTALL = yes
-
 compile: configure
 	@cd $(COMPILE_DIR); sed -i -e 's/-lncurses/-lncurses -ltinfo/' Makefile
 	@$(MAKE) $(JOBS) -C $(COMPILE_DIR)
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	@$(MAKE) -C $(COMPILE_DIR) prefix=$(PKG_ROOT)$(PKG_DIR) install

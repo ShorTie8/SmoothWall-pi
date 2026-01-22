@@ -7,17 +7,13 @@
 include ../Makefile.conf
 
 PACKAGE = shadow
-#VERSION = 4.1.4.2
-VERSION = 4.7
+VERSION = 4.18.0
 EXTENSION = .tar.xz
-
-#BASE_URL = http://downloads.smoothwall.org/buildmirror
-BASE_URL = https://github.com/shadow-maint/shadow/releases/download/4.7
-
-INSTALL = yes
+BASE_URL = https://github.com/shadow-maint/shadow/releases/download/$(VERSION)
 
 CONFIG_OPTS= --with-selinux=no
 
+INSTALL = yes
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	@make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install

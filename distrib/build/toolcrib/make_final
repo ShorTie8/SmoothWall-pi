@@ -202,19 +202,25 @@ fi
       build meson
       build libidn2
       build libunistring
-      build libpsl
-      build curl
-      build cacert-bundle
+      build ninja
+#      build libpsl
       build perl
       build perl-mods
 
+      build libuv
+      build libarchive
+      build cmake
+
       build python3
       build setuptools
-      build ninja
       build glib
       build cairo
       build libcap-ng
       build pango
+ 
+      build curl
+      build cacert-bundle
+      
       build sqlite
       build unbound
       build libevent

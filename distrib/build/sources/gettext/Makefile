@@ -8,9 +8,11 @@ include ../Makefile.conf
 
 PACKAGE = gettext
 VERSION = 0.26
-
 BASE_URL = https://ftp.gnu.org/gnu/gettext
 
 CONFIG_OPTS += --disable-libasprintf --without-csharp
+
+# if mARCH=x86_64 && mTUPLE=586
+##	$ ../configure CC="gcc -m32"
 
 include ../Makefile.rules

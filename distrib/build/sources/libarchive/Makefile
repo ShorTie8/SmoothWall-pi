@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libarchive
-VERSION = 3.7.4
+VERSION = 3.8.0
 
 BASE_URL = http://www.libarchive.org/downloads
 

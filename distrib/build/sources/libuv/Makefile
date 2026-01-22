@@ -8,7 +8,7 @@
 include ../Makefile.conf
 
 PACKAGE = libuv
-VERSION = v1.50.0
+VERSION = v1.51.0
 
 BASE_URL = https://dist.libuv.org/dist/$(VERSION)
 

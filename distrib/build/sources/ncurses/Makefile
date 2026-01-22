@@ -59,11 +59,12 @@ install: compile
 	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
 
 ##	Allow the linker to find non-wide-character ncurses libraries
-#	for lib in ncurses form panel menu; do \
-#		rm -v $(PKG_ROOT)$(PREFIX)/lib/lib$${lib}.so; \
-#		echo "INPUT(-l$${lib}w)" > $(PKG_ROOT)$(PREFIX)/lib/lib$${lib}.so; \
-#		ln -sfv $${lib}w.pc $(PKG_ROOT)$(PREFIX)/lib/pkgconfig/$${lib}.pc; \
-#	  done
+	mkdir -vp $(PKG_ROOT)$(PREFIX)/lib/pkgconfig
+	for lib in ncurses form panel menu; do \
+		rm -vf $(PKG_ROOT)$(PREFIX)/lib/lib$${lib}.so; \
+		echo "INPUT(-l$${lib}w)" > $(PKG_ROOT)$(PREFIX)/lib/lib$${lib}.so; \
+		ln -sfv $${lib}w.pc $(PKG_ROOT)$(PREFIX)/lib/pkgconfig/$${lib}.pc; \
+	  done
 
 
 ##	For old applications that look for -lcurses at build time are still buildable
