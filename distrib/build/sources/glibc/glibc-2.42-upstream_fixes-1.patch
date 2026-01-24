@@ -1,0 +1,113 @@
+ubmitted by:             Bruce Dubbs <bdubbs@linuxfromscratch.org>
+Date:                    2025-11-14
+Initial Package Version: 2.42
+Upstream Status:         Committed
+
+Origin:                  
+https://sourceware.org/git?p=glibc.git;a=commit;h=d0f72b96f2e91e1aa93f7e826c71f74078ada7d0
+https://sourceware.org/git?p=glibc.git;a=commit;h=3970785bebcc3f1de4460072f3a041d178f64846
+https://sourceware.org/git?p=glibc.git;a=commit;h=7a8f3c6ee4b565a02da4ba0dad9aaeaeed4639ce
+https://sourceware.org/git?p=glibc.git;a=commit;h=e87844ec42b77363a499ea4da6c4a6ab85eba310
+
+Description:             See https://wiki.linuxfromscratch.org/lfs/ticket/5824
+
+diff -Naur glibc-2.42.orig/sysdeps/i386/Makefile glibc-2.42/sysdeps/i386/Makefile
+--- glibc-2.42.orig/sysdeps/i386/Makefile	2025-07-28 13:22:55.000000000 -0500
++++ glibc-2.42/sysdeps/i386/Makefile	2025-11-14 08:53:26.781693601 -0600
+@@ -60,6 +60,15 @@
+ 	@echo "Checking ld.so for SSE register use.  This will take a few seconds..."
+ 	$(BASH) $< $(objpfx) '$(NM)' '$(OBJDUMP)' '$(READELF)' > $@; \
+ 	$(evaluate-test)
++
++tests-special += $(objpfx)check-gnu-tls.out
++
++$(objpfx)check-gnu-tls.out: $(common-objpfx)libc.so
++	LC_ALL=C $(READELF) -V -W $< \
++		| sed -ne '/.gnu.version_d/, /.gnu.version_r/ p' \
++		| grep GLIBC_ABI_GNU_TLS > $@; \
++	$(evaluate-test)
++generated += check-gnu-tls.out
+ else
+ CFLAGS-.os += $(if $(filter rtld-%.os,$(@F)), $(rtld-CFLAGS))
+ endif
+diff -Naur glibc-2.42.orig/sysdeps/i386/Versions glibc-2.42/sysdeps/i386/Versions
+--- glibc-2.42.orig/sysdeps/i386/Versions	2025-07-28 13:22:55.000000000 -0500
++++ glibc-2.42/sysdeps/i386/Versions	2025-11-14 08:53:26.781734544 -0600
+@@ -28,6 +28,11 @@
+   GLIBC_2.13 {
+     __fentry__;
+   }
++  GLIBC_ABI_GNU_TLS {
++    # This symbol is used only for empty version map and will be removed
++    # by scripts/versions.awk.
++    __placeholder_only_for_empty_version_map;
++  }
+ }
+ libm {
+   GLIBC_2.1 {
+diff -Naur glibc-2.42.orig/sysdeps/x86/Makefile glibc-2.42/sysdeps/x86/Makefile
+--- glibc-2.42.orig/sysdeps/x86/Makefile	2025-07-28 13:22:55.000000000 -0500
++++ glibc-2.42/sysdeps/x86/Makefile	2025-11-14 08:53:42.781959686 -0600
+@@ -135,6 +135,15 @@
+ tst-tls23-mod.so-no-z-defs = yes
+ 
+ $(objpfx)tst-tls23-mod.so: $(libsupport)
++
++tests-special += $(objpfx)check-gnu2-tls.out
++
++$(objpfx)check-gnu2-tls.out: $(common-objpfx)libc.so
++	LC_ALL=C $(READELF) -V -W $< \
++		| sed -ne '/.gnu.version_d/, /.gnu.version_r/ p' \
++		| grep GLIBC_ABI_GNU2_TLS > $@; \
++	$(evaluate-test)
++generated += check-gnu2-tls.out
+ endif
+ 
+ ifeq ($(subdir),gmon)
+diff -Naur glibc-2.42.orig/sysdeps/x86/Versions glibc-2.42/sysdeps/x86/Versions
+--- glibc-2.42.orig/sysdeps/x86/Versions	2025-07-28 13:22:55.000000000 -0500
++++ glibc-2.42/sysdeps/x86/Versions	2025-11-14 08:53:42.781987787 -0600
+@@ -7,4 +7,9 @@
+   GLIBC_2.33 {
+     __x86_get_cpuid_feature_leaf;
+   }
++  GLIBC_ABI_GNU2_TLS {
++    # This symbol is used only for empty version map and will be removed
++    # by scripts/versions.awk.
++    __placeholder_only_for_empty_version_map;
++  }
+ }
+diff -Naur glibc-2.42.orig/sysdeps/x86_64/Makefile glibc-2.42/sysdeps/x86_64/Makefile
+--- glibc-2.42.orig/sysdeps/x86_64/Makefile	2025-07-28 13:22:55.000000000 -0500
++++ glibc-2.42/sysdeps/x86_64/Makefile	2025-11-14 08:53:42.782018239 -0600
+@@ -212,6 +212,15 @@
+ LDFLAGS-tst-plt-rewritemod2.so = -Wl,-z,now,-z,undefs
+ tst-plt-rewrite2-ENV = GLIBC_TUNABLES=glibc.cpu.plt_rewrite=2
+ $(objpfx)tst-plt-rewrite2: $(objpfx)tst-plt-rewritemod2.so
++
++tests-special += $(objpfx)check-dt-x86-64-plt.out
++
++$(objpfx)check-dt-x86-64-plt.out: $(common-objpfx)libc.so
++	LC_ALL=C $(READELF) -V -W $< \
++		| sed -ne '/.gnu.version_d/, /.gnu.version_r/ p' \
++		| grep GLIBC_ABI_DT_X86_64_PLT > $@; \
++	$(evaluate-test)
++generated += check-dt-x86-64-plt.out
+ endif
+ 
+ test-internal-extras += tst-gnu2-tls2mod1
+diff -Naur glibc-2.42.orig/sysdeps/x86_64/Versions glibc-2.42/sysdeps/x86_64/Versions
+--- glibc-2.42.orig/sysdeps/x86_64/Versions	2025-07-28 13:22:55.000000000 -0500
++++ glibc-2.42/sysdeps/x86_64/Versions	2025-11-14 08:53:42.782039750 -0600
+@@ -5,6 +5,11 @@
+   GLIBC_2.13 {
+     __fentry__;
+   }
++  GLIBC_ABI_DT_X86_64_PLT {
++    # This symbol is used only for empty version map and will be removed
++    # by scripts/versions.awk.
++    __placeholder_only_for_empty_version_map;
++  }
+ }
+ libm {
+   GLIBC_2.1 {
