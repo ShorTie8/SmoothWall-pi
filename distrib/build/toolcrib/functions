@@ -106,6 +106,8 @@ function build_tc_stage_1() {
   buildenv gcc 1
   buildenv kernel-headers 1
   buildenv glibc 1
+  buildenv libxcrypt 1
+  buildenv libstdc++ 1
   startTIME=`date +%s`-beginTIME
   displayTIME=`perl -e "printf('%6d', $startTIME);"`
   echo "    $displayTIME $BUILD_PHASE build complete"
@@ -122,8 +124,6 @@ function build_tc_stage_2() {
 
   export JOBS=$JOBS_MP
   beginTIME=`date +%s`
-  buildenv libxcrypt 2
-  buildenv libstdc++ 2
   buildenv zlib-ng 2
   buildenv binutils 2
   buildenv gcc 2

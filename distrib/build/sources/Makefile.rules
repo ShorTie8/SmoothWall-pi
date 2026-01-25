@@ -40,7 +40,7 @@ ifdef ReConfigure
 #	cd $(DIR); autoupdate
 	pwd
 	@echo; echo "autoconf --verbose --force"
-	@echo; autoreconf --force --install --warnings=all
+	@echo;cd $(DIR); autoreconf --force --install --warnings=all
 endif
 endif
 

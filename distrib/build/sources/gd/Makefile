@@ -7,15 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = gd
-VERSION = 2.0.33
-#VERSION = 2.2.5
-#TARBALL = $(PACKAGE)-$(VERSION)
-#DIR = libgd-gd-$(VERSION)
-
-BASE_URL = https://github.com/libgd/libgd/archive
-
-ifeq ($(mARCH), arm64)
+VERSION = 2.3.3
+DIR = libgd-gd-$(VERSION)
 ReConfigure = yes
-endif
+BASE_URL = https://github.com/libgd/libgd/archive
 
 include ../Makefile.rules

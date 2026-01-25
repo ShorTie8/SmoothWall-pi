@@ -13,13 +13,12 @@ VERSION = $(GCC_VER)
 EXTENSION = $(GCC_EXT)
 BASE_URL = https://ftp.gnu.org/gnu/gcc/gcc-$(VERSION)
 TARBALL = gcc-$(VERSION)
-
 DIR = gcc-$(VERSION)
 COMPILE_DIR = $(DIR)-compile
 
-# Tool Chain Build Stage 2
+# Tool Chain Build Stage 1
 #
-ifeq ($(BUILD_PHASE), Stage_2)
+ifeq ($(BUILD_PHASE), Stage_1)
 
 DOWNLOAD = yes
 download:
@@ -30,6 +29,10 @@ PREPARE = yes
 prepare: download
 	@echo; echo; echo "prepare"; echo
 	tar xf $(DOWNLOADS_DIR)/gcc-$(VERSION)$(EXTENSION)
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_GMP); mv gmp-$(GMP_VER) gmp
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
+	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
+	#cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_ISL); mv isl-$(ISL_VER) isl
 	mkdir -v $(COMPILE_DIR)
 
 CONFIG_OPTS = \

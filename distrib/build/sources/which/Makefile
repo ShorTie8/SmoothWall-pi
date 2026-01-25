@@ -7,8 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = which
-VERSION = 2.21
-
+VERSION = 2.23
 BASE_URL = https://ftp.gnu.org/gnu/which
 
 include ../Makefile.rules
