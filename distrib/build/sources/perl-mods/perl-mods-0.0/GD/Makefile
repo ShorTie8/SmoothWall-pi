@@ -16,7 +16,7 @@ CLEAN = yes
 
 configure: $(DIR)/
 	@echo; echo "configure"
-	cd $(DIR); perl Makefile.PL
+	@+cd $(DIR); echo 'y' | perl Makefile.PL
 
 clean:
 	@echo -n " $(PACKAGE)"
