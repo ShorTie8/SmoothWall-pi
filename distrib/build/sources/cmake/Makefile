@@ -14,10 +14,11 @@ BASE_URL = https://cmake.org/files/v4.2
 
 CONFIGURE = yes
 configure: patch
-	@echo; echo; echo "configure"; echo
+	@echo; echo; echo "Configure"; echo
 	cd $(DIR); sed -i '/"lib64"/s/64//' Modules/GNUInstallDirs.cmake
 	cd $(DIR); ./bootstrap --prefix=/usr \
 							--system-libs \
+							--no-system-cppdap \
 							--no-system-jsoncpp \
 							--no-system-librhash
 

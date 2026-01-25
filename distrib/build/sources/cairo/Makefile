@@ -22,7 +22,7 @@ configure: patch
 COMPILE = yes
 compile: configure
 	@echo; echo; echo "Compile"; echo
-	cd $(DIR); ninja -C $(PKG_ROOT) --prefix=$(PKG_DIR)
+	cd $(DIR); ninja -C $(PKG_ROOT)
 	
 INSTALL = yes
 install: compile

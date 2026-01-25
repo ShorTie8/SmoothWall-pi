@@ -203,21 +203,18 @@ fi
       build libidn2
       build libunistring
       build ninja
-#      build libpsl
+      build gd
       build perl
       build perl-mods
-
       build libuv
       build libarchive
       build cmake
-
       build python3
       build setuptools
       build glib
       build cairo
       build libcap-ng
       build pango
- 
       build curl
       build cacert-bundle
       
@@ -249,7 +246,6 @@ fi
       build popt
       build dialog
       build newt
-      build gd
       touch crumbs/Final.grp2.compiled
     fi
 

@@ -20,6 +20,7 @@ CONFIG_OPTS += --prefix=/usr --exec-prefix=/usr \
 	       --includedir=/usr/include \
 	       --libdir=/usr/lib \
 	       --with-ssl=/usr \
+	       --without-libpsl \
 	       --with-ca-path=/usr/lib/ssl/certs
 
 include ../Makefile.rules

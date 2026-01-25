@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = pango
-VER_MM = 1.57
+VER_MM = 1.90
 VERSION = $(VER_MM).0
 EXTENSION = .tar.xz
 #PRE_CONFIGURE = ENABLE_GTK_DOC_FALSE=''
@@ -18,11 +18,11 @@ PREPARE = yes
 $(DIR)/: download
 	@echo; echo "prepare"
 	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
-ifeq ($(mARCH), arm64)
+#ifeq ($(mARCH), arm64)
 	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
 		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
 	done
-endif
+#endif
 
 CONFIG_OPTS += --prefix=/usr --without-x
 INSTALL = yes
