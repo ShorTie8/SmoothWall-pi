@@ -31,16 +31,12 @@ $(DIR)/: download
 	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
 ifdef ReConfigure
 	@echo; echo "ReConfigure"
-#	echo "libtoolize --install --copy --force --automake"
-#	cd $(DIR); libtoolize --install --copy --force --automake
-#	@echo; echo "aclocal -I m4"
-#	cd $(DIR); aclocal -I m4
-	@cp -v ../glibc/glibc-2.42/scripts/config.guess $(DIR)/config.guess
-	@cp -v ../glibc/glibc-2.42/scripts/config.sub $(DIR)/config.sub
-#	cd $(DIR); autoupdate
-	pwd
-	@echo; echo "autoconf --verbose --force"
-	@echo;cd $(DIR); autoreconf --force --install --warnings=all
+	@echo "  update config.guess/config.sub"
+	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
+		cp -vf $(ROOT)/build/toolcrib/$$(basename $${i}) $${i}; done
+	@echo; echo "autoupdate"; cd $(DIR); autoupdate
+	@#echo; echo "autoconf"; cd $(DIR); autoconf
+	@echo; echo "autoreconf -ifv"; cd $(DIR); autoreconf -ifv
 endif
 endif
 
