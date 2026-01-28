@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = vim
-MAJ = 7
-MIN = 3
-VERSION = $(MAJ).$(MIN)
+MAJ = 9
+MIN = 1
+VERSION = $(MAJ).$(MIN).1629
 
-BASE_URL = https://ftp.vim.org/pub/vim/unix
+BASE_URL = https://github.com/vim/vim/archive/v9.1.1629
 EXTENSION = .tar.bz2
 
 DIR = $(PACKAGE)$(MAJ)$(MIN)

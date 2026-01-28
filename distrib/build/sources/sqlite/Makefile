@@ -7,12 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = sqlite-autoconf
-VERSION = 3080403
+VERSION = 3510200
 
-BASE_URL = http://www.sqlite.org/2014
+BASE_URL = http://www.sqlite.org/2026
 
-CONFIG_OPTS += --enable-threadsafe \
-               --enable-cross-thread-connections \
+CONFIG_OPTS = --enable-threadsafe \
                LIBS=-ltinfo LDFLAGS=-ltinfo
 
 include ../Makefile.rules

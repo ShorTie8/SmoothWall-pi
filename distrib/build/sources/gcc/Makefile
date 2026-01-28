@@ -23,10 +23,6 @@ download:
 	#$(DL_CMD) $(BASE_ISL)/$(TAR_ISL)
 	$(DL_CMD) $(BASE_URL)/$(TARBALL)$(EXTENSION) $(MD5)
 
-# Tool Chain Build Stage 1 gcc
-#
-ifeq ($(BUILD_PHASE), Stage_1)
-
 PREPARE = yes
 $(DIR)/: download
 	@echo; echo; echo "PrePare"; echo
@@ -35,6 +31,10 @@ $(DIR)/: download
 	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
 	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
 	#cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_ISL); mv isl-$(ISL_VER) isl
+
+# Tool Chain Build Stage 1 gcc
+#
+ifeq ($(BUILD_PHASE), Stage_1)
 
 PATCH = yes
 patch: $(DIR)/
@@ -92,7 +92,6 @@ configure: patch
 	mkdir -v $(COMPILE_DIR)
 	(cd $(COMPILE_DIR); CXXFLAGS="$(CFLAGS)" CFLAGS="$(CFLAGS)" $(PRE_CONFIGURE) ../$(DIR)/configure $(CONFIG_OPTS))
 
-
 COMPILE = yes
 compile: configure
 	@echo; echo; echo "Compile"; echo
@@ -107,19 +106,9 @@ install: compile
 	  `dirname $$($$SWE_TGT-gcc -print-libgcc-file-name)`/include-fixed/limits.h
 endif # Stage 1
 
-
 # Tool Chain Build Stage 2 gcc
 #
 ifeq ($(BUILD_PHASE), Stage_2)
-
-PREPARE = yes
-$(DIR)/: download
-	@echo; echo; echo "PrePare"; echo
-	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
-	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_GMP); mv gmp-$(GMP_VER) gmp
-	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPFR); mv mpfr-$(MPFR_VER) mpfr
-	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_MPC); mv mpc-$(MPC_VER) mpc
-	#cd $(DIR); tar -xf $(DOWNLOADS_DIR)/$(TAR_ISL); mv isl-$(ISL_VER) isl
 
 PATCH = yes
 patch: $(DIR)/

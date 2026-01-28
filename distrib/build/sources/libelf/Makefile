@@ -8,7 +8,7 @@
 include ../Makefile.conf
 
 PACKAGE = libelf
-VERSION = 0.192
+VERSION = 0.193
 EXTENSION = .tar.bz2
 
 TARBALL = elfutils-$(VERSION)
@@ -21,7 +21,7 @@ BASE_URL = https://gcc.gnu.org/pub/elfutils/$(VERSION)
 
 INSTALL = yes
 install: compile
-	@echo; echo; echo "install"
+	@echo; echo; echo "Install"
 	$(MAKE) -C $(DIR)/libelf DESTDIR=$(PKG_ROOT) install
 	@echo
 	mkdir -vp $(PKG_ROOT)/usr/lib/pkgconfig

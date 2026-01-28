@@ -9,8 +9,7 @@ include ../Makefile.conf
 
 PACKAGE = lz4
 VERSION = 1.10.0
-
-BASE_URL = https://github.com/lz4/lz4/archive/v$(VERSION)/lz4-$(VERSION).tar.gz
+BASE_URL = https://github.com/lz4/lz4/archive/v$(VERSION)
 
 CONFIGURE = yes
 configure: patch

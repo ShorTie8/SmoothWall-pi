@@ -20,6 +20,7 @@ VERSION = 0.0
 export PERL_MODS = \
 	    inc-latest \
 	    File-Remove \
+	    File-Which \
 	    YAML-Tiny \
 	    Module-Build \
 	    Module-Install \

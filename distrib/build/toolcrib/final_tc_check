@@ -70,7 +70,8 @@ done
 
 # GCC searching for correct header files?
 #
-grep -B3 '^ /usr/include' dummy.log >/tmp/a.a
+#grep -B3 '^ /usr/include' dummy.log >/tmp/a.a
+grep -B4 '^ /usr/include' dummy.log >/tmp/a.a
 case $mARCH in
   arm|arm64) cat >/tmp/b.b <<END
 #include <...> search starts here:
@@ -89,6 +90,7 @@ END
   $ARCH64) cat >/tmp/b.b <<END
 #include <...> search starts here:
  /usr/lib/gcc/${FINAL_TGT}/${VERSION}/include
+ /usr/local/include
  /usr/lib/gcc/${FINAL_TGT}/${VERSION}/include-fixed
  /usr/include
 END
