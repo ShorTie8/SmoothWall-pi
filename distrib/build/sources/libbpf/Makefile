@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = libbpf
-VERSION = 1.5.0
+VERSION = 1.6.2
 TARBALL = v$(VERSION)
 DIR = $(PACKAGE)-$(VERSION)/src
 BASE_URL = https://github.com/libbpf/libbpf/archive/refs/tags

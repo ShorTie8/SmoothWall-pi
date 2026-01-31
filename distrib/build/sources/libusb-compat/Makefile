@@ -15,7 +15,7 @@ DLPACKAGE = libusb
 TARBALL = $(PACKAGE)-$(VERSION)
 EXTENSION = .tar.gz
 
-BASE_URL = http://downloads.sourceforge.net/project/libusb/$(DLPACKAGE)-$(VER_MM)%20%28LEGACY%29/$(VERSION)
+BASE_URL = https://github.com/libusb/libusb-compat-0.1/archive/refs/tags/v0.1.8.tar.gz
 
 # They moved the legacy lib again. Adjust accordingly.
 DOWNLOAD = yes

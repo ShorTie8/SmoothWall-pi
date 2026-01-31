@@ -8,11 +8,6 @@ include ../Makefile.conf
 
 PACKAGE = texinfo
 VERSION = 7.2
-
 BASE_URL = https://ftp.gnu.org/gnu/texinfo
-
-ifeq ($(BUILD_PHASE), Final)
-PRE_CONFIGURE = LIBS=-ltinfo
-endif
 
 include ../Makefile.rules

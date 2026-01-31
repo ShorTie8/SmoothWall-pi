@@ -119,9 +119,10 @@ fi
                 "crumbs/$BUILD_PHASE.verification.out"
       build gcc libgcc
       build pkg-config
-      build autoconf	##	need these 4 for coreutils
+      build autoconf
       build autoconf-archive
       build automake
+      build coreutils
       build libtool
       build gdbm
       build mktemp
@@ -139,7 +140,7 @@ fi
       build flex
       build dejagnu
       build gettext
- #     build libxcrypt	##	 autoreconf: command not found
+      build libxcrypt
       build inetutils
       build check
 #  exit 22
@@ -288,6 +289,7 @@ fi
     else
       echo
       echo -e "  Final group 4 packages (system)"
+      build libxcrypt
       build psmisc	##	Cannot find tinfo, ncurses or termcap libraries
       build shadow	##	checking for crypt in -lcrypt... no
       build sysklogd

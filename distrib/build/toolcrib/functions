@@ -106,6 +106,7 @@ function build_tc_stage_1() {
   buildenv gcc 1
   buildenv kernel-headers 1
   buildenv glibc 1
+  buildenv libxcrypt 1
   buildenv libstdc++ 1
   startTIME=`date +%s`-beginTIME
   displayTIME=`perl -e "printf('%6d', $startTIME);"`
@@ -171,7 +172,6 @@ function build_tc_stage_3() {
   buildenv sed 1
   buildenv tar 1
   buildenv texinfo 1
-  buildenv libxcrypt 1
   buildenv util-linux 1
   buildenv wget 1
   buildenv git 1

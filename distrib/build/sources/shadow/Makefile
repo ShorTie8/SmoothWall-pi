@@ -11,7 +11,7 @@ VERSION = 4.18.0
 EXTENSION = .tar.xz
 BASE_URL = https://github.com/shadow-maint/shadow/releases/download/$(VERSION)
 
-CONFIG_OPTS= --with-selinux=no
+CONFIG_OPTS= --without-libbsd --with-selinux=no
 
 INSTALL = yes
 install: compile
