@@ -12,7 +12,9 @@ DIR = libxcrypt-$(VERSION)
 TARBALL = v$(VERSION)
 BASE_URL = https://github.com/besser82/libxcrypt/archive/refs/tags
 
-PREPARE = yes
+##	ReConfigure = yes	##	autoupdate: command not found
+
+PREPARE = yes	##	autoreconf: command not found
 $(DIR)/: download
 	@echo; echo "PrePare"
 	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)

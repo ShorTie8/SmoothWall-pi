@@ -13,11 +13,11 @@ BASE_URL = https://github.com/mesonbuild/meson/releases/download/$(VERSION)
 COMPILE = yes
 compile: $(DIR)/
 	@echo; echo; echo "Compile"; echo
-	cd $(DIR); pip3 wheel -w dist --no-cache-dir --no-build-isolation --no-deps $$PWD
+	cd $(DIR); python3 setup.py build
 	
 INSTALL = yes
 install: compile
 	@echo; echo; echo "Install"; echo
-	cd $(DIR); pip3 install --no-index --find-links dist meson
+	cd $(DIR); python3 setup.py install --root=$(PKG_ROOT)
 
 include ../Makefile.rules

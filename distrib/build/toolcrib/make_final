@@ -107,15 +107,11 @@ fi
                 "final toolchain adjustment" \
                 "bash -x toolcrib/final_tc_adjustment" \
                 "crumbs/$BUILD_PHASE.adjustment.out"
-      build autoconf
-      build autoconf-archive
-      build automake
       build zlib
       build binutils
       build gmp
       build mpfr
       build mpc
-      build zlib
       build gcc
       other_cmd "crumbs/$BUILD_PHASE.toolchain.verified" \
                 "final toolchain verification" \
@@ -123,10 +119,10 @@ fi
                 "crumbs/$BUILD_PHASE.verification.out"
       build gcc libgcc
       build pkg-config
-      build file
-      build readline
-      build m4
-      build bc
+      build autoconf	##	need these 4 for coreutils
+      build autoconf-archive
+      build automake
+      build libtool
       build gdbm
       build mktemp
       build device-ids
@@ -143,7 +139,7 @@ fi
       build flex
       build dejagnu
       build gettext
-      build libtool
+ #     build libxcrypt	##	 autoreconf: command not found
       build inetutils
       build check
 #  exit 22
@@ -176,7 +172,7 @@ fi
       build findutils
       build libcap
       build pcre
-      build pcre2
+      build pcre2	##	needed for glib ??
       build libpcap
       build expat
 
@@ -194,35 +190,34 @@ fi
       build fontconfig
       build libpng
       build libdnet
-      build pixman
       build libffi
       build freefont
       build openssl
       build rsync
+      build libuv
+      build libarchive
+      build curl
+      build cmake
       build meson
       build libidn2
       build libunistring
       build ninja
       build gd
-      build perl
-      build perl-mods
-      build libuv
-      build libarchive
-      build cmake
+      build pixman
       build python3
       build setuptools
       build glib
       build cairo
       build libcap-ng
+      build git
+      build fribidi
+      build harfbuzz
       build pango
-      build curl
-      build cacert-bundle
-      
       build sqlite
       build unbound
       build libevent
       build nspr
-      build nss
+      build nss		##	needs sqlite
       build curl
       build neon
       build libelf
@@ -256,13 +251,17 @@ fi
       echo -e "  Final group 3 packages (essential)"
       build sysfsutils
       build iputils
-      build perl
       build texinfo
       build readline
+      build autoconf
+      build autoconf-archive
+      build automake
       build bash
       build lzip
       build ed
       build bc
+      build file
+      build libtool
       build xz
       build bzip2
       build diffutils
@@ -272,13 +271,13 @@ fi
       build make
       build module-init-tools
       build patch
-      build procinfo-ng
+      build procinfo-ng	##	cannot find -ltinfo: No such file or directory
       build procps-ng
       build which
       build GeoIP
-      JOBS=$JOBS_UP
+ #   JOBS=$JOBS_UP
       build acpica
-      JOBS=$JOBS_MP
+ #   JOBS=$JOBS_MP
       build nasm
       build net-tools
       touch crumbs/Final.grp3.compiled
@@ -289,10 +288,10 @@ fi
     else
       echo
       echo -e "  Final group 4 packages (system)"
-      build psmisc
-      build shadow
+      build psmisc	##	Cannot find tinfo, ncurses or termcap libraries
+      build shadow	##	checking for crypt in -lcrypt... no
       build sysklogd
-      build sysvinit
+      build sysvinit	##	fatal error: crypt.h: No such file or directory
       build tar
       build joe
       build db
@@ -309,6 +308,9 @@ fi
       build ipbatch
      build klibc
 #      build linux-atm
+      build cmake
+      build git
+      build pango
       touch crumbs/Final.grp4.compiled
     fi
 
@@ -419,7 +421,6 @@ fi
       build p3scan
 
       build tcl
-      build git
       build screen
       build gdb
       build lynx

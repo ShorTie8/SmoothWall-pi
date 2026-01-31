@@ -7,10 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = procps-ng
-VERSION = 4.0.5
-EXTENSION = .tar.xz
+VERSION = v4.0.6
+COMPILE_DIR = $(DIR)-*
+BASE_URL = https://gitlab.com/procps-ng/procps/-/archive/$(VERSION)
 
-BASE_URL = http://sourceforge.net/projects/procps-ng/files/Production/
+CONFIG_OPTS += --prefix=/ --includedir=/usr/include --datarootdir=/usr/share
 
 ifeq ($(BUILD_PHASE), Final)
 PKG_DIR =
@@ -21,15 +22,14 @@ CONFIG_OPTS += --prefix= --exec-prefix= \
 	       --includedir=/usr/include
 endif
 
-CONFIGURE = yes
-INSTALL = yes
 
-CONFIG_OPTS += --prefix=/ --includedir=/usr/include --datarootdir=/usr/share
+CONFIGURE = yes
 configure: $(DIR)/
 	@echo; echo; echo "configure"; echo
-	cd $(DIR); LIBS=-ltinfo ./configure $(CONFIG_OPTS)
+	cd $(COMPILE_DIR); LIBS=-ltinfo ./configure $(CONFIG_OPTS)
 	#cd $(DIR); sed -i -e 's/-lncurses/& -ltinfo/' Makefile
 
+INSTALL = yes
 install: compile
 	@echo; echo; echo "install"; echo
 	mkdir -p $(PKG_ROOT)/etc

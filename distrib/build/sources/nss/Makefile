@@ -8,13 +8,13 @@ include ../Makefile.conf
 
 PACKAGE = nss
 VER_MAJ = 3
-VER_MIN = 41
+VER_MIN = 115
 VERSION = $(VER_MAJ).$(VER_MIN)
 DIR = $(PACKAGE)-$(VERSION)/nss
 
 BASE_URL = https://ftp.mozilla.org/pub/security/$(PACKAGE)/releases/NSS_$(VER_MAJ)_$(VER_MIN)_RTM/src
 
-PATCH_FILE1 = nss-$(VERSION)-standalone-1.patch
+PATCH_FILE1 = nss-standalone-1.patch
 PATCH_URL1 = http://linuxfromscratch.org/patches/downloads/nss/$(PATCH_FILE1)
 #PATCH_URL1 = http://www.linuxfromscratch.org/patches/blfs/svn/nss-$(VERSION)-standalone-1.patch
 
@@ -36,8 +36,8 @@ MAKE_DEFS = BUILD_OPT=1 \
 	    NSS_USE_SYSTEM_SQLITE=1 \
 	    USE_SYSTEM_ZLIB=1 \
 	    ZLIB_LIBS=-lz
-ifeq ($(BITS_64), yes)
-  MAKE_DEFS += USE_64=1
+ifeq ($(mARCH),$(filter $(mARCH),arm64 x86_64))
+MAKE_DEFS += USE_64=1
 endif
 
 compile: configure

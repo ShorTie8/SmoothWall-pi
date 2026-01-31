@@ -6,20 +6,15 @@
 
 include ../Makefile.conf
 
-PACKAGE = cairo
-VERSION = 1.18.4
+PACKAGE = fribidi
+VERSION = 1.0.16
 EXTENSION = .tar.xz
-BASE_URL = https://www.cairographics.org/releases
-##	https://download.gnome.org/sources/glib/2.74/glib-2.74.0.tar.xz
-
-CONFIG_OPTS = --enable-xml
+BASE_URL = https://github.com/fribidi/fribidi/releases/download/v$(VERSION)
 
 CONFIGURE = yes
 configure: patch
-	@echo; echo; echo "Configure"; echo
 	mkdir -vp $(PKG_ROOT)
-	echo; echo; meson -h install; echo; echo
-	cd $(DIR); meson -Dprefix=$(PKG_ROOT)/$(PKG_DIR) builddir
+	cd $(DIR); meson -Dprefix=$(PKG_ROOT)/$(PKG_DIR) --buildtype=release builddir
 
 COMPILE = yes
 compile: configure

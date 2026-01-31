@@ -21,8 +21,8 @@ compile: $(DIR)/
 INSTALL = yes
 install: compile
 	@echo; echo; echo "Install"; echo
-	cd $(DIR); install -vm755 ninja /usr/bin/
-	cd $(DIR); install -vDm644 misc/bash-completion /usr/share/bash-completion/completions/ninja
-	cd $(DIR); install -vDm644 misc/zsh-completion  /usr/share/zsh/site-functions/_ninja
+	cd $(DIR); install -vDm755 ninja $(PKG_ROOT)/usr/bin/ninja
+	cd $(DIR); install -vDm644 misc/bash-completion $(PKG_ROOT)/usr/share/bash-completion/completions/ninja
+	cd $(DIR); install -vDm644 misc/zsh-completion  $(PKG_ROOT)/usr/share/zsh/site-functions/_ninja
 
 include ../Makefile.rules
