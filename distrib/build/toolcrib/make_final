@@ -307,6 +307,8 @@ fi
       build iptables
       build ipset
       build xtables-addons
+      build libtirpc
+      build libnsl
       build ipbatch
      build klibc
 #      build linux-atm
