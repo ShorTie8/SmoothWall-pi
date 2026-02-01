@@ -170,13 +170,19 @@ patch: $(DIR)/
 	@echo; echo "Patch"; echo
 	rm -vf /usr/lib/gcc
 
-CONFIG_OPTS = --prefix=$(PKG_DIR) \
+CONFIG_OPTS = \
+		--prefix=$(PKG_DIR) \
 	    --host=$(FINAL_TGT) \
 	    --build=$(FINAL_TGT) \
 	    --target=$(FINAL_TGT) \
+	    --libexecdir=/usr/lib \
+	    --enable-shared \
+		--enable-clocale=gnu \
+		--enable-__cxa_atexit \
+		--enable-threads=posix \
 		--enable-languages=c,c++ \
 		--disable-multilib \
-		--disable-bootstrap      \
+		--disable-bootstrap \
 		--with-system-zlib
  
 ifeq ($(mARCH), arm64)

@@ -14,7 +14,7 @@ BASE_URL = https://github.com/fribidi/fribidi/releases/download/v$(VERSION)
 CONFIGURE = yes
 configure: patch
 	mkdir -vp $(PKG_ROOT)
-	cd $(DIR); meson -Dprefix=$(PKG_ROOT)/$(PKG_DIR) --buildtype=release builddir
+	cd $(DIR); meson setup builddir -Dbuildtype=release -Db_lto=true -Dprefix=$(PKG_ROOT)/$(PKG_DIR)
 
 COMPILE = yes
 compile: configure

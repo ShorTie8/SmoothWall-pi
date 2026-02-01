@@ -15,7 +15,7 @@ CONFIGURE = yes
 configure: patch
 	@echo; echo; echo "Configure"; echo
 	mkdir -vp $(PKG_ROOT)
-	cd $(DIR); meson -Dprefix=$(PKG_ROOT)/$(PKG_DIR) builddir
+	cd $(DIR); meson setup builddir -Dbuildtype=release -Db_lto=true -Dprefix=$(PKG_ROOT)/$(PKG_DIR)
 
 COMPILE = yes
 compile: configure

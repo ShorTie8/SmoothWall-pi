@@ -14,17 +14,19 @@ CONFIGURE = yes
 configure: patch
 	@echo; echo; echo "Configure"; echo
 	mkdir -vp $(PKG_ROOT)
-	cd $(DIR); meson --prefix=$(PKG_DIR) $(PKG_ROOT)
+	echo "meson setup"; echo
+	mkdir -vp $(PKG_ROOT)
+	cd $(DIR); meson setup builddir -Dbuildtype=release -Db_lto=true -Dprefix=$(PKG_ROOT)/$(PKG_DIR)
 
 COMPILE = yes
 compile: configure
 	@echo; echo; echo "Compile"; echo
-	cd $(DIR); ninja -C $(PKG_ROOT)
+	cd $(DIR); ninja -C builddir
 	
 INSTALL = yes
 install: compile
 	@echo; echo; echo "Install"; echo
-	cd $(DIR); ninja -C $(PKG_ROOT) install
+	cd $(DIR); ninja -C builddir install
 
 include ../Makefile.rules
 

@@ -60,7 +60,6 @@ patch: $(DIR)/
 	mkdir -vp $(COMPILE_DIR)
 	@echo; echo; echo "Patch"; echo
 	cd $(DIR); ln -sfv $(TOOLS_DIR)/lib/gcc /usr/lib
-	@echo; echo; echo "GCC_INCDIR"
 
 	@echo; echo "links"
 ifeq ($(mARCH), x86_64)
@@ -75,14 +74,35 @@ endif
 
 CONFIG_OPTS = \
 	      --prefix=$(PKG_DIR) \
-	      --host=$(FINAL_TGT) \
 	      --build=$(FINAL_TGT) \
-	      --target=$(FINAL_TGT) \
 	      --enable-kernel=3.2 \
 	      --enable-obsolete-rpc \
+	      --libexecdir=/usr/lib/glibc \
 	      --enable-stack-protector=strong \
+	--disable-profile \
+	--enable-kernel=5.4.0 \
+	--enable-add-ons \
+	--without-selinux \
+	--enable-experimental-malloc \
+	--enable-bind-now \
+	--enable-fortify-source \
+	--enable-stack-protector=strong \
+	--disable-crypt \
+	--disable-build-nscd \
+	--disable-nscd \
 	      libc_cv_slibdir=/lib
 
+ifeq ($(mARCH), x86_64)
+CONFIG_OPTS += \
+		--enable-cet \
+		--enable-sframe
+endif
+
+ifeq ($(mARCH), arm64)
+CONFIG_OPTS += \
+		--enable-memory-tagging \
+		--enable-sframe
+endif
 CONFIGURE = yes
 configure: patch
 	@echo; echo "Configure"; echo

@@ -93,8 +93,7 @@ CONFIG_OPTS = \
 		--enable-ld=default \
 		--enable-plugins \
 		--enable-shared \
-		--disable-werror \
-		--with-system-zlib
+		--disable-werror
 
 PATCH = yes
 patch: $(DIR)/

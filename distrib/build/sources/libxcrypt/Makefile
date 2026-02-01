@@ -18,9 +18,11 @@ PREPARE = yes	##	autoreconf: command not found
 $(DIR)/: download
 	@echo; echo "PrePare"
 	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
-	@cp -v ../glibc/glibc-2.42/scripts/config.guess $(DIR)/config.guess
-	@cp -v ../glibc/glibc-2.42/scripts/config.sub $(DIR)/config.sub
-	cd $(DIR); ./autogen.sh
+#	@cp -v ../glibc/glibc-2.42/scripts/config.guess $(DIR)/config.guess
+#	@cp -v ../glibc/glibc-2.42/scripts/config.sub $(DIR)/config.sub
+#	cd $(DIR); ./autogen.sh
+	cd $(DIR); libtoolize --copy --force
+	cd $(DIR); autoreconf --install
 
 CONFIG_OPTS += --disable-static \
 			--enable-hashes=strong,glibc \

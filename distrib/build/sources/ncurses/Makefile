@@ -15,6 +15,17 @@ COMPILE_DIR = $(DIR)-compile
 #PATCH_FILE1 = ncurses-5.9-gcc5_buildfixes-1.patch
 #PATCH_URL1 = http://www.linuxfromscratch.org/patches/downloads/ncurses/$(PATCH_FILE1)
 
+CONFIGURE = yes
+configure: patch
+	@echo; echo; echo "Configure"; echo
+	mkdir $(COMPILE_DIR)
+	cd $(COMPILE_DIR); ../$(DIR)/configure
+	@echo; echo; echo "building include"; echo
+	cd $(COMPILE_DIR); make -C include
+	@echo; echo; echo "building progs tic"; echo
+	cd $(COMPILE_DIR); make -C progs tic
+	(cd $(COMPILE_DIR); CXXFLAGS="$(CFLAGS)" CFLAGS="$(CFLAGS)" $(PRE_CONFIGURE) ../$(DIR)/configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
+
 ifeq ($(BUILD_PHASE), Stage_3)
 #CONFIG_OPTS += --with-shared \
 #    --without-debug --without-ada --enable-overwrite
@@ -29,17 +40,6 @@ CONFIG_OPTS = --prefix=$(TOOLS_DIR) \
             --without-debug              \
             --without-ada                \
             --disable-stripping
-
-CONFIGURE = yes
-configure: patch
-	@echo; echo; echo "configure"; echo
-	mkdir $(COMPILE_DIR)
-	cd $(COMPILE_DIR); ../$(DIR)/configure
-	@echo; echo; echo "include"; echo
-	cd $(COMPILE_DIR); make -C include
-	@echo; echo; echo "progs tic"; echo
-	cd $(COMPILE_DIR); make -C progs tic
-	(cd $(COMPILE_DIR); CXXFLAGS="$(CFLAGS)" CFLAGS="$(CFLAGS)" $(PRE_CONFIGURE) ../$(DIR)/configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
 
 else
 CONFIG_OPTS += \
