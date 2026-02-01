@@ -10,16 +10,13 @@ PACKAGE = cairo
 VERSION = 1.18.4
 EXTENSION = .tar.xz
 BASE_URL = https://www.cairographics.org/releases
-##	https://download.gnome.org/sources/glib/2.74/glib-2.74.0.tar.xz
-
-CONFIG_OPTS = --enable-xml
 
 CONFIGURE = yes
 configure: patch
 	@echo; echo; echo "Configure"; echo
 	mkdir -vp $(PKG_ROOT)
-	echo; echo; meson -h install; echo; echo
-	cd $(DIR); meson -Dprefix=$(PKG_ROOT)/$(PKG_DIR) builddir
+	echo "meson setup"; echo
+	cd $(DIR); meson setup builddir -Dbuildtype=release -Db_lto=true -Dprefix=$(PKG_ROOT)/$(PKG_DIR)
 
 COMPILE = yes
 compile: configure
