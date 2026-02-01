@@ -7,29 +7,15 @@
 include ../Makefile.conf
 
 PACKAGE = procps-ng
-VERSION = 4.0.4
-TARBALL = v$(VERSION)
-BASE_URL = https://github.com/sysfce2/procps-ng/archive/refs/tags
-ReConfigure = yes
-CONFIG_OPTS += --prefix=/ --includedir=/usr/include --datarootdir=/usr/share
+VERSION = 4.0.5
+EXTENSION = .tar.xz
+BASE_URL = https://sourceforge.net/projects/procps-ng/files/Production
 
-ifeq ($(BUILD_PHASE), Final)
-PKG_DIR =
-
-CONFIG_OPTS += --prefix= --exec-prefix= \
-	       --datarootdir=/usr/share \
-	       --libexecdir=/usr/libexec \
-	       --includedir=/usr/include
-endif
-
-
-CONFIGURE = yes
-configure: $(DIR)/
-	@echo; echo; echo "autogen"; echo
-	cd $(DIR); ./autogen.sh
-	@echo; echo; echo "Configure"; echo
-	cd $(DIR); LIBS=-ltinfo ./configure $(CONFIG_OPTS)
-	#cd $(DIR); sed -i -e 's/-lncurses/& -ltinfo/' Makefile
+CONFIG_OPTS += \
+	       --docdir=/usr/share/doc/procps-ng-4.0.5 \
+	       --disable-static \
+	       --disable-kill \
+	       --enable-watch8bit
 
 INSTALL = yes
 install: compile
