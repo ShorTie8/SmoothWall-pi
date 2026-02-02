@@ -7,11 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = openssh
-VERSION = 9.3p1
+VERSION = 10.2p1
 
 BASE_URL = http://ftp.openbsd.org/pub/OpenBSD/OpenSSH/portable/
 
-PATCH_FILE1 = log.c.patch
+#PATCH_FILE1 = log.c.patch
 
 CONFIG_OPTS += --with-md5-passwords --with-pid-dir=/var/run
 

@@ -8,9 +8,9 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = squid
-VERSION = 7.3
-TARBALL = SQUID_7_3
-DIR = squid-SQUID_7_3
+VERSION = 7.4
+TARBALL = SQUID_7_4
+DIR = squid-SQUID_7_4
 BASE_URL = https://github.com/squid-cache/squid/archive/refs/tags
 
 CONFIG_OPTS += --disable-arch-native \

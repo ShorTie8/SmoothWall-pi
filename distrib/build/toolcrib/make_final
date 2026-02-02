@@ -385,12 +385,12 @@ fi
     else
       echo
       echo -e "  Final group 6 packages (last utils)"
-      build vim
+ #     build vim
       build nano
       build mtools
-    if [ "$mTUPLE" == "$mARCH" ]; then
-      build cdrtools
-    fi
+ #   if [ "$mTUPLE" == "$mARCH" ]; then
+ #     build cdrtools
+ #   fi
       build busybox
 
       build dhcp

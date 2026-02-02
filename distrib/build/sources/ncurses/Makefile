@@ -71,7 +71,7 @@ install: compile
 	echo; echo
 	##	For old applications that look for -lcurses at build time are still buildable
 	rm -vf $(PKG_ROOT)/usr/lib/libncurses.so	##	 No such file or directory
-	echo "INPUT(libncurses.so.6 -ltinfo)" > $(PKG_ROOT)/usr/lib/libncurses.so
+	echo "INPUT(libncursesw.so.6 -ltinfo)" > $(PKG_ROOT)/usr/lib/libncurses.so
 	ln -sv libncurses.so $(PKG_ROOT)/usr/lib/libcurses.so
 
 endif

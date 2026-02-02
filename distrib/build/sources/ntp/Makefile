@@ -7,14 +7,19 @@
 include ../Makefile.conf
 
 PACKAGE = ntp
-VERSION = 4.2.8p13
-BASE_URL = http://www.eecis.udel.edu/~ntp/ntp_spool/ntp4/ntp-4.2
-
-PATCH_FILE1 = mod_nano.patch
+VERSION = 4_2_8P18
+TARBALL = NTP_$(VERSION)
+DIR =  ntp-$(TARBALL)
+BASE_URL = https://github.com/ntp-project/ntp/archive/refs/tags
 
 CONFIG_OPTS += --prefix=${PKG_DIR} --sysconfdir=/etc \
 		--with-binsubdir=sbin --with-lineeditlibs=readline LIBS=-ltinfo
 
+CONFIGURE = yes
+configure: patch
+	@echo; echo; echo "Configure"; echo
+	(cd $(DIR); ./bootstrap)
+	(cd $(DIR); ./configure --prefix=$(PKG_DIR) $(CONFIG_OPTS))
 
 INSTALL = yes
 install: compile

@@ -5,7 +5,7 @@ include ../Makefile.conf
 PACKAGE = busybox
 #VERSION = 1.29.1
 #VERSION = 1.29.3
-VERSION = 1.30.0
+VERSION = 1.37.0
 
 BASE_URL = http://busybox.net/downloads/
 EXTENSION = .tar.bz2

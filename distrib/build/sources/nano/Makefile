@@ -13,7 +13,10 @@ VERSION = $(VER_MAG).$(VER_MIN)
 EXTENSION = .tar.xz
 BASE_URL = https://www.nano-editor.org/dist/v$(VER_MAG)
 
+#ReConfigure = yes
 PRE_CONFIGURE = LIBS=-ltinfo
+
+#CFLAGS += -std=gnu17
 
 INSTALL = yes
 install: compile
