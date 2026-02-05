@@ -107,11 +107,11 @@ fi
                 "final toolchain adjustment" \
                 "bash -x toolcrib/final_tc_adjustment" \
                 "crumbs/$BUILD_PHASE.adjustment.out"
-      build zlib
       build binutils
       build gmp
       build mpfr
       build mpc
+      build zlib
       build gcc
       other_cmd "crumbs/$BUILD_PHASE.toolchain.verified" \
                 "final toolchain verification" \
@@ -128,8 +128,10 @@ fi
       build mktemp
       build device-ids
       build iana-etc
+      build findutils
       build gawk
       build ncurses
+      build nano
       build m4
       build bison
       build less
@@ -169,8 +171,6 @@ fi
       build strace
       build attr
       build acl
-      build coreutils
-      build findutils
       build libcap
       build pcre
       build pcre2	##	needed for glib ??
@@ -252,11 +252,9 @@ fi
       echo -e "  Final group 3 packages (essential)"
       build sysfsutils
       build iputils
+      build perl
       build texinfo
       build readline
-      build autoconf
-      build autoconf-archive
-      build automake
       build bash
       build lzip
       build ed
