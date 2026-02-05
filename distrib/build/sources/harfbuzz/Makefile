@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = harfbuzz
-VERSION = 11.4.1
+VERSION = 12.3.2
 EXTENSION = .tar.xz
 BASE_URL = https://github.com/harfbuzz/harfbuzz/releases/download/$(VERSION)
 

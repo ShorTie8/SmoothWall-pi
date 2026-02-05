@@ -7,7 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = pango
-VER_MM = 1.90
+VER_MM = 1.57
 VERSION = $(VER_MM).0
 EXTENSION = .tar.xz
 #PRE_CONFIGURE = ENABLE_GTK_DOC_FALSE=''
