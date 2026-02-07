@@ -16,7 +16,7 @@ BASE_URL = https://pdw.ex-parrot.com/iftop/download/iftop-0.17.tar.gz
 CFLAGS += -std=gnu17
 PRE_CONFIGURE = LIBS=-ltinfo
 
-#ifeq ($(mARCH), arm64)
+#ifeq ($(mARCH), aarch64)
 ReConfigure = yes
 #endif
 

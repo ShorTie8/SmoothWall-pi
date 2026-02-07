@@ -44,7 +44,7 @@ function set_build_environment() {
   case $BUILD_PHASE in
     Stage_1)
       # Is pure host compiler at this point
-      LDLINUX="      ProgInterp: (host system)"
+      LDLINUX="        ProgInterp: (host system)"
       ;;
     Stage_2)
       # Look at Stage 1 result
@@ -85,7 +85,7 @@ function set_build_environment() {
       #
       echo "    Environment:"
       echo "      Build Phase: $BUILD_PHASE"
-      echo "        mARCH=$mARCH mTUPLE=$mTUPLE"
+      echo "        mARCH=$mARCH mTUPLE=$mTUPLE BOARD=$BOARD"
       echo "        SWE_ROOT=$SWE_ROOT"
       echo "          PKG_ROOT=$PKG_ROOT; PKG_DIR=$PKG_DIR; "
       echo "          ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "
@@ -119,7 +119,7 @@ function set_build_environment() {
       #
       echo "    Environment:"
       echo "      Build Phase: $BUILD_PHASE"
-      echo "        mARCH=$mARCH mTUPLE=$mTUPLE"
+      echo "        mARCH=$mARCH mTUPLE=$mTUPLE BOARD=$BOARD"
       echo "        SWE_ROOT=$SWE_ROOT"
       echo "      (PKG_ROOT not yet set); PKG_DIR=$PKG_DIR; "
       echo "      ROOT=$ROOT; TOOLS_DIR=$TOOLS_DIR; "

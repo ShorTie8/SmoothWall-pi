@@ -64,7 +64,7 @@ patch: $(DIR)/
 	@echo; echo "links"
 ifeq ($(mARCH), x86_64)
 	ln -sfv ld-linux-x86-64.so.2 /lib/ld-lsb-x86-64.so.3
-else ifeq ($(mARCH), arm64)
+else ifeq ($(mARCH), aarch64)
 	ln -sfv ld-linux-aarch64.so.1 /lib/ld-lsb-aarch64.so.2
 else
 	ln -sfv ld-linux.so.2 /lib/ld-lsb.so.3
@@ -98,7 +98,7 @@ CONFIG_OPTS += \
 		--enable-sframe
 endif
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 CONFIG_OPTS += \
 		--enable-memory-tagging \
 		--enable-sframe

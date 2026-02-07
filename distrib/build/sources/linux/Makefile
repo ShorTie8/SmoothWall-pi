@@ -8,7 +8,7 @@ include ../Makefile
 include ../Makefile.conf
 include ../Makefile.versions
 
-ifeq ($(mARCH),$(filter $(mARCH),arm arm64))
+ifeq ($(mARCH),$(filter $(mARCH),aarch64 arm64))
 include ../Makefile.kernel.rpi
 else
 include ../Makefile.kernel

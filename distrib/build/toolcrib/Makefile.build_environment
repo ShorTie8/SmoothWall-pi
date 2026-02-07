@@ -8,7 +8,7 @@ prep_env:
 	@( \
 	  echo -e "set +h"; \
 	  echo -e "export SHELL=\"BASH\"\nexport mARCH=\"$(mARCH)\""; \
-	  echo -e "export SWE_ROOT=\"$(SWE_ROOT)\""; \
+	  echo -e "export SWE_ROOT=\"$(SWE_ROOT)\"\nexport BOARD=\"$(BOARD)\""; \
 	  echo -e "export SWE_TGT=\"$(SWE_TGT)\"\nexport FINAL_TGT=\"$(FINAL_TGT)\""; \
 	  echo -e "export mTUPLE=\"$(mTUPLE)\"\nexport CXXFLAGS=\"$(CFLAGS)\""; \
 	  echo -e "export CFLAGS=\"$(CFLAGS)\"\nexport SWE32_TGT=\"$(SWE32_TGT)\""; \

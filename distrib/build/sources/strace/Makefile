@@ -14,7 +14,7 @@ BASE_URL = https://github.com/strace/strace/releases/download/v$(VERSION)
 
 CFLAGS += -std=gnu17
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 # <ldv> try --enable-mpers=check if you don't need 32-bit personality support on aarch64
 CONFIG_OPTS += --enable-mpers=check
 endif

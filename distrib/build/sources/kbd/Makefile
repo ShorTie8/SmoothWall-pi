@@ -13,7 +13,7 @@ BASE_URL = https://www.kernel.org/pub/linux/utils/kbd
 
 CONFIG_OPTS += --disable-vlock
 
-#ifeq ($(mARCH), arm64)
+#ifeq ($(mARCH), aarch64)
 #ReConfigure = yes
 #endif
 

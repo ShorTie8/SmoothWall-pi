@@ -20,9 +20,9 @@ download:
 	$(DL_CMD) $(KERNEL_URL)
 
 install: download
-ifeq ($(mARCH),$(mTUPLE))
+ifeq ($(mTUPLE),$(filter $(mTUPLE),i586 x86_64))
 	tar -xf $(DOWNLOADS_DIR)/linux-$(KERNELHEADERVER).tar.xz
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64 rpi5))
+else ifeq ($(BOARD),$(filter $(BOARD),rpi5 rpi6))
 	tar -xf $(DOWNLOADS_DIR)/linux-rpi-$(KERNEL_VER).tar.gz
 	#unzip -q $(DOWNLOADS_DIR)/linux-$(KERNEL_COM).zip
 	mv linux-$(KERNEL_COM) linux-$(KERNEL_VER)
@@ -31,14 +31,10 @@ else
 	$(error FAIL)
 endif
 
-
-
-
-
 ifeq ($(BUILD_PHASE), Stage_1)
 	+cd linux-$(KERNELHEADERVER); \
 	  make mrproper; \
-	  make ARCH=$(mARCH) INSTALL_HDR_PATH=dest headers_install; \
+	  make ARCH=$(mTUPLE) INSTALL_HDR_PATH=dest headers_install; \
 	  cp -rv dest/include/* $(TOOLS_DIR)/include
 endif
 
@@ -48,7 +44,7 @@ ifeq ($(BUILD_PHASE), Final)
 	cd linux-$(KERNEL_VER); \
 	  make mrproper
 	cd linux-$(KERNEL_VER); \
-	  make ARCH=$(mARCH) INSTALL_HDR_PATH=$(PKG_ROOT)$(PKG_DIR) headers_install
+	  make ARCH=$(mTUPLE) INSTALL_HDR_PATH=$(PKG_ROOT)$(PKG_DIR) headers_install
 	find $(PKG_ROOT)$(PKG_DIR)/include \( -name .install -o -name ..install.cmd \) -delete
 endif
 

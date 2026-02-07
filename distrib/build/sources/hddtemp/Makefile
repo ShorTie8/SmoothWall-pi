@@ -24,7 +24,7 @@ PATCH_FILE4 = hddtemp-0.3_beta15-nls.patch
 
 CFLAGS += -std=gnu17
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 ReConfigure = yes
 endif
 

@@ -18,15 +18,14 @@ PATCH_FILE1 = nss-standalone-1.patch
 PATCH_URL1 = http://linuxfromscratch.org/patches/downloads/nss/$(PATCH_FILE1)
 #PATCH_URL1 = http://www.linuxfromscratch.org/patches/blfs/svn/nss-$(VERSION)-standalone-1.patch
 
-
 PATCH = yes
 patch: $(DIR)/
-	@echo; echo; echo "patch"
+	@echo; echo; echo "Patch"
 	cd $(DIR); patch -Np2 -i $(DOWNLOADS_DIR)/$(PATCH_FILE1)
 
 CONFIGURE = yes
 configure: patch
-	@echo; echo; echo "configure"
+	@echo; echo; echo "Configure"
 	true
 	#sed -i -e 's/\(OS_REL_CFLAGS.*-Di386\)/\1 -march=i586 -mtune=generic/' $(PACKAGE)-$(VERSION)/$(PACKAGE)/coreconf/Linux.mk
 
@@ -36,7 +35,8 @@ MAKE_DEFS = BUILD_OPT=1 \
 	    NSS_USE_SYSTEM_SQLITE=1 \
 	    USE_SYSTEM_ZLIB=1 \
 	    ZLIB_LIBS=-lz
-ifeq ($(mARCH),$(filter $(mARCH),arm64 x86_64))
+
+ifeq ($(mARCH),$(filter $(mARCH),aarch64 x86_64))
 MAKE_DEFS += USE_64=1
 endif
 

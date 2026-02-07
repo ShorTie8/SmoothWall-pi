@@ -22,7 +22,7 @@ PREPARE = yes
 $(DIR)/: download
 	@echo; echo "prepare"
 	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 	#cd $(PACKAGE)-$(VERSION)/dist; autoreconf -vi
 	for i in $$(find $(PACKAGE)-$(VERSION) -name config.guess -o -name config.sub); do \
 		cp -vf $${i} $${i}.orig; \
