@@ -9,7 +9,7 @@ include ../Makefile.conf
 PACKAGE = libdaq
 VERSION = 3.0.24
 TARBALL = v$(VERSION)
-BASE_URL = https://github.com/snort3/libdaq/archive/refs/tags/v3.0.24.tar.gz
+BASE_URL = https://github.com/snort3/libdaq/archive/refs/tags
 
 CONFIG_OPTS += --disable-bundled-modules --enable-nfq-module \
 	      --enable-pcap-module --enable-dump-module 

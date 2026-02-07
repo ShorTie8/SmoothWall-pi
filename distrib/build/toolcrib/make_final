@@ -341,7 +341,7 @@ fi
       build cacert-bundle
 
       # daq (and snort) version check depend on cacert-bundle
-      build daq
+      build libdaq
       build httpd
       build cron
       JOBS=$JOBS_UP
