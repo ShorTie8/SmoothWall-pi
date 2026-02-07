@@ -16,10 +16,20 @@ PKG_DIR =
 
 PRE_CONFIGURE = DOCBOOKTOMAN=/bin/true
 
+CFLAGS += -std=gnu17
+
 CONFIG_OPTS += --datarootdir=/usr/share
 
-ifeq ($(mARCH), arm64)
-ReConfigure = yes
+ifeq ($(mARCH), aarch64)
+#ReConfigure = yes
+CONFIGURE = yes
+configure: $(DIR)/
+	@echo; echo; echo "Configure"; echo
+	@(cd $(DIR); \
+		cd $(DIR); aclocal -I m4; \
+		automake --add-missing --copy; \
+		autoconf; \
+		./config --prefix=$(PKG_DIR)
 endif
 
 include ../Makefile.rules

@@ -19,7 +19,7 @@ PATCH_FILE1 = expect-5.45.4-gcc15-1.patch
 PATCH_URL1 = https://www.linuxfromscratch.org/patches/lfs/12.4/expect-5.45.4-gcc15-1.patch
 endif
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 ReConfigure = yes
 CFLAGS += -Wall -g -ansi -D_SVID_SOURCE -D_POSIX_SOURCE
 endif

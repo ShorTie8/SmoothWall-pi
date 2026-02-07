@@ -17,7 +17,7 @@ CONFIGURE = yes
 
 configure: $(DIR)/
 #	@( cd $(COMPILE_DIR); ./configure --prefix=/usr; ./config.status; )
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
 		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
 	done

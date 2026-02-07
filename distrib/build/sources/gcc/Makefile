@@ -82,7 +82,7 @@ CONFIG_OPTS = --prefix=$(TOOLS_DIR) \
 		  --enable-gnu-unique-object \
 	      --enable-languages=c,c++
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 CONFIG_OPTS += --enable-standard-branch-protection
 endif
 
@@ -150,7 +150,7 @@ CONFIG_OPTS = --prefix=$(TOOLS_DIR) \
 	    --disable-bootstrap \
 	    --disable-libgomp
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 CONFIG_OPTS += --enable-standard-branch-protection
 endif
 
@@ -185,7 +185,7 @@ CONFIG_OPTS = \
 		--disable-bootstrap \
 		--with-system-zlib
  
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 CONFIG_OPTS += --enable-standard-branch-protection
 endif
 

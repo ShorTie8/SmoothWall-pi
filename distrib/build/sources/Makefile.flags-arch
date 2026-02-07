@@ -69,10 +69,8 @@ endif
 
 # What ARCH do we seem to be?
 ifndef mARCH
-  ifeq ($(shell uname -m | grep arm | cut -d"v" -f1 | awk '{print$1}'), arm)
-    export mARCH = arm
-  else ifeq ($(shell uname -m), aarch64)
-    export mARCH = arm64
+  ifeq ($(shell uname -m), aarch64)
+    export mARCH = aarch64
   else
     export mARCH = $(shell uname -m | sed -e 's/i.86/$(ARCH32)/')
 #    export mTUPLE = $(mARCH)
@@ -102,6 +100,7 @@ ifeq ($(ARCH32), yes)
   export ARCH_OK = yes
   export BITS_32 = yes
   export mTUPLE = i586
+  export BOARD = "pentium"
   export SWE_TGT = $(mTUPLE)-tools-linux-gnu
   export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
   #export CFLAGS = $(OPT_FLAGS) -m32
@@ -115,6 +114,7 @@ else ifeq ($(mARCH),$(ARCH64))
   export ARCH_OK = yes
   export BITS_64 = yes
   export mTUPLE = $(ARCH64)
+  export BOARD = "AMD/Intel"
   export SWE_TGT = $(mTUPLE)-tools-linux-gnu
   export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
   export CFLAGS = $(OPT_FLAGS) -m64 -fPIC
@@ -129,6 +129,7 @@ else ifeq ($(mARCH),$(ARCH32))
   export ARCH_OK = yes
   export BITS_32 = yes
   export mTUPLE = $(ARCH32)
+  export BOARD = "pentium"
   export SWE_TGT = $(mTUPLE)-tc-linux-gnu
   export FINAL_TGT = $(mTUPLE)-swe-linux-gnu
   export CFLAGS = $(OPT_FLAGS) -m32 -march=$(ARCH32) -mtune=generic
@@ -138,78 +139,16 @@ else ifeq ($(mARCH),$(ARCH32))
 
 endif
 
-ifeq ($(mARCH),arm)
-  export ARCH_OK = yes
-  export ARCHset = linux64
-  export CFLAGS = -O3 -fPIC
-
-  export SWE_TGT = armv7l-tools-linux-gnueabihf
-  export FINAL_TGT = armv7l-swe-linux-gnueabihf
-
-#rpi
-  ifeq ($(shell cat /proc/cpuinfo | grep "Hardware" | cut -d " " -f2 | awk '{print$1}'),BCM2708)
-    export mTUPLE = "rpi"
-
-#rpi2
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a21041)
-    export mTUPLE = "rpi2"
-
-#rpi3
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a22082)
-    export mTUPLE = "rpi3"
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a020d3)
-    export mTUPLE = "rpi3"
-      
-#pi0w
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),9000c1)
-    export mTUPLE = "pi0w"
-
-#rpi4
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),a03111)
-    export mTUPLE = "rpi4"
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),b03111)
-    export mTUPLE = "rpi4"
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Revision" | cut -d " " -f2 | awk '{print$1}'),c03111)
-    export mTUPLE = "rpi4"
-    # export SWE_TGT = armv7-tools-linux-gnueabihf
-    # export FINAL_TGT = armv7-swe-linux-gnueabihf
-
-#Odroid xu3/4
-  else ifeq ($(shell cat /proc/cpuinfo | grep "Hardware" | cut -d " " -f2 | awk '{print$1}'),ODROID-XU3)
-    export mTUPLE = "xu4"
-
-  else
-    $(info So, So, Sorry, Unknown arm board)
-    $(error FAIL)
-  endif
-endif
-
-ifeq ($(mARCH),arm64)
-  ifeq ($(shell cat /proc/cpuinfo | grep "CPU part" | head -1 | cut -d " " -f3 | awk '{print$1}'),0xd08)
-    # For pi64
-    #export mTUPLE = "pi3-64"
-    export mTUPLE = "pi4-64"
-    export ARCH_OK = yes
-    export ARCHset = linux64
-    export CFLAGS= -march=armv8-a+crc -mtune=cortex-a72 -O3 -pipe -fPIC
-    export ARCH64 = aarch64
-    # creates lib64 symlinks
-    export BITS_64 = yes
-    export SWE_TGT = aarch64-tools-linux-gnu
-    export FINAL_TGT = aarch64-swe-linux-gnu
-  else ifeq ($(shell cat /proc/cpuinfo | grep "CPU part" | head -1 | cut -d " " -f3 | awk '{print$1}'),0xd0b)
-    export ARCH = arm64
-    export mTUPLE = "rpi5"
+ifeq ($(mARCH),aarch64)
+#  else ifeq ($(shell cat /proc/cpuinfo | grep "CPU part" | head -1 | cut -d " " -f3 | awk '{print$1}'),0xd0b)
+    export mTUPLE = "arm64"
+    export BOARD = "rpi5"
     export ARCH_OK = yes
     export BITS_64 = yes
     export ARCHset = linux64
     export SWE_TGT = aarch64-tools-linux-gnu
     export FINAL_TGT = aarch64-swe-linux-gnu
     export CFLAGS = $(OPT_FLAGS) -pipe -fPIC
-  else
-    $(info So, So, Sorry, Unknown arm64 board)
-    $(error FAIL)
-  endif
 endif
 
 

@@ -13,7 +13,7 @@ BASE_URL = https://sourceforge.net/projects/linux-atm/files/linux-atm/$(VERSION)
 
 PATCH_FILE1 = led-main.c.patch
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 ReConfigure = yes
 endif
 

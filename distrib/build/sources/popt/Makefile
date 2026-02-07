@@ -15,7 +15,7 @@ PREPARE = yes
 $(DIR)/: download
 	@echo; echo "prepare"
 	tar -xf $(DOWNLOADS_DIR)/$(TARBALL)$(EXTENSION)
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
 		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
 	done

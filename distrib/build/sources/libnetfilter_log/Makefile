@@ -14,7 +14,7 @@ DIR = $(PACKAGE)-$(VERSION)
 
 BASE_URL = https://www.netfilter.org/projects/libnetfilter_log/files
 
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 ReConfigure = yes
 endif
 

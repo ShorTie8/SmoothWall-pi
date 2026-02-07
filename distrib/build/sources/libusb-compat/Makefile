@@ -26,7 +26,7 @@ PREPARE = yes
 $(DIR)/: download
 	@tar -xf $(DOWNLOADS_DIR)/$(DLPACKAGE)-$(VERSION)$(EXTENSION)
 	@mv $(DLPACKAGE)-$(VERSION) $(PACKAGE)-$(VERSION)
-ifeq ($(mARCH), arm64)
+ifeq ($(mARCH), aarch64)
 	for i in $$(find $(DIR) -name config.guess -o -name config.sub); do \
 		cp -vf ../glibc/glibc-*/scripts/$$(basename $${i}) $${i}; \
 	done

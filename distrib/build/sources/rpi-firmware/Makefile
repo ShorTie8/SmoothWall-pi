@@ -11,11 +11,7 @@ PACKAGE = rpi-firmware
 VERSION = 20200704
 GIT_COMMIT = 9a3a10bf1019ebb2d59053564dc6b90068bad27d
 
-ifeq ($(mARCH), arm)
-FILES = LICENCE.broadcom bootcode.bin fixup.dat start.elf
-else ifeq ($(mARCH), arm64)
 FILES = LICENCE.broadcom  fixup4.dat start4.elf
-endif
 
 DOWNLOAD = yes
 download:

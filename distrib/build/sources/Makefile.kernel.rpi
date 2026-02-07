@@ -27,32 +27,20 @@ prepare: unpack
 #	@echo; echo "Setting scmversion to plus"
 #	echo + > linux/.scmversion
 
-	@echo; echo; echo "Creating $(mTUPLE) .config"
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0 pi0w rpi))
-	cd linux; make bcmrpi_defconfig
-
-else ifeq ($(mTUPLE), rpi2)
-	cd linux; make bcm2708_defconfig
-
-else ifeq ($(mTUPLE), rpi3)
-	cd linux; make bcm2709_defconfig
-
-else ifeq ($(mTUPLE), pi3-64)
-	cd linux; make bcmrpi3_defconfig
-
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi4 pi4-64))
-	cd linux; make bcm2711_defconfig
-
-else ifeq ($(mTUPLE), rpi5)
+	@echo; echo; echo "Creating $(BOARD) .config"
+ifeq ($(BOARD), rpi5)
+	KERNEL=kernel_2712
 	make -C linux bcm2712_defconfig
-
+else ifeq ($(BOARD), rpi6)
+	KERNEL=kernel_2713
+	make -C linux bcm2713_defconfig
 else
-	$(info Un-supported $(mTUPLE) kernel config!)
+	$(info Un-supported $(BOARD) kernel config!)
 	$(error FAIL)
 endif
 
 #	@echo; echo "  Set hostname"
-#	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-Express"/' -i linux/.config
+#	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-pi-Express"/' -i linux/.config
 
 	@echo; echo "  Reset CONFIG_LOCALVERSION"
 	# CONFIG_LOCALVERSION needs reset for libreswan
@@ -95,80 +83,44 @@ endif
 
 	@echo; echo; echo "make oldconfig"; echo
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) oldconfig
-	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(mTUPLE)-$(KERNEL_MMR).new
+	cp $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config$(KERNEL_TYPE)-$(BOARD)-$(KERNEL_MMR).new
 
 
 compile-kernel: prepare
-	@echo; echo; echo "compile-kernel"
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 rpi4))
-	make $(JOBS) V=1 -C linux CC=$(COMPILER) zImage
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
-	make $(JOBS) V=1 -C linux CC=$(COMPILER)
-else ifeq ($(mTUPLE), rpi5)
-	make $(JOBS) V=1 -C linux CC=$(COMPILER) Image.gz
+	@echo; echo; echo "Compile kernel"
+ifeq ($(BOARD), rpi5)
+	#make $(JOBS) V=1 -C linux CC=$(COMPILER) Image.gz
+	##	Configure for Cross-Compilation
+	make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- bcm2712_defconfig
 else
 	$(info Unsupported kernel compile)
 	$(error FAIL)
 endif
 
 	@echo; echo; echo "Make modules"
-	make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
+	#make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
+	make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- modules
 
 	@echo; echo; echo "Make dtbs"
-	make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
+	#make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
+	make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- dtbs
 
 
 package-kernel: compile-kernel
 	@echo; echo; echo "Package Kernel"
 	mkdir -vp $(PKG_ROOT)/boot/overlays
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi3 rpi4))
-	@echo; echo "Make modules_install"; echo
-	make $(JOBS) V=1 -C linux CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
-
-	@echo; echo "Some $(mTUPLE) copies"; echo
-	cp -v $(KERNEL_DIR)/arch/arm/boot/zImage $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
-	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
-	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
-	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
-ifeq ($(mTUPLE), pi0w)
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2708-rpi-0-w.dtb $(PKG_ROOT)/boot
-else ifeq ($(mTUPLE), rpi3)
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2709-rpi-2-b.dtb $(PKG_ROOT)/boot
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b.dtb $(PKG_ROOT)/boot
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-cm3.dtb $(PKG_ROOT)/boot
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
-else ifeq ($(mTUPLE), rpi4)
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
-else
-	$(info Un-supported $(mTUPLE) Some copies dtb's !!)
-	$(error FAIL)
-endif
-
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),pi3-64 pi4-64))
+ifeq ($(BOARD), rpi5)
 	echo; echo "Make modules_install"
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
-
-	@echo; echo "Some $(mTUPLE) copies"
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/Image $(PKG_ROOT)/boot/vmlinuz-$(K_SWE_VERSION)
-	cp -v $(KERNEL_DIR)/System.map $(PKG_ROOT)/boot/System.map-$(K_SWE_VERSION)
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/README $(PKG_ROOT)/boot/overlays/
-	cp -v $(KERNEL_DIR)/.config $(SOURCES_DIR)/linux.config-$(mTUPLE).new
-	cp -v $(KERNEL_DIR)/.config $(PKG_ROOT)/boot/linux.config-$(K_SWE_VERSION)
-ifeq ($(mTUPLE), pi3-64)
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2710-rpi-3-b.dtb $(PKG_ROOT)/boot
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2710-rpi-cm3.dtb $(PKG_ROOT)/boot
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2710-rpi-3-b-plus.dtb $(PKG_ROOT)/boot
-else ifeq ($(mTUPLE), pi4-64)
-	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)arch/arm64/boot/Image.gz $(PKG_ROOT)/boot/firmware/$KERNEL.img
+	cp -v $(KERNEL_DIR)arch/arm64/boot/dts/broadcom/*.dtb $(PKG_ROOT)/boot/firmware/
+	cp -v $(KERNEL_DIR)arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/firmware/overlays/
 else
-	$(info Un-supported $(mTUPLE) Some copies dtb's !!)
+	$(info Un-supported $(BOARD) Some copies dtb's !!)
 	$(error FAIL)
 endif
 
-else ifeq ($(mTUPLE), rpi5)
+else ifeq ($(BOARD), rpi5)
 	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
 
 else

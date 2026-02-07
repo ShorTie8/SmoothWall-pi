@@ -37,9 +37,7 @@ CONFIG_OPTS = \
 INSTALL = yes
 install: compile
 	@echo; echo; echo "Install"; echo
-#ifeq ($(BITS_64), yes)
-#ifeq ($(mARCH), x86_64)
-ifeq ($(mARCH),$(filter $(mARCH),arm64 x86_64))
+ifeq ($(BITS_64), yes)
 	mkdir -pv $(TOOLS_DIR)/lib
 	ln -sv lib $(TOOLS_DIR)/lib64
 endif
@@ -63,10 +61,6 @@ CONFIG_OPTS = \
 		--with-lib-path=$(TOOLS_DIR)/lib \
 		--with-sysroot
 #		--disable-werror
-
-ifeq ($(mARCH), arm64)
-CONFIG_OPTS += --host=$(SWE_TGT)
-endif
 
 INSTALL = yes
 install: compile

@@ -24,18 +24,9 @@ K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
 KERNEL_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNEL_MAJOR).x/linux-$(K_RAW_VERSION).tar.xz
 KERNELHEADER_URL = http://www.kernel.org/pub/linux/kernel/v$(KERNELHEADER_MAJOR).x/linux-$(KERNELHEADERVER).tar.xz
 
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64 rpi4 pi4-64 rpi5))
+ifeq ($(BOARD),$(filter $(BOARD),rpi5 rpi6))
     KERNEL_COM = a1073743767f9e7fdc7017ababd2a07ea0c97c1c
     KERNEL_URL = https://github.com/raspberrypi/linux/archive/$(KERNEL_COM)/linux-rpi-$(KERNEL_VER).tar.gz
-
-else ifeq ($(mTUPLE), xu4)
-    KERNEL_MAJOR = 4
-    KERNEL_MMR = $(KERNEL_MAJOR).9
-    KERNEL_VER = $(KERNEL_MMR).57+
-    KERNEL_COM = 6d16e47ca139ba64c5daedf06e72f2774adbdc48
-    KERNEL_URL = https://github.com/hardkernel/linux/archive/$(KERNEL_COM)/linux-$(KERNEL_COM).tar.gz
-    K_RAW_VERSION = $(KERNEL_VER)
-    K_SWE_VERSION = $(KERNEL_VER)$(KERNEL_TYPE)
 else ifneq ($(mARCH),$(mTUPLE))
 	KERNEL_URL = Unknown_system_kernel
 endif
