@@ -1,28 +1,28 @@
---- cron-3.0pl1.orig/database.c.orig	2018-11-15 16:27:30.952298940 -0500
-+++ cron-3.0pl1.orig/database.c	2018-11-15 16:32:35.448350799 -0500
-@@ -27,6 +27,7 @@
- #define __USE_GNU /* For O_NOFOLLOW */
+--- cron-3.0pl1.orig/database.c.orig	2026-02-08 00:35:46.057519258 -0500
++++ cron-3.0pl1.orig/database.c	2026-02-08 00:45:49.000000000 -0500
+@@ -25,6 +25,7 @@
+ 
+ #include "cron.h"
  #include <fcntl.h>
- #undef __USE_GNU
 +#include <glob.h>
  #include <sys/stat.h>
  #include <sys/file.h>
  #include <time.h>
-@@ -183,42 +184,57 @@
+@@ -166,42 +167,58 @@
+ 	}
  
- #ifdef DEBIAN
  	/* Read all the package crontabs. */
 -	if (!(dir = opendir(SYSCRONDIR))) {
 -		log_it("CRON", getpid(), "OPENDIR FAILED", SYSCRONDIR);
 -	}
 +	/* Smoothwall additions adapted from Steve McNeill's SmoothInstall work. */
-+
-+	int i;
-+	glob_t cronDotD;
  
 -	while (dir != NULL && NULL != (dp = readdir(dir))) {
 -		char	fname[MAXNAMLEN+1],
--		        tabname[PATH_MAX+1];
+-			tabname[PATH_MAX+1];
++	int i;
++	glob_t cronDotD;
+ 
 +	/* First get /etc/cron.d/ */
 +	glob(SYSCRONDIR, GLOB_ONLYDIR|GLOB_NOMAGIC, NULL, &cronDotD);
 +	/* Now get all the mods' cron.d/ dirs */
@@ -30,7 +30,7 @@
 +		
 +	for (i=0; i<cronDotD.gl_pathc; i++) {
 +		log_it( "CRON", getpid(), "Processing ", cronDotD.gl_pathv[i]);
- 
++ 
 +		if (!(dir = opendir(cronDotD.gl_pathv[i]))) {
 +			log_it("CRON", getpid(), "OPENDIR FAILED", cronDotD.gl_pathv[i]);
 +		}
@@ -66,7 +66,7 @@
 -		if (!valid_name(dp->d_name))
 -		  continue;
 -
--		/* Generate the "fname" */
+ 		/* Generate the "fname" */
 -		(void) strcpy(fname,"*system*");
 -		(void) strcat(fname, dp->d_name);
 -		sprintf(tabname,"%s/%s", SYSCRONDIR, dp->d_name);
@@ -75,7 +75,6 @@
 -		   current contents are irrelevant */
 -		process_crontab(SYSUSERNAME, fname, tabname,
 -				&statbuf, &new_db, old_db);
-+			/* Generate the "fname" */
 +			(void) strcpy(fname,"*system*");
 +			(void) strcat(fname, dp->d_name);
 +			sprintf(tabname,"%s/%s", cronDotD.gl_pathv[i], dp->d_name);
@@ -84,14 +83,15 @@
 +			current contents are irrelevant */
 +			process_crontab(SYSUSERNAME, fname, tabname,
 +					&statbuf, &new_db, old_db);
- 
++ 
 +		}
 +		if (dir)
 +			closedir(dir);
+ 
  	}
 -	if (dir)
 -		closedir(dir);
 +	globfree(&cronDotD);
- #endif
  
  	/* we used to keep this dir open all the time, for the sake of
+ 	 * efficiency.  however, we need to close it in every fork, and
