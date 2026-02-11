@@ -49,15 +49,15 @@ class UDSocket {
         int getTimeout();
 
         bool checkForInput();
-        void checkForInput(int timeout) throw(exception);
+        void checkForInput(int timeout) noexcept (true);
         bool readyForOutput();
-        void readyForOutput(int timeout) throw(exception);
-        int getline(char* buff, int size, int timeout) throw(exception);
-        void writeString(const char* line) throw(exception);
+        void readyForOutput(int timeout) noexcept (true);
+        int getline(char* buff, int size, int timeout) noexcept (true);
+        void writeString(const char* line) noexcept (true);
         bool writeToSocket(char* buff, int len, unsigned int flags, int timeout);
         int readFromSocketn(char* buff, int len, unsigned int flags, int timeout);
         int readFromSocket(char* buff, int len, unsigned int flags, int timeout);
-        void writeToSockete(char* buff, int len, unsigned int flags, int timeout) throw(exception);
+        void writeToSockete(char* buff, int len, unsigned int flags, int timeout) noexcept (true);
 
 
     private:

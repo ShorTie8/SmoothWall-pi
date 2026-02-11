@@ -138,7 +138,7 @@ bool UDSocket::checkForInput() {  // non-blocking check
 }
 
 
-void UDSocket::checkForInput(int timeout) throw (exception)  {
+void UDSocket::checkForInput(int timeout) noexcept (true)  {
                                             // blocks if socket blocking
                                             // until timeout
     fd_set fdSet;
@@ -167,7 +167,7 @@ bool UDSocket::readyForOutput() {  // non-blocking check
 }
 
 
-void UDSocket::readyForOutput(int timeout) throw(exception) {
+void UDSocket::readyForOutput(int timeout) noexcept (true) {
                                             // blocks if socket blocking
                                             // until timeout
     fd_set fdSet;
@@ -181,7 +181,7 @@ void UDSocket::readyForOutput(int timeout) throw(exception) {
     }
 }
 
-int UDSocket::getline(char* buff, int size, int timeout) throw(exception) {
+int UDSocket::getline(char* buff, int size, int timeout) noexcept (true) {
 
     char b[1];
     int rc;
@@ -207,14 +207,14 @@ int UDSocket::getline(char* buff, int size, int timeout) throw(exception) {
 }
 
 
-void UDSocket::writeString(const char* line) throw(exception) {
+void UDSocket::writeString(const char* line) noexcept (true) {
     int l = strlen(line);
     if (!writeToSocket((char*)line, l, 0, 10)) {
         throw exception();
     }
 }
 
-void UDSocket::writeToSockete(char* buff, int len, unsigned int flags, int timeout) throw(exception) {
+void UDSocket::writeToSockete(char* buff, int len, unsigned int flags, int timeout) noexcept (true) {
   if (!UDSocket::writeToSocket(buff, len, flags, timeout)) {
       throw exception();
   }
