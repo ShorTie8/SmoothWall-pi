@@ -29,25 +29,23 @@ prepare: unpack
 
 	@echo; echo; echo "Creating $(BOARD) .config"
 ifeq ($(BOARD), rpi5)
-	KERNEL=kernel_2712
 	make -C linux bcm2712_defconfig
 else ifeq ($(BOARD), rpi6)
-	KERNEL=kernel_2713
 	make -C linux bcm2713_defconfig
 else
 	$(info Un-supported $(BOARD) kernel config!)
 	$(error FAIL)
 endif
 
-#	@echo; echo "  Set hostname"
-#	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="SmoothWall-pi-Express"/' -i linux/.config
+	@echo; echo "  Set hostname"
+	sed -e 's/CONFIG_DEFAULT_HOSTNAME="(none)"/CONFIG_DEFAULT_HOSTNAME="smoothwall-express"/' -i linux/.config
 
 	@echo; echo "  Reset CONFIG_LOCALVERSION"
 	# CONFIG_LOCALVERSION needs reset for libreswan
 	sed -e 's/CONFIG_LOCALVERSION=.*/CONFIG_LOCALVERSION=""/' -i linux/.config
 
-#	@echo; echo "  disable multi media support"
-#	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
+	@echo; echo "  disable multi media support"
+	sed -e 's/CONFIG_MEDIA_SUPPORT=m/# CONFIG_MEDIA_SUPPORT is not set/' -i linux/.config
 
 #	@# turn off wifi power save
 #	@#sed -e 's/CONFIG_CFG80211_DEFAULT_PS=y/# CONFIG_CFG80211_DEFAULT_PS is not set/' -i linux/.config
@@ -58,13 +56,13 @@ endif
 #	@# pi3
 #	sed -e 's/CONFIG_USB_LAN78XX=y/CONFIG_USB_LAN78XX=m/' -i linux/.config
 #	@# pi4
-#	sed -e 's/CONFIG_BROADCOM_PHY=y/CONFIG_BROADCOM_PHY=m/' -i linux/.config
-#	sed -e 's/CONFIG_BCMGENET=y/CONFIG_BCMGENET=m/' -i linux/.config
-#	sed -e 's/CONFIG_USB_RTL8152=y/CONFIG_USB_RTL8152=m/' -i linux/.config
-#	#sed -e 's/CONFIG_GENERIC_PHY=y/CONFIG_GENERIC_PHY=m/' -i linux/.config
-#	#sed -e 's/CONFIG_NET_VENDOR_BROADCOM=y/CONFIG_NET_VENDOR_BROADCOM=m/' -i linux/.config
-#
-#
+	sed -e 's/CONFIG_BROADCOM_PHY=y/CONFIG_BROADCOM_PHY=m/' -i linux/.config
+	sed -e 's/CONFIG_BCMGENET=y/CONFIG_BCMGENET=m/' -i linux/.config
+	sed -e 's/CONFIG_USB_RTL8152=y/CONFIG_USB_RTL8152=m/' -i linux/.config
+	#sed -e 's/CONFIG_GENERIC_PHY=y/CONFIG_GENERIC_PHY=m/' -i linux/.config
+	#sed -e 's/CONFIG_NET_VENDOR_BROADCOM=y/CONFIG_NET_VENDOR_BROADCOM=m/' -i linux/.config
+
+
 #	@echo; echo "  Adjust Ciphers"
 #	sed -e 's/# CONFIG_CRYPTO_AES_TI is not set/CONFIG_CRYPTO_AES_TI=m/' -i linux/.config
 #	sed -e 's/# CONFIG_CRYPTO_ANUBIS is not set/CONFIG_CRYPTO_ANUBIS=m/' -i linux/.config
@@ -89,21 +87,21 @@ endif
 compile-kernel: prepare
 	@echo; echo; echo "Compile kernel"
 ifeq ($(BOARD), rpi5)
-	#make $(JOBS) V=1 -C linux CC=$(COMPILER) Image.gz
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) Image.gz
 	##	Configure for Cross-Compilation
-	make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- bcm2712_defconfig
+	#make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- bcm2712_defconfig
 else
 	$(info Unsupported kernel compile)
 	$(error FAIL)
 endif
 
 	@echo; echo; echo "Make modules"
-	#make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
-	make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- modules
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) modules
+	#make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- modules
 
 	@echo; echo; echo "Make dtbs"
-	#make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
-	make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- dtbs
+	make $(JOBS) V=1 -C linux CC=$(COMPILER) dtbs
+	#make $(JOBS) V=1 -C linux ARCH=$(mTUPLE) CROSS_COMPILE=$(FINAL_TGT)- dtbs
 
 
 package-kernel: compile-kernel
@@ -112,17 +110,9 @@ package-kernel: compile-kernel
 ifeq ($(BOARD), rpi5)
 	echo; echo "Make modules_install"
 	make $(JOBS) V=1 -C linux CC=$(COMPILER) INSTALL_MOD_PATH=$(PKG_ROOT) modules_install
-	cp -v $(KERNEL_DIR)arch/arm64/boot/Image.gz $(PKG_ROOT)/boot/firmware/$KERNEL.img
-	cp -v $(KERNEL_DIR)arch/arm64/boot/dts/broadcom/*.dtb $(PKG_ROOT)/boot/firmware/
-	cp -v $(KERNEL_DIR)arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/firmware/overlays/
-else
-	$(info Un-supported $(BOARD) Some copies dtb's !!)
-	$(error FAIL)
-endif
-
-else ifeq ($(BOARD), rpi5)
-	cp -v $(KERNEL_DIR)/arch/arm/boot/dts/bcm2711-rpi-4-b.dtb $(PKG_ROOT)/boot
-
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/Image.gz $(PKG_ROOT)/boot/kernel_2712.img
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/broadcom/*.dtb $(PKG_ROOT)/boot
+	cp -v $(KERNEL_DIR)/arch/arm64/boot/dts/overlays/*.dtb* $(PKG_ROOT)/boot/overlays/
 else
 	$(info Unsupported package-kernel)
 	$(error FAIL)
