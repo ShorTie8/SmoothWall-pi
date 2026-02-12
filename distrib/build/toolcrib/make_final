@@ -393,6 +393,7 @@ fi
       build busybox
 
       build dhcp
+      build LibML
       build snort
       build oinkmaster
       build swig
