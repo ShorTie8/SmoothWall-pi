@@ -363,6 +363,7 @@ fi
       build coretree
 
       build openssh
+      build lynx
       build ntp
       build openntpd
 
