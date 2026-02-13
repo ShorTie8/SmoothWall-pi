@@ -3,42 +3,22 @@
 include ../Makefile.conf
 
 PACKAGE = busybox
-#VERSION = 1.29.1
-#VERSION = 1.29.3
 VERSION = 1.37.0
-
-BASE_URL = http://busybox.net/downloads/
 EXTENSION = .tar.bz2
-
 LICENCE_FILE = $(DIR)/LICENSE
-
 PKG_DIR = /opt/busybox
-
-#PATCH_FILE1 = libbb.h.patch
+BASE_URL = http://busybox.net/downloads/
 
 CONFIGURE = yes
 configure: patch
-	@echo -e "\n\nconfigure\n"
+	@echo -e "\n\nConfigure\n"
 	cp -av config $(DIR)/.config
 	cd $(DIR); make oldconfig
 
-#	$(MAKE) -C $(COMPILE_DIR) defconfig
-#	# per INSTALL
-#	cd $(COMPILE_DIR); \
-#	  sed -e 's/.*FEATURE_PREFER_APPLETS.*/CONFIG_FEATURE_PREFER_APPLETS=y/' -i .config; \
-#	  sed -e 's/.*FEATURE_SH_STANDALONE.*/CONFIG_FEATURE_SH_STANDALONE=y/' -i .config
-
-#	cp -av config.new8 $(COMPILE_DIR)/.config
-	#cp -av config.oldconfig $(COMPILE_DIR)/.config
-#	@$(MAKE) $(JOBS) -C $(DIR) oldconfig
-
-
 COMPILE = yes
 compile: configure
-	@echo -e "\n\ncompile\n"
+	@echo -e "\n\nCompile\n"
 	$(MAKE) $(JOBS) -C $(DIR) V=1
-	#$(MAKE) $(JOBS) -C $(COMPILE_DIR) V=1
-	#+$(MAKE) ${JOBS} -C $(COMPILE_DIR) V=1
 
 INSTALL = yes
 install: compile
