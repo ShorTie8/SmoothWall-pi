@@ -39,19 +39,20 @@ CONFIGURE = yes
 configure: patch
 	cd $(DIR); ./bootstrap.sh
 	@echo; echo; echo "Configure"; echo
-	cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=$(PKG_DIR)/usr/local/squid
+	@/bin/sh -c "ulimit -n 8192; cd $(DIR); ./configure $(CONFIG_OPTS) --prefix=/$(PKG_DIR)"
 
 
 INSTALL = yes
 install: compile
-	@echo; echo; echo "Install"; echo
-	mkdir -p $(PKG_ROOT)
-	+$(MAKE) -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
-	mkdir -p $(PKG_ROOT)/var/smoothwall/proxy
+	@echo -e "/n/n  Install  /n"
+	mkdir -vp $(PKG_ROOT)
+	make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
+	mkdir -vp $(PKG_ROOT)/var/smoothwall/proxy
 	touch $(PKG_ROOT)/var/smoothwall/proxy/squid.conf
-	chown nobody:nobody $(PKG_ROOT)/var/smoothwall/proxy/squid.conf
-	chmod 664 $(PKG_ROOT)/var/smoothwall/proxy/squid.conf
-	rm -f $(PKG_ROOT)/usr/etc/squid.conf
+	chown -v nobody:nobody $(PKG_ROOT)/var/smoothwall/proxy/squid.conf
+	chmod -v 664 $(PKG_ROOT)/var/smoothwall/proxy/squid.conf
+	rm -vf $(PKG_ROOT)/usr/etc/squid.conf
+	mkdir -vp $(PKG_ROOT)/usr/{bin,etc,libexec,share}
 	ln -s /var/smoothwall/proxy/squid.conf $(PKG_ROOT)/usr/etc/squid.conf
 
 
