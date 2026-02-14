@@ -13,20 +13,15 @@
 include ../Makefile.conf
 
 PACKAGE = dhcpcd
-VERSION = 9.5.2
-
-TARBALL = $(PACKAGE)-$(VERSION)
+VERSION = 10.3.0
 EXTENSION = .tar.xz
-
-BASE_URL = https://github.com/NetworkConfiguration/dhcpcd/releases/download/v$(VERSION)/
-
+TARBALL = $(PACKAGE)-$(VERSION)
 DIR =  $(PACKAGE)-$(VERSION)
+BASE_URL = https://github.com/NetworkConfiguration/dhcpcd/releases/download/v$(VERSION)/
 
 CONFIG_OPTS += --mandir=$(PKG_DIR)/man --disable-privsep
 
-
 INSTALL = yes
-
 install: compile
 	@mkdir -p $(PKG_ROOT)
 	make -C $(DIR) DESTDIR=$(PKG_ROOT) install
