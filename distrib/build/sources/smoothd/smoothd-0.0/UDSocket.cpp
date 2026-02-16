@@ -148,7 +148,7 @@ void UDSocket::checkForInput(int timeout) noexcept (true)  {
     t.tv_sec = timeout;
     t.tv_usec = 0;
     if (UDSocket::selectEINTR(sck_un + 1, &fdSet, NULL, NULL, &t) < 1) {
-        throw exception();
+        noexcept (true);
     }
 }
 
@@ -177,7 +177,7 @@ void UDSocket::readyForOutput(int timeout) noexcept (true) {
     t.tv_sec = timeout;
     t.tv_usec = 0;
     if (UDSocket::selectEINTR(sck_un + 1, NULL, &fdSet, NULL, &t) < 1) {
-        throw exception();  // on error or timeout
+        noexcept (true);  // on error or timeout
     }
 }
 
@@ -190,7 +190,7 @@ int UDSocket::getline(char* buff, int size, int timeout) noexcept (true) {
     while(i < (size - 1)) {
         rc = readFromSocket(b, 1, 0, timeout);
         if (rc < 0) {
-            throw exception();  // on error
+            noexcept (true);  // on error
         }
         if (rc == 0) {  // eof, other end closed so
             b[0] = '\n'; // force it to return what read
@@ -210,13 +210,13 @@ int UDSocket::getline(char* buff, int size, int timeout) noexcept (true) {
 void UDSocket::writeString(const char* line) noexcept (true) {
     int l = strlen(line);
     if (!writeToSocket((char*)line, l, 0, 10)) {
-        throw exception();
+        noexcept (true);
     }
 }
 
 void UDSocket::writeToSockete(char* buff, int len, unsigned int flags, int timeout) noexcept (true) {
   if (!UDSocket::writeToSocket(buff, len, flags, timeout)) {
-      throw exception();
+      noexcept (true);
   }
 }
 

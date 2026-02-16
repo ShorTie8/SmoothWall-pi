@@ -25,8 +25,8 @@ CONFIG_OPTS += \
 
 PATCH = yes
 patch: $(DIR)/
-	#cd $(DIR); sed -i 's@<sys/types.h>@<sys/types.h>\n#include <stdlib.h>@' \
-	#    libicmp/icmp_timestamp.c
+	cd $(DIR); sed -i 's@<sys/types.h>@<sys/types.h>\n#include <stdlib.h>@' \
+	    libicmp/icmp_timestamp.c
 	##	First, make the package build with gcc-14.1 or later:
 	cd $(DIR); sed -i 's/def HAVE_TERMCAP_TGETENT/ 1/' telnet/telnet.c
 include ../Makefile.rules

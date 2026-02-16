@@ -20,7 +20,7 @@ configure: patch
 
 COMPILE = yes
 compile: configure
-	cd $(DIR); $(MAKE) $(JOBS) LOCAL_ZIP="$(CFLAGS)" prefix=/usr -f unix/Makefile generic_gcc
+	cd $(DIR); $(MAKE) $(JOBS) LOCAL_ZIP="$(CFLAGS)" prefix=/usr -f unix/Makefile generic_gcc CC="gcc -std=gnu89"
 
 INSTALL = yes
 install: compile

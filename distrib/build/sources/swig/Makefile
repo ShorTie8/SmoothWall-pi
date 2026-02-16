@@ -10,7 +10,7 @@
 include ../Makefile.conf
 
 PACKAGE = swig
-VERSION = 4.0.0
+VERSION = 4.4.1
 
 BASE_URL = http://prdownloads.sourceforge.net/swig
 

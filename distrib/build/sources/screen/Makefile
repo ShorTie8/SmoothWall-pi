@@ -7,10 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = screen
-VERSION = 4.0.2
-
+VERSION = 5.0.1
 BASE_URL = https://ftp.gnu.org/gnu/screen
-
 PRE_CONFIGURE = LIBS=-ltinfo
+CONFIG_OPTS += --disable-pam 
 
 include ../Makefile.rules

@@ -165,9 +165,9 @@ function build_tc_stage_3() {
   buildenv bison 1
   buildenv e2fsprogs 1 
   buildenv file
+  buildenv cacert-bundle 1
   buildenv perl 1
-  buildenv python3
-#  buildenv cacert-bundle 1
+  buildenv python3 1
   buildenv openssl 1
   buildenv sed 1
   buildenv tar 1

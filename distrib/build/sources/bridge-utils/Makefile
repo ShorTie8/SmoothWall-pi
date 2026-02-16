@@ -8,7 +8,7 @@
 include ../Makefile.conf
 
 PACKAGE = bridge-utils
-VERSION = 1.6
+VERSION = 1.7.1
 
 BASE_URL = https://www.kernel.org/pub/linux/utils/net/bridge-utils
 

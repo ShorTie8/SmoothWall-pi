@@ -35,7 +35,7 @@ distrib:
 	@chown -R 104:104 distrib/var/lib/imspector
 	
 	@(cd distrib/etc/httpd/conf; ln -s /var/smoothwall/main/hostname.conf)
-	@(cd distrib/usr/etc ln -s /var/smoothwall/dhcp/dhcpd.conf)
+#	@(cd distrib/usr/etc ln -s /var/smoothwall/dhcp/dhcpd.conf)
 	@(cd distrib/usr/etc; ln -s /var/smoothwall/vpn/ipsec.conf)
 	@(cd distrib/usr/etc; ln -s /var/smoothwall/vpn/ipsec.secrets)
 	@(cd distrib/etc; ln -s /var/smoothwall/time/localtime)

@@ -7,20 +7,21 @@
 include ../Makefile.conf
 
 PACKAGE = M2Crypto
-VERSION = 0.43.0
-BASE_URL = https://files.pythonhosted.org/packages/74/18/3beedd4ac48b52d1a4d12f2a8c5cf0ae342ce974859fba838cbbc1580249
-# https://github.com/mcepl/M2Crypto/archive/refs/tags/0.42.0.tar.gz
+VERSION = 0.47.0
+DIR = m2crypto-$(VERSION)
+TARBALL = m2crypto-$(VERSION)
+BASE_URL = https://files.pythonhosted.org/packages/8b/19/409bcaf2820beb0cb6e52e807c6af3ac535edd494e599c7eceb01c6534c1
 
 COMPILE = yes
 compile: patch
 	@echo; echo; echo "compile"; echo
-	cd $(DIR); python setup.py build
+	cd $(DIR); python3 setup.py build
 
 INSTALL = yes
 install: compile
 	@echo; echo; echo "install"; echo
 	mkdir -vp $(PKG_ROOT)
 	#cd $(DIR); python setup.py DESTDIR=$(PKG_ROOT) install
-	cd $(DIR); python setup.py install
+	cd $(DIR); python3 setup.py install
 
 include ../Makefile.rules

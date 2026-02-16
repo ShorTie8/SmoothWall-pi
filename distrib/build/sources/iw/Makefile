@@ -8,7 +8,7 @@
 include ../Makefile.conf
 
 PACKAGE = iw
-VERSION = 5.0.1
+VERSION = 6.9
 EXTENSION = .tar.xz
 BASE_URL = https://www.kernel.org/pub/software/network/iw
 

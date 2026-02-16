@@ -1,14 +1,13 @@
 # SmoothWall Build system.
 #
 # (c) SmoothWall Ltd 2005
-# (c) ShorTie 2018
 #
 # This code is distributed under the terms of the GPL v2.
 
 include ../Makefile.conf
 
-PACKAGE = pv
-VERSION = 1.10.3
-BASE_URL = https://www.ivarch.com/programs/sources
+PACKAGE = hwloc
+VERSION = 2.12.2
+BASE_URL =  https://download.open-mpi.org/release/hwloc/v2.12
 
 include ../Makefile.rules

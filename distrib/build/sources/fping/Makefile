@@ -7,10 +7,9 @@
 include ../Makefile.conf
 
 PACKAGE = fping
-VERSION = 3.13
-
-BASE_URL = http://fping.org/dist
+VERSION = 5.5
 EXTENSION = .tar.gz
+BASE_URL = http://fping.org/dist
 
 CONFIG_OPTS += --sbindir=/sbin --enable-ipv4 --enable-ipv6
 
@@ -20,6 +19,6 @@ install: compile
 	cd $(PKG_ROOT)/sbin; \
 	chmod 4755 fping*; \
 	/sbin/setcap cap_net_raw+ep fping; \
-	/sbin/setcap cap_net_raw+ep fping6
+#	/sbin/setcap cap_net_raw+ep fping6
 
 include ../Makefile.rules

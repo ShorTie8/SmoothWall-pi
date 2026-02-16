@@ -1,15 +1,15 @@
 include ../Makefile.conf
 
 PACKAGE = p3scan
-VERSION = 2.3.2
+VERSION = 3.0_rc1
 
-BASE_URL = https://sourceforge.net/projects/p3scan/files/p3scan%20%28stable%29/p3scan-2.3.2
+BASE_URL = https://sourceforge.net/projects/p3scan/files/latest/download
 
 CONFIGURE = yes
 COMPILE = yes
 INSTALL = yes
 
-PATCH_FILE1 = p3scan.patch
+#PATCH_FILE1 = p3scan.patch
 
 configure: patch
 	@true

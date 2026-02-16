@@ -9,7 +9,7 @@
 include ../Makefile.conf
 
 PACKAGE = LuaJIT
-VERSION = 20250816
+VERSION = 20260213
 EXTENSION = .tar.xz
 DIR = luajit-$(VERSION)
 TARBALL = luajit-$(VERSION)

@@ -394,7 +394,10 @@ fi
 
       build dhcp
       build LibML
-      build snort
+#      build snort
+      build hwloc
+      build libunwind
+      build snort3
       build oinkmaster
       build swig
       build audit
@@ -430,6 +433,7 @@ fi
       build lynx
       #build samba
 
+      build libosip2
       build siproxd
 
       build miniupnpd
@@ -458,7 +462,7 @@ fi
  #     build bash-completion
  #     build mkinitcpio
    fi
-      build reiserfsprogs
+ #     build reiserfsprogs
       build parted
       build pcmciautils
       build yaml
@@ -473,7 +477,7 @@ fi
       build apcupsd
       build setkerneltz
       build c_icap
-      build c_icap_modules
+ #     build c_icap_modules
       build squidclamav
       build usb-modeswitch
       build zip

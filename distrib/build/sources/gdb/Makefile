@@ -7,9 +7,7 @@
 include ../Makefile.conf
 
 PACKAGE = gdb
-VERSION = 8.0
-#VERSION = 16.1
-
+VERSION = 17.1
 BASE_URL = https://ftp.gnu.org/gnu/gdb
 
 PRE_CONFIGURE = CFLAGS="$(CFLAGS) -Wno-error"

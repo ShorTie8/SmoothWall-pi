@@ -44,3 +44,6 @@ int handlerestore(void);
 
 /* defaults.c */
 //int handledefaults(void);
+
+/* timezone.c */
+int handletimezone(void);
