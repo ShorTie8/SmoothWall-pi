@@ -396,6 +396,7 @@ fi
       build LibML
 #      build snort
       build hwloc
+      build jemalloc
       build libunwind
       build snort3
       build oinkmaster

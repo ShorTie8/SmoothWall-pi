@@ -8,7 +8,7 @@ include ../Makefile.conf
 include ../Makefile.versions
 
 PACKAGE = iproute2
-VERSION = 6.9.0
+VERSION = 6.15.0
 EXTENSION=.tar.gz
 BASE_URL = https://www.kernel.org/pub/linux/utils/net/iproute2/
 
