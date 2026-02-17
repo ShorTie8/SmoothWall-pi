@@ -10,7 +10,7 @@ PACKAGE = at
 VERSION = 3.2.5
 TARBALL = $(PACKAGE)_$(VERSION).orig
 DIR = $(PACKAGE)-$(VERSION)
-BASE_URL = https://ftp.debian.org/debian/pool/main/a/at/at_3.2.5.orig.tar.gz
+BASE_URL = https://ftp.debian.org/debian/pool/main/a/at
 
 PATCH_FILE1 = no-sendmail.patch
 #PATCH_FILE2 = at_3.1.20-3.debian.tar.xz
