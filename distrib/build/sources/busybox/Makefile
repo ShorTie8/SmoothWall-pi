@@ -3,7 +3,7 @@
 include ../Makefile.conf
 
 PACKAGE = busybox
-VERSION = 1.37.0
+VERSION = 1.36.1
 EXTENSION = .tar.bz2
 LICENCE_FILE = $(DIR)/LICENSE
 PKG_DIR = /opt/busybox
