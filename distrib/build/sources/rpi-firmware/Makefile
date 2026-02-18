@@ -9,7 +9,8 @@ include ../Makefile.versions
 
 PACKAGE = rpi-firmware
 VERSION = 20200704
-GIT_COMMIT = 9a3a10bf1019ebb2d59053564dc6b90068bad27d
+##	https://github.com/RPi-Distro/pi-gen
+GIT_COMMIT = 358f9785089fa9fce397b7c36de2d90a9ae9a50e
 
 FILES = LICENCE.broadcom  fixup4.dat start4.elf
 
@@ -60,18 +61,12 @@ install: download
 
 	@echo; mkdir -vp $(PKG_ROOT)/{boot,lib/firmware/brcm}; echo
 	install -m 0644 $(DIR)/boot/LICENCE.broadcom $(PKG_ROOT)/boot/LICENCE.broadcom
-ifeq ($(mTUPLE),$(filter $(mTUPLE),pi0w rpi2 rpi3 pi3-64))
-	install -m 0644 $(DIR)/boot/bootcode.bin $(PKG_ROOT)/boot/bootcode.bin
-	install -m 0644 $(DIR)/boot/fixup.dat    $(PKG_ROOT)/boot/fixup.dat
-	install -m 0644 $(DIR)/boot/start.elf    $(PKG_ROOT)/boot/start.elf
-	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43430-sdio.bin $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43430-sdio.bin
-	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43430-sdio.txt $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43430-sdio.txt
-else ifeq ($(mTUPLE),$(filter $(mTUPLE),rpi4 pi4-64))
+ifeq ($(BOARD),rpi5)
 	install -m 0644 $(DIR)/boot/fixup4.dat   $(PKG_ROOT)/boot/fixup4.dat
 	install -m 0644 $(DIR)/boot/start4.elf   $(PKG_ROOT)/boot/start4.elf
-	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43455-sdio.bin $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43455-sdio.bin
-	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43455-sdio.clm_blob $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43455-sdio.clm_blob
-	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43455-sdio.txt $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43455-sdio.txt
+#	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43455-sdio.bin $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43455-sdio.bin
+#	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43455-sdio.clm_blob $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43455-sdio.clm_blob
+#	install -m 0644 $(DIR)/lib/firmware/brcm/brcmfmac43455-sdio.txt $(PKG_ROOT)/lib/firmware/brcm/brcmfmac43455-sdio.txt
 	@echo; echo; echo "rpi-eeprom install"; echo
 	mkdir -vp $(PKG_ROOT)/usr/sbin/rpi-eeprom; echo
 	cd $(DIR); tar -xf $(DOWNLOADS_DIR)/rpi-eeprom-master.tar.gz
