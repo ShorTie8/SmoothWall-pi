@@ -1,0 +1,26 @@
+From 12baa36320ecd27cb8bbdb3ff029259bcd571d7c Mon Sep 17 00:00:00 2001
+From: UlinKot <denis2005991@gmail.com>
+Date: Sat, 21 Jun 2025 21:22:16 +0300
+Subject: [PATCH] build fix: error occurring on non-i386, x86_64 systems when
+ using `sha1_process_block64`
+
+---
+ libbb/hash_md5_sha.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/libbb/hash_md5_sha.c b/libbb/hash_md5_sha.c
+index 57a8014..75a61c3 100644
+--- a/libbb/hash_md5_sha.c
++++ b/libbb/hash_md5_sha.c
+@@ -1313,7 +1313,9 @@ unsigned FAST_FUNC sha1_end(sha1_ctx_t *ctx, void *resbuf)
+ 	hash_size = 8;
+ 	if (ctx->process_block == sha1_process_block64
+ #if ENABLE_SHA1_HWACCEL
++# if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+ 	 || ctx->process_block == sha1_process_block64_shaNI
++# endif
+ #endif
+ 	) {
+ 		hash_size = 5;
+-- 
+2.49.0

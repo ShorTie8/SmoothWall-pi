@@ -3,11 +3,13 @@
 include ../Makefile.conf
 
 PACKAGE = busybox
-VERSION = 1.36.1
+VERSION = 1.37.0
 EXTENSION = .tar.bz2
 LICENCE_FILE = $(DIR)/LICENSE
 PKG_DIR = /opt/busybox
 BASE_URL = http://busybox.net/downloads/
+
+PATCH_FILE1 = arm_libbb.patch
 
 CONFIGURE = yes
 configure: patch
