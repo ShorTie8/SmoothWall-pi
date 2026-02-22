@@ -8,9 +8,9 @@ include ../Makefile.conf
 
 PACKAGE = libcap-ng
 VERSION = 0.8.5
-
 DIR = $(PACKAGE)-$(VERSION)
-
 BASE_URL = https://people.redhat.com/sgrubb/libcap-ng
+
+CONFIG_OPTS += --disable-static
 
 include ../Makefile.rules

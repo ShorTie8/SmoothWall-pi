@@ -7,24 +7,24 @@
 include ../Makefile.conf
 
 PACKAGE = libcap
-VERSION = 2.44
-
-BASE_URL = http://ftp.de.debian.org/debian/pool/main/libc/libcap2
-
-DIR = $(PACKAGE)-$(VERSION)
-TARBALL = $(PACKAGE)2_$(VERSION).orig
-EXTENSION = .tar.xz
-CONFIG_OPTS += --prefix=$(PKG_DIR)
+VERSION = 2.77
+BASE_URL = https://git.kernel.org/pub/scm/libs/libcap/libcap.git/snapshot
 
 CONFIGURE = yes
-
 configure: patch
-	sed -i -e 's/^\(CFLAGS :=.*\)/\1 $(CFLAGS)/' $(DIR)/Make.Rules
+	##	Prevent a static library from being installed
+	cd $(DIR); sed -i '/install -m.*STA/d' libcap/Makefile
+
+CONFIG_OPTS = GOLANG=no prefix=/usr exec_prefix= lib_prefix=/usr
+
+COMPILE = yes
+compile: configure
+	@echo -e "/n/n  Compile /n"
+	cd $(DIR); $(MAKE) $(JOBS) $(CONFIG_OPTS)
 
 INSTALL = yes
 install: compile
-	@mkdir -p $(PKG_ROOT)
-	@make -C $(COMPILE_DIR) install
-	@make -C $(COMPILE_DIR) DESTDIR=$(PKG_ROOT) install
+	@echo -e "/n/n  Install /n"
+	cd $(DIR); make DESTDIR=$(PKG_ROOT) install $(CONFIG_OPTS)
 
 include ../Makefile.rules
