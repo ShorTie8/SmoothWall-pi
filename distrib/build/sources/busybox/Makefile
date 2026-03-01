@@ -3,28 +3,33 @@
 include ../Makefile.conf
 
 PACKAGE = busybox
-VERSION = 1.37.0
+VERSION = 1.36.1
+#VERSION = 1.37.0
 EXTENSION = .tar.bz2
 LICENCE_FILE = $(DIR)/LICENSE
 PKG_DIR = /opt/busybox
 BASE_URL = http://busybox.net/downloads/
 
-PATCH_FILE1 = arm_libbb.patch
+PATCH_FILE1 = busybox-1.26.2-bb.patch
+PATCH_FILE2 = busybox-1.34.1-skip-selinux-search.patch
+PATCH_FILE3 = busybox-1.36.0-fortify-source-3-fixdep.patch
+PATCH_FILE4 = busybox-1.36.1-kernel-6.8.patch
+PATCH_FILE5 = busybox-1.36.1-skip-dynamic-relocations.patch
 
 CONFIGURE = yes
 configure: patch
-	@echo -e "\n\nConfigure\n"
+	@echo -e "/n/n  Configure  /n"
 	cp -av config $(DIR)/.config
 	cd $(DIR); make oldconfig
 
 COMPILE = yes
 compile: configure
-	@echo -e "\n\nCompile\n"
+	@echo -e "/n/n  Compile  /n"
 	$(MAKE) $(JOBS) -C $(DIR) V=1
 
 INSTALL = yes
 install: compile
-	@echo -e "\n\ninstall\n"
+	@echo -e "/n/n  Install  /n"
 	mkdir -vp $(PKG_ROOT)/bin
 	#install -D -v -m755 $(DIR)/busybox $(PKG_ROOT)/bin/;
 	$(MAKE) $(JOBS) -C $(DIR) CONFIG_PREFIX=$(PKG_ROOT)$(PKG_DIR) install
@@ -36,7 +41,7 @@ install: compile
 
 BUILDTARBALL = yes
 $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz: install
-	@echo; echo; echo "build-tarball"
+	@echo -e "/n/n Build Tarball  /n"
 	ls $(PKG_ROOT)/bin
 	cd $(PKG_ROOT); \
 		tar -zcvf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz bin/busybox bin/busybox.links
@@ -49,7 +54,7 @@ $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz: install
 
 
 	ls $(DIR)/busy*
-	@echo; echo; echo "install tarball"
+	@echo -e "/n/n  Install Tarball  /n"
 	echo "Do not untar, or mess up chroot"
 	#tar -zvxf $(TARGET_DIR)/smoothwall-$(PACKAGE).tar.gz -C /
 
