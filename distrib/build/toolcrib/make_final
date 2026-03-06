@@ -145,6 +145,7 @@ fi
       build libxcrypt
       build inetutils
       build check
+      build dbus
 #  exit 22
       touch crumbs/Final.grp1.compiled
     fi
