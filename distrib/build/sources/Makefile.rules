@@ -49,7 +49,8 @@ ifdef PATCH_FILE1
 	  cp $$FILENAME ./; \
 	done; \
 	(cd $(DIR); \
-	for PATCH in $(PATCH_FILE1) $(PATCH_FILE2) $(PATCH_FILE3) $(PATCH_FILE4) $(PATCH_FILE5); do \
+	for PATCH in $(PATCH_FILE1) $(PATCH_FILE2) $(PATCH_FILE3) $(PATCH_FILE4) $(PATCH_FILE5) \
+					$(PATCH_FILE6) $(PATCH_FILE7) $(PATCH_FILE8); do \
 	  tput smso; echo $$PATCH; tput rmso; \
 	  FILENAME=../$$PATCH; \
 	  echo; echo $$FILENAME; \
