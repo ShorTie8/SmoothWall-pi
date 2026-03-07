@@ -7,22 +7,11 @@
 include ../Makefile.conf
 
 PACKAGE = pciutils
-VERSION = 3.1.7
+VERSION = 3.14.0
+BASE_URL = https://github.com/pciutils/pciutils/releases/download/v$(VERSION)
 
-BASE_URL = https://www.kernel.org/pub/software/utils/pciutils/
-
-CONFIGURE = yes
 COMPILE = yes
-INSTALL = yes
-
-configure: $(DIR)/
-	sed -i -e 's/^\(OPT=.*\)/\1 $(CFLAGS)/' $(DIR)/Makefile
-
-compile: configure
-	@$(MAKE) $(JOBS) -C $(COMPILE_DIR) PREFIX=/$(PKG_DIR) ZLIB=no
-
-install: compile
-	@mkdir -p $(PKG_ROOT)
-	@$(MAKE) -C $(COMPILE_DIR) PREFIX=$(PKG_ROOT)$(PKG_DIR) install
+compile: $(DIR)/
+	@$(MAKE) $(JOBS) -C $(COMPILE_DIR) PREFIX=/$(PKG_DIR)
 
 include ../Makefile.rules
